@@ -25,30 +25,32 @@ npm run serve      # serve the static out/ locally to verify the production buil
 `npm run build` runs `next build` (which writes the static site to `out/`) and a `postbuild`
 step that runs Pagefind to generate the search index at `out/_pagefind/`.
 
-## Deploy (Cloudflare Pages)
+## Deploy (Cloudflare — Workers Static Assets)
 
-Two supported paths:
+The site is a static export served by **Cloudflare Workers Static Assets** (assets-only — there
+is no Worker script). `wrangler.jsonc` points `assets.directory` at `./out`, so a plain
+`wrangler deploy` uploads the built site.
 
-### A. Connect the repo in the Cloudflare dashboard
+### A. Connect the repo in the Cloudflare dashboard (recommended)
 
-- Framework preset: **None** (it's a static export)
+In **Workers & Pages → Create → Import a repository**, point it at this repo and set:
+
 - Build command: `npm run build`
-- Build output directory: `out`
+- Deploy command: `npx wrangler deploy` (the default; reads `wrangler.jsonc`)
 - Environment variable: `NODE_VERSION=22`
+
+No output-directory setting is needed — `wrangler.jsonc` declares `assets.directory: "./out"`.
 
 ### B. GitHub Actions (included)
 
-`.github/workflows/deploy.yml` builds and deploys to Cloudflare Pages on push to `main`. It
-needs two repository secrets:
+`.github/workflows/deploy.yml` builds and runs `wrangler deploy` on push to `main`. It needs two
+repository secrets:
 
-- `CLOUDFLARE_API_TOKEN` — a token with the **Pages: Edit** permission
+- `CLOUDFLARE_API_TOKEN` — a token with the **Workers Scripts: Edit** permission
 - `CLOUDFLARE_ACCOUNT_ID`
 
-The Pages project is named `sfdt-docs` (see `wrangler.jsonc`). Create it once with:
-
-```bash
-npx wrangler pages project create sfdt-docs --production-branch main
-```
+> Note: use **either** A **or** B, not both, to avoid double deploys. The Worker is named
+> `sfdt-docs` (see `wrangler.jsonc`).
 
 ## Structure
 

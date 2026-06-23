@@ -1,8 +1,15 @@
 {
-  // Cloudflare Pages project config for the SFDT docs site.
-  // Static export output lands in ./out (next build + `output: 'export'`).
-  "$schema": "node_modules/wrangler/config-schema.json",
+  // Cloudflare Workers Static Assets config for the SFDT docs site.
+  // The site is a Next.js static export (output: 'export') written to ./out,
+  // served as assets-only — there is no Worker script (no "main").
+  // Deploy with `wrangler deploy` (the Cloudflare build runs `npx wrangler deploy`).
   "name": "sfdt-docs",
   "compatibility_date": "2026-06-22",
-  "pages_build_output_dir": "out"
+  "assets": {
+    "directory": "./out",
+    // Serve /foo from /foo.html and add trailing slashes to match Next's export.
+    "html_handling": "auto-trailing-slash",
+    // Serve the exported 404.html for unknown routes.
+    "not_found_handling": "404-page"
+  }
 }
