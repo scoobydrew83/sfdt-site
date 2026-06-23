@@ -1,0 +1,72 @@
+---
+title: Security & privacy
+description: SFDT's local-only model — the bridge token, CSRF protection, log redaction, and the AI tool sandbox.
+---
+
+import { Callout } from 'nextra/components'
+
+# Security & privacy
+
+SFDT is designed to keep your data on your machine. This page summarizes the security model
+across the suite; the extension's full data-handling policy is on its
+[Privacy](/chrome-extension/privacy) page, and the canonical policy is
+[`SECURITY.md`](https://github.com/scoobydrew83/sfdt/blob/main/SECURITY.md) in the repo.
+
+## Everything is local
+
+- **The dashboard & bridge bind to `127.0.0.1` only** (default port 7654) — never exposed to
+  your network.
+- **Salesforce traffic uses your existing session.** SOQL/REST/SOAP/Tooling calls go straight
+  from your browser or the CLI to the org you're already authenticated to.
+- **No third-party analytics or telemetry leaves your device.** The extension's optional
+  telemetry is opt-in and local-only (see below).
+
+## The bridge token
+
+The local bridge is protected by a bearer token stored at `~/.sfdt/bridge-token` (mode `0600`),
+generated on first request. Clients (the Chrome extension) must present it. Pair once via the
+options page; see [The bridge](/guides/the-bridge).
+
+## Dashboard hardening
+
+- **CSRF protection** — all mutating dashboard routes require an `X-SFDT-CSRF` header.
+- **Per-launch auth token** — prevents unauthorized access if the process keeps running.
+- **Log redaction at ingest** — secrets are redacted as logs are streamed (in the SSE path),
+  so they never reach the in-memory buffer or the browser's live log view, not just the
+  persisted file.
+
+## The AI tool sandbox
+
+<Callout type="warning">
+  AI invocations default to **read-only tools** (`Read,Grep,Glob`), denying `Bash`/`Write`/`Edit`,
+  across the Claude/Gemini/Codex providers — for both the streaming dashboard chat and all
+  non-streaming AI calls. This blocks a prompt injection in AI-influenced content (diffs, org
+  output, page context) from driving destructive tool execution. See
+  [AI across SFDT](/guides/ai-across-sfdt).
+</Callout>
+
+Defense-in-depth details from recent releases include rejecting `..` in git refs (so a validated
+ref is safe to reuse as a path), sanitizing externally-derived values before logging
+(log-injection hardening), and redacting MCP tool-call arguments to keys + byte size.
+
+## The MCP server
+
+The CLI's [MCP server](/cli/mcp) gates destructive tools (`deploy`, `quick_deploy`, `rollback`)
+behind an explicit `confirmExecution: true`, routes logs to stderr to keep the RPC channel
+clean, and redacts argument values in its audit log.
+
+## Extension privacy in brief
+
+- State lives in `chrome.storage.local` (per-feature toggles, the bridge token, opt-in
+  telemetry) — never synced, never transmitted.
+- **Telemetry is opt-in and local-only** — per-feature counters with no PII, monthly rollover,
+  capped at 500 feature ids, no outbound requests.
+- **No third-party SDKs.** Optional AI prompts go to a provider key you supply; SFDT is a
+  pass-through and does not see, log, or store them.
+
+Full policy: [Chrome → Privacy](/chrome-extension/privacy).
+
+## Reporting a vulnerability
+
+Use [GitHub's private security advisory](https://github.com/scoobydrew83/sfdt/security/advisories/new)
+rather than a public issue. See [`SECURITY.md`](https://github.com/scoobydrew83/sfdt/blob/main/SECURITY.md).

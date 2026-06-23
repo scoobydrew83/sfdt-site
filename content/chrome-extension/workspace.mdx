@@ -1,0 +1,54 @@
+---
+title: The Workspace Tab
+description: A standalone full-page tab that hosts SFDT's heavier tools so they never disturb the Salesforce page you were on.
+---
+
+import { Callout } from 'nextra/components'
+
+# The Workspace Tab
+
+Click the ⚡ side button on any Salesforce page and choose **Open Workspace ↗** to launch a
+standalone full-page tab at `chrome-extension://<id>/app.html`. The Workspace hosts the heavier
+tools in their own browser tab, so opening a query runner or executing Apex never disturbs the
+Salesforce page you were on — and closing a tool's modal no longer loses your place.
+
+## Org targeting
+
+The Workspace opens against the org you launched it from. With no org in the URL it falls back,
+in order, to:
+
+1. Your **last-used** org, then
+2. An **org picker** listing every Salesforce org you're currently logged in to (detected from
+   session cookies).
+
+The Workspace works **without a content script on the page** — features run against a *synthetic*
+window that reports the chosen org's URL, so the existing tools run unchanged.
+
+## Switching orgs
+
+The top bar's **Switch org** button reloads the Workspace against another logged-in org, cleanly
+rebuilding every tool's session. This is the `org-switcher` feature.
+
+<Callout type="info">
+  Org discovery reads the `sid` session cookies for the Salesforce domains the extension has
+  host permissions for. Nothing is sent off your device.
+</Callout>
+
+## Tools available in the Workspace
+
+| Feature | What it does |
+| --- | --- |
+| `soql-runner` | SOQL (REST or Tooling) with autocomplete, history, and CSV export |
+| `saved-soql` | Bookmarked and recent queries, loadable into the runner |
+| `apex-anonymous` | Execute anonymous Apex with compile/runtime results and saved snippets |
+| `debug-log-viewer` | List recent `ApexLog` records and view full bodies |
+| `org-limits` | Live governor-limit usage |
+| `rest-explore` | Arbitrary REST calls against `/services/data/...` |
+| `event-monitor` | Live platform / streaming event monitoring |
+| `org-switcher` | Switch between logged-in orgs |
+| `org-health` | Latest audit/monitor snapshots (requires the [bridge](/chrome-extension/bridge)) |
+
+<Callout type="info">
+  The Workspace is also where you reach the ⚙ **Settings** (options) page. See
+  [Settings &amp; Options](/chrome-extension/settings).
+</Callout>

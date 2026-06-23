@@ -1,0 +1,92 @@
+---
+title: Privacy & Permissions
+description: What the SFDT SF Helper extension stores, what it requests, and why — no third parties, no off-device telemetry by default, no PII.
+---
+
+import { Callout } from 'nextra/components'
+
+# Privacy & Permissions
+
+The extension's full source is public, so every claim here is verifiable against the code. This
+page summarises the policy; the canonical version is
+[`extension/PRIVACY.md`](https://github.com/scoobydrew83/sfdt/blob/main/extension/PRIVACY.md).
+
+## The short version
+
+- **No user data is sent to any third-party service.**
+- **No analytics or usage tracking leaves your device by default.** (Optional, opt-in,
+  local-only telemetry exists — see below.)
+- **No ads, no tracking pixels, no accounts, no PII.**
+- All network traffic goes only to: the Salesforce org you're already authenticated with, your
+  own `http://127.0.0.1:7654` when you start `sfdt ui`, and an optional local native-messaging
+  host you install yourself.
+
+## Manifest permissions
+
+These are the permissions the **built manifest** (`v0.3.2`) actually requests:
+
+| Permission | Why |
+| --- | --- |
+| `storage` | Save your per-feature toggles and opt-in local telemetry counters |
+| `clipboardWrite` | Copy reports (e.g. Flow Health Check) to your clipboard on demand |
+| `cookies` | Read `sid` session cookies to discover which Salesforce orgs you're logged in to |
+
+### Host permissions
+
+| Host | Why |
+| --- | --- |
+| `https://*.salesforce.com/*` | Run feature scripts on Salesforce pages |
+| `https://*.salesforce-setup.com/*` | Setup pages |
+| `https://*.my.salesforce.com/*` | My Domain orgs |
+| `https://*.lightning.force.com/*` | Lightning Experience |
+| `http://localhost/*`, `http://127.0.0.1/*` | Talk to the local sfdt CLI bridge on your own machine |
+
+<Callout type="info">
+  Chrome blocks fetches from an `https://` content script to `http://127.0.0.1` unless the host
+  is explicitly permitted at install time — that's why the localhost hosts are listed.
+</Callout>
+
+## Data stored locally
+
+All state lives in `chrome.storage.local` in your Chrome profile; none of it is synced or
+transmitted off your device.
+
+| Key | What it is |
+| --- | --- |
+| `sfut.settings` | Per-feature toggles, AI provider preferences, bridge token |
+| `sfut.killswitch.cache` | Most-recent server-disabled feature list from the bridge ping |
+| `sfut.telemetry` | Opt-in local feature-use counters |
+
+## Telemetry (opt-in, local-only)
+
+Telemetry is **off unless you turn it on** in the options page. Even when enabled:
+
+- Counters are kept in `chrome.storage.local` under `sfut.telemetry`.
+- The schema is a per-feature `{ activated, errored, disabled_remote }` integer triple keyed by
+  feature id, plus a `monthKey` like `2026-05`.
+- Counts reset to zero at the start of each calendar month and are capped at 500 feature ids.
+- **No PII** — no org names, usernames, Flow names, record ids, IPs, or timestamps beyond the
+  month.
+- **No outbound network requests** — the data is read back into the options page so you can see
+  your own usage.
+
+When you also run the local CLI, the extension may push a snapshot of these counters to
+`<project>/.sfdt/telemetry-snapshot.json` so `sfdt extension stats` can render them. That file
+stays on your machine.
+
+## Salesforce data
+
+The extension reads Flow metadata and runs SOQL/REST/SOAP calls through **your existing
+Salesforce session**, from the page you're already on. Queries, requests, and responses stay
+between your browser and the org you're authenticated to.
+
+When you use a bridge feature (e.g. "Deploy this Flow"), the extension sends the Flow's developer
+name to `http://127.0.0.1:7654` so the local CLI can run the deploy. It never leaves your
+device.
+
+## Third parties
+
+**None.** The extension bundles no third-party SDK, analytics service, error reporter, ad
+network, or telemetry endpoint. The optional AI features send your prompts to a Claude / Gemini /
+OpenAI key **you** supply, billed to you and governed by that provider's policy — the extension
+is a pass-through and does not see, log, or store prompts or completions.

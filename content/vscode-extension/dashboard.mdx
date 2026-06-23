@@ -1,0 +1,37 @@
+---
+title: The Embedded Dashboard
+description: Open the full sfdt ui web dashboard inside a VS Code editor tab.
+---
+
+import { Callout } from 'nextra/components'
+
+# The Embedded Dashboard
+
+The **SFDT: Open Dashboard** command (also the Open Dashboard button in the Org Health view, and
+clicking the status-bar item) launches the full [`sfdt ui`](/cli/dashboard) web dashboard
+**inside an editor tab** — no separate browser window.
+
+## How it works
+
+1. The extension spawns a `sfdt ui` child process.
+2. It polls the server's `/api/health` endpoint (up to ~15 seconds) until the server is ready.
+3. It opens a VS Code `WebviewPanel` and loads the dashboard in an iframe pointed at the local
+   server.
+
+The panel retains its state when hidden, so the dashboard keeps running until you close the tab.
+
+## Port
+
+The dashboard server port is controlled by [`sfdt.dashboardPort`](/vscode-extension/settings)
+(default `7654`). Change it if `7654` is already in use on your machine.
+
+<Callout type="info">
+  This is the same dashboard the CLI serves with `sfdt ui` and that the Chrome extension's bridge
+  talks to. See [CLI → Web Dashboard](/cli/dashboard) for a full tour of its pages.
+</Callout>
+
+<Callout type="warning">
+  Because the dashboard runs a local server, the embedded webview is bound to `127.0.0.1`. If the
+  panel never reveals, the server probably failed to start — check the **SFDT** output channel
+  and confirm the port is free.
+</Callout>

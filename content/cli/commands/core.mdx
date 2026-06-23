@@ -1,0 +1,153 @@
+---
+title: Core & Deployment Commands
+description: init, deploy, preflight, rollback, smoke, and release — the core SFDT deployment lifecycle.
+---
+
+import { Callout } from 'nextra/components'
+
+# Core & Deployment
+
+The standard sfdt deployment cycle:
+
+```bash
+sfdt preflight          # validate the branch is ready
+sfdt test               # run Apex tests
+sfdt manifest           # generate package.xml from git diff
+sfdt deploy             # deploy to the target org
+sfdt smoke              # post-deploy verification
+sfdt changelog generate # update CHANGELOG.md
+sfdt notify deploy-success
+```
+
+`sfdt deploy` automatically runs preflight first unless you pass `--skip-preflight`.
+
+---
+
+## `sfdt init`
+
+Initializes the `.sfdt/` configuration directory interactively. Run it once from your
+Salesforce DX project root.
+
+```bash
+sfdt init
+```
+
+It prompts for a project name, default org alias, coverage threshold, and AI provider, then
+scans your `packageDirectories` for Apex test classes to populate `test-config.json`. See
+[Configuration](/cli/configuration) for what it writes.
+
+---
+
+## `sfdt deploy`
+
+Deploys metadata to a Salesforce org. Preflight runs automatically first unless skipped. Output
+streams to your terminal with full TTY passthrough (spinner, colors, interactive prompts).
+
+```bash
+sfdt deploy
+sfdt deploy --managed
+sfdt deploy --skip-preflight
+sfdt deploy --source-dir force-app/feature-a   # deploy a folder directly (no manifest)
+```
+
+| Option | Description |
+|---|---|
+| `--managed` | Use the managed-package deploy path (namespace + version locking) |
+| `--skip-preflight` | Skip the preflight validation step |
+| `--dry-run` | Show what would run without making changes |
+| `--source-dir <path>` | Deploy a source directory directly instead of a manifest |
+| `--org <alias>` | Target org (defaults to `config.defaultOrg`) |
+
+<Callout type="info">
+  Use `--source-dir` for targeted deploys of a single package directory without generating a
+  manifest first — handy during development.
+</Callout>
+
+---
+
+## `sfdt preflight`
+
+Runs pre-deployment validation checks without deploying — the same checks `sfdt deploy` runs
+internally. The result is written to `logs/preflight-latest.json` and shows in the dashboard.
+
+```bash
+sfdt preflight
+sfdt preflight --strict
+```
+
+| Option | Description |
+|---|---|
+| `--strict` | Fail on any warning, not just errors |
+| `--dry-run` | Preview without writing results |
+
+**What it checks** (controlled by `deployment.preflight.*` in config):
+
+- Branch-naming conventions
+- Apex-test presence
+- `CHANGELOG.md` has unreleased content
+
+Set the `enforce*` flags in config to turn warnings into hard failures.
+
+---
+
+## `sfdt rollback`
+
+Rolls back a deployment to a target org. By default it backs up the org's current state first
+(`deployment.backupBeforeRollback`, default `true`).
+
+```bash
+sfdt rollback
+sfdt rollback --org staging
+```
+
+| Option | Description |
+|---|---|
+| `--org <alias>` | Target org (defaults to `config.defaultOrg`) |
+| `--dry-run` | Preview the rollback |
+| `--json` | Structured output |
+
+---
+
+## `sfdt smoke`
+
+Runs post-deployment smoke tests against a target org to verify the deploy succeeded. Intended
+to run immediately after a successful `sfdt deploy`.
+
+```bash
+sfdt smoke
+sfdt smoke --org production
+```
+
+| Option | Description |
+|---|---|
+| `--org <alias>` | Target org (defaults to `config.defaultOrg`) |
+| `--dry-run` | Preview |
+
+---
+
+## `sfdt release`
+
+Generates a versioned release manifest, optionally creates AI release notes, and walks you
+through a git commit → tag → deploy → push workflow. Every git step is optional — bail at any
+confirm prompt.
+
+```bash
+sfdt release 1.5.0
+sfdt release          # version resolved from config or prompted
+```
+
+| Argument | Description |
+|---|---|
+| `[version]` | Semver version string (e.g. `1.5.0`). Optional. |
+
+**What happens:**
+
+1. Produces versioned manifests in `manifest/release/` (e.g. `rl-1.5.0-package.xml`).
+2. If AI is enabled, offers to generate release notes to `release-notes/rl-1.5.0-RELEASE-NOTES.md`.
+3. Stages manifests, `CHANGELOG.md`, and release notes.
+4. Prompts to commit (`release: Generate manifests for 1.5.0`).
+5. Prompts to create an annotated tag (`v1.5.0`).
+6. Prompts to deploy.
+7. Prompts to push the tag.
+
+See the [Production Release workflow](/cli/workflows/production-release) for the full sequence.

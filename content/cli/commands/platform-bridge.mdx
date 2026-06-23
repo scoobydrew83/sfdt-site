@@ -1,0 +1,139 @@
+---
+title: Platform & Bridge Commands
+description: ui, extension, feature-flags, doctor, mcp, plugin, and skills — the dashboard, the Chrome bridge, the MCP server, and extensibility.
+---
+
+import { Callout } from 'nextra/components'
+
+# Platform & Bridge
+
+These commands run the web dashboard, manage the Chrome extension bridge, start the MCP server,
+and extend sfdt.
+
+---
+
+## `sfdt ui`
+
+Starts the local web dashboard (an Express server bound to `127.0.0.1`) and opens it in your
+browser. See the full [Web Dashboard](/cli/dashboard) page.
+
+```bash
+sfdt ui                   # opens http://localhost:7654
+sfdt ui --port 8080       # custom port
+sfdt ui --no-open         # start without opening the browser
+```
+
+| Option | Description |
+|---|---|
+| `-p, --port <n>` | Port to listen on (default `7654`) |
+| `--no-open` | Start without opening the browser |
+
+<Callout type="info">
+  When installing from source, build the dashboard first with `npm run build:gui`. The published
+  npm package ships a pre-built `gui/dist/`.
+</Callout>
+
+---
+
+## `sfdt extension`
+
+Manages the Chrome native messaging host that backs the extension's fallback transport. See
+[The Bridge](/guides/the-bridge) and the [Chrome Extension](/chrome-extension/bridge) docs.
+
+```bash
+sfdt extension install-host --extension-id abcdefghijklmnopabcdefghijklmnop --browser chrome
+sfdt extension install-host --extension-id <id> --browser all
+sfdt extension status
+sfdt extension uninstall-host --browser all
+sfdt extension stats --limit 20
+```
+
+| Subcommand | Options |
+|---|---|
+| `install-host` | `--extension-id <id>` (required, 32 lowercase a–p chars), `--browser <chrome\|edge\|brave\|chromium\|vivaldi\|all>`, `--json` |
+| `uninstall-host` | `--browser <name>`, `--json` |
+| `status` | `--json` |
+| `stats` | `--limit <n>` (default `10`), `--json` |
+
+---
+
+## `sfdt feature-flags`
+
+Manages `.sfdt/feature-flags.json` to remotely disable specific extension features — a kill
+switch that needs no Web Store re-review.
+
+```bash
+sfdt feature-flags list
+sfdt feature-flags disable flow-health-check
+sfdt feature-flags enable flow-health-check
+sfdt feature-flags clear --remove
+```
+
+| Subcommand | Description |
+|---|---|
+| `list` | Show the current kill-switch file |
+| `disable <id>` | Add a feature id to the kill list |
+| `enable <id>` | Remove a feature id |
+| `clear` | Re-enable everything (`--remove` deletes the file) |
+
+---
+
+## `sfdt doctor`
+
+End-to-end diagnostic for the extension stack: bridge reachable, native host registered,
+kill-switch readable, telemetry snapshot present. Exits non-zero on failure — wire it into CI.
+
+```bash
+sfdt doctor --extension
+sfdt doctor --extension --json
+sfdt doctor --extension --port 8080
+```
+
+| Option | Description |
+|---|---|
+| `--extension` | Run the extension-stack diagnostic |
+| `--json` | CI-friendly structured output |
+| `--port <n>` | Bridge port if not the default |
+
+---
+
+## `sfdt mcp`
+
+Starts the built-in Model Context Protocol server so agents can drive sfdt as a tool. See the
+full [MCP Server](/cli/mcp) page.
+
+```bash
+sfdt mcp start      # JSON-RPC 2.0 over stdio
+sfdt mcp cleanup    # purge expired parked results from the cache
+```
+
+| Subcommand | Description |
+|---|---|
+| `start` | Start the MCP server (stdio transport) |
+| `cleanup` | Purge expired parked results from `.sfdt/cache/parked/` |
+
+---
+
+## `sfdt plugin`
+
+Scaffolds a new sfdt CLI plugin project. See [Plugins](/cli/plugins).
+
+```bash
+sfdt plugin create my-plugin --description "My custom command" --author "you@example.com"
+```
+
+| Option | Description |
+|---|---|
+| `--description <desc>` | Plugin description |
+| `--author <author>` | Plugin author |
+
+---
+
+## `sfdt skills`
+
+Exports local agent skills to IDE/agent-specific configurations.
+
+```bash
+sfdt skills export
+sfdt skills export --json
+```

@@ -1,0 +1,75 @@
+---
+title: Report an issue
+description: How to file a good bug report, request a feature, or disclose a security vulnerability.
+---
+
+import { Callout, Steps } from 'nextra/components'
+
+# Report an issue
+
+## Bugs & feature requests
+
+File these on [GitHub Issues](https://github.com/scoobydrew83/sfdt/issues). Add the relevant
+area label so it routes correctly:
+
+| Label | Use for |
+|---|---|
+| `area: cli` | The `@sfdt/cli` command-line tool |
+| `area: extension` | The Chrome extension |
+| `area: vscode` | The VS Code extension |
+| `area: host` | The native-messaging host |
+
+### A good bug report includes
+
+<Steps>
+### Versions
+
+```bash
+sfdt version
+node --version
+sf --version
+```
+For the Chrome extension, note the version shown on `chrome://extensions`; for VS Code, the
+extension version in the Extensions panel.
+
+### What you ran and what happened
+
+The exact command or feature, the full output (redact secrets), and what you expected instead.
+
+### Diagnostics
+
+```bash
+sfdt doctor --extension --json
+```
+Attach the output for bridge/extension issues.
+
+### A minimal repro
+
+The smallest project state or steps that reproduce it.
+</Steps>
+
+## Security vulnerabilities
+
+<Callout type="error">
+  **Do not open a public issue for a security vulnerability.** Use the private channel below so
+  it can be fixed before disclosure.
+</Callout>
+
+Report security issues through
+[GitHub's private security advisory flow](https://github.com/scoobydrew83/sfdt/security/advisories/new).
+See [`SECURITY.md`](https://github.com/scoobydrew83/sfdt/blob/main/SECURITY.md) for the full
+policy. See also [Security & privacy](/guides/security).
+
+## Contributing a fix
+
+Pull requests are welcome. The short version:
+
+```bash
+git checkout -b feature/your-feature
+# make changes with tests
+npm test && npm run lint
+git commit -m "feat: ..."
+```
+
+Open a PR against `main`. See
+[`CONTRIBUTING.md`](https://github.com/scoobydrew83/sfdt/blob/main/CONTRIBUTING.md).

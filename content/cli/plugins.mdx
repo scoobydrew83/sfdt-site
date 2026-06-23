@@ -1,0 +1,115 @@
+---
+title: Plugins
+description: Extend the SFDT CLI with custom subcommands via npm sfdt-plugin-* packages, local scripts, or an explicit plugin list.
+---
+
+import { Callout } from 'nextra/components'
+
+# Plugins
+
+SFDT plugins extend the CLI with new subcommands using Commander.js. A plugin is a Node.js **ESM
+module** that exports a single `register` function.
+
+## The contract
+
+```js
+/**
+ * @param {import('commander').Command} program
+ */
+export function register(program) {
+  program
+    .command('my-command')
+    .description('What this command does')
+    .option('--flag <value>', 'Description')
+    .action(async (options) => {
+      // implementation
+    });
+}
+```
+
+The `program` argument is the root Commander instance. Call `.command()` to add subcommands.
+
+<Callout type="warning">
+  Do **not** call `program.parse()` or `program.parseAsync()` — the CLI entry point handles that
+  after all plugins load.
+</Callout>
+
+## Loading sources & precedence
+
+Plugins load in this order, before CLI argument parsing:
+
+### 1. Explicit packages (`config.plugins[]`)
+
+```json
+{ "plugins": ["sfdt-plugin-my-thing", "@myorg/sfdt-plugin-deploy-ext"] }
+```
+
+Resolved from the **project's** `node_modules/`, not the global sfdt install. Explicit plugins
+that fail to load print a warning but never abort startup.
+
+### 2. Auto-discovered packages (`pluginOptions.autoDiscover`)
+
+```json
+{ "pluginOptions": { "autoDiscover": true } }
+```
+
+When enabled, sfdt scans `node_modules/` for packages named `sfdt-plugin-*` (including scoped
+`@org/sfdt-plugin-*`) and loads them automatically.
+
+<Callout type="warning">
+  Auto-discovery is **off by default** — it executes arbitrary project-local code before CLI
+  parsing. Only enable it when you control the packages in your project.
+</Callout>
+
+### 3. Local files (`.sfdt/plugins/*.js`)
+
+Also requires `pluginOptions.autoDiscover: true`. Any `.js`/`.mjs` file in `.sfdt/plugins/` is
+loaded as a local plugin:
+
+```
+.sfdt/
+  plugins/
+    custom-deploy.js   ← loaded automatically when autoDiscover is true
+```
+
+## Scaffold a plugin
+
+```bash
+sfdt plugin create my-plugin --description "My custom command" --author "you@example.com"
+```
+
+## Minimal example
+
+```js
+// sfdt-plugin-hello/index.js
+export function register(program) {
+  program
+    .command('hello')
+    .description('Print a greeting')
+    .option('--name <name>', 'Who to greet', 'world')
+    .action((options) => {
+      console.log(`Hello, ${options.name}!`);
+    });
+}
+```
+
+Install it in your Salesforce project and list it:
+
+```bash
+npm install --save-dev sfdt-plugin-hello
+```
+
+```json
+{ "plugins": ["sfdt-plugin-hello"] }
+```
+
+## Error handling
+
+Plugin failures are **warnings, never crashes**. If a plugin throws during load, sfdt prints a
+warning and continues — the CLI stays fully functional.
+
+## Naming rules
+
+- npm packages must start with `sfdt-plugin-` for auto-discovery.
+- Scoped `@yourorg/sfdt-plugin-name` also qualifies for auto-discovery.
+- Any name works when listed explicitly in `config.plugins[]`.

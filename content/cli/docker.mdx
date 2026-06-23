@@ -1,0 +1,57 @@
+---
+title: Docker
+description: Run sfdt in CI/CD with the official Docker image — Node, Salesforce CLI, git, bash, and jq in one container.
+---
+
+import { Callout } from 'nextra/components'
+
+# Docker
+
+An official Docker image is available for CI/CD pipelines. It ships Node, the Salesforce CLI,
+`git`, `bash`, and `jq` — everything sfdt's shell scripts need.
+
+## Build from source
+
+```bash
+docker build -t sfdt .
+```
+
+## Run against a mounted project
+
+Mount your Salesforce project at `/project` and pass auth via environment:
+
+```bash
+docker run --rm \
+  -v "$(pwd):/project" \
+  -e SFDX_AUTH_URL="$SFDX_AUTH_URL" \
+  sfdt deploy
+```
+
+```bash
+docker run --rm -v "$(pwd):/project" \
+  sfdt explain --latest
+```
+
+## GitHub Actions
+
+```yaml
+- name: Deploy
+  run: |
+    docker run --rm \
+      -v "${{ github.workspace }}:/project" \
+      -e SF_ORG_INSTANCE_URL="${{ secrets.SF_ORG_INSTANCE_URL }}" \
+      sfdt deploy --skip-preflight
+```
+
+## AI in the container
+
+<Callout type="info">
+  Install the selected AI provider CLI in the container when using AI features. Use **Gemini** or
+  **OpenAI** in CI — Claude's interactive mode isn't CI-friendly. See
+  [AI Providers](/cli/ai-providers).
+</Callout>
+
+```bash
+docker run --rm -v "$(pwd):/project" \
+  sfdt explain --latest
+```

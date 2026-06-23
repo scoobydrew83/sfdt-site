@@ -1,0 +1,161 @@
+---
+title: Org Health & Operations Commands
+description: audit, monitor, docs, data, scratch, and notify — diagnose org health, back up metadata, generate docs, seed data, manage scratch orgs, and notify Slack.
+---
+
+import { Callout } from 'nextra/components'
+
+# Org Health & Operations
+
+Most commands here accept `--org <alias>` (defaults to `config.defaultOrg`) and `--json`.
+
+---
+
+## `sfdt audit`
+
+Diagnoses org health. Run a single check or `all`.
+
+```bash
+sfdt audit all
+sfdt audit mfa
+sfdt audit licenses --org production --json
+```
+
+| Check | What it inspects |
+|---|---|
+| `audittrail` | Recent Setup Audit Trail entries (lookback `audit.auditTrailLookbackDays`) |
+| `licenses` | License usage vs `audit.licenseWarnThreshold` |
+| `mfa` | Multi-factor-authentication coverage |
+| `unused-apex` | Apex classes with no recent references |
+| `inactive-users` | Users inactive beyond `audit.inactiveUserDays` |
+| `api-versions` | Components below `audit.minApiVersion` |
+
+Results are written to `logs/audit-latest.json` (consumed by the dashboard and the VS Code Org
+Health sidebar).
+
+---
+
+## `sfdt monitor`
+
+Monitors org operational health. Run a single check or `all`.
+
+```bash
+sfdt monitor all
+sfdt monitor limits
+sfdt monitor all --backup    # include a metadata backup in the run
+```
+
+| Check | What it inspects |
+|---|---|
+| `limits` | Governor-limit usage vs `monitoring.limitWarnThreshold` |
+| `errors` | Apex errors in the last `monitoring.errorLookbackDays` days |
+| `health` | Security Health Check score vs `monitoring.healthMinScore` |
+| `backup` | Metadata backup (see below) |
+
+| Option | Description |
+|---|---|
+| `--backup` | Include a metadata backup when running `all` |
+| `--org <alias>` | Target org |
+| `--json` | Structured output |
+
+Results land in `logs/monitor-latest.json`.
+
+### `sfdt monitor backup`
+
+Retrieves a full metadata backup into `monitoring.backupDir`.
+
+```bash
+sfdt monitor backup
+sfdt monitor backup --org production --json
+```
+
+---
+
+## `sfdt docs`
+
+Generates documentation and diagrams from your org/source.
+
+```bash
+sfdt docs generate            # objects, Apex, flows (MkDocs-compatible)
+sfdt docs generate --ai       # include an AI overview
+sfdt docs diagram             # print a Mermaid ER diagram
+sfdt docs diagram --output erd.mmd
+```
+
+| Subcommand | Options |
+|---|---|
+| `docs generate` | `--ai`, `--json` |
+| `docs diagram` | `--output <file>`, `--json` |
+
+---
+
+## `sfdt data`
+
+Manages data sets via the native `sf data tree`, for seeding sandboxes and scratch orgs.
+
+```bash
+sfdt data list
+sfdt data export AccountsAndContacts
+sfdt data import AccountsAndContacts
+sfdt data delete AccountsAndContacts --yes
+```
+
+| Subcommand | Description |
+|---|---|
+| `list` | List defined data sets |
+| `export [set]` | Export records to a data set |
+| `import [set]` | Import a data set into the org |
+| `delete [set]` | Delete records (`--yes` to skip confirmation; required non-interactively) |
+
+Common options: `--org <alias>`, `--json`.
+
+---
+
+## `sfdt scratch`
+
+Creates, deletes, lists, and pools scratch orgs.
+
+```bash
+sfdt scratch create --alias feature-x --days 7
+sfdt scratch list
+sfdt scratch delete --alias feature-x
+sfdt scratch pool --size 3
+```
+
+| Subcommand | Description |
+|---|---|
+| `create` | Create a scratch org from `scratch.definitionFile` |
+| `delete` | Delete a scratch org |
+| `list` | List active scratch orgs |
+| `pool` | Manage a pre-created pool |
+
+Options: `--alias <name>`, `--days <n>`, `--size <n>`, `--json`.
+
+---
+
+## `sfdt notify`
+
+Sends a structured Slack notification for a deployment-lifecycle event via Slack Incoming
+Webhooks.
+
+```bash
+sfdt notify deploy-success
+sfdt notify deploy-failure --org production --version 1.5.0
+sfdt notify test-failure --message "Coverage dropped below threshold"
+sfdt notify release-created --version 1.5.0
+```
+
+| Argument | Values |
+|---|---|
+| `<event>` | `deploy-success`, `deploy-failure`, `test-failure`, `release-created` |
+
+| Option | Description |
+|---|---|
+| `--version <ver>` | Version label to include |
+| `--org <alias>` | Org alias to display |
+| `--message <msg>` | Custom message body |
+
+<Callout type="warning">
+  Requires `features.notifications: true` and `notifications.slack.webhookUrl` in config.
+  Otherwise the command exits with setup instructions.
+</Callout>

@@ -1,0 +1,44 @@
+---
+title: Get help
+description: Where to get help with SFDT, and how to report bugs or security issues.
+---
+
+import { Cards, Callout } from 'nextra/components'
+
+# Get help
+
+SFDT is an open-source project. The fastest paths to an answer:
+
+<Cards>
+  <Cards.Card title="FAQ" href="/support/faq" arrow />
+  <Cards.Card title="Troubleshooting" href="/support/troubleshooting" arrow />
+  <Cards.Card title="Report an issue" href="/support/report-an-issue" arrow />
+  <Cards.Card title="GitHub repository" href="https://github.com/scoobydrew83/sfdt" arrow />
+</Cards>
+
+## Self-service first
+
+Most problems are fastest to solve with the built-in diagnostics:
+
+```bash
+sfdt doctor --extension     # bridge, native host, kill-switch, telemetry
+sfdt extension status       # native host install state
+sfdt version                # confirm your CLI version
+```
+
+For the extensions, start at [Chrome → Troubleshooting](/chrome-extension/troubleshooting) or
+[VS Code → Troubleshooting](/vscode-extension/troubleshooting).
+
+## Channels
+
+| I want to… | Go to |
+|---|---|
+| Ask a question or report a bug | [GitHub Issues](https://github.com/scoobydrew83/sfdt/issues) |
+| Report a security vulnerability | [GitHub Security Advisory](https://github.com/scoobydrew83/sfdt/security/advisories/new) (not a public issue) |
+| Read recent changes | [Changelog](/support/changelog) |
+| Browse the source | [scoobydrew83/sfdt](https://github.com/scoobydrew83/sfdt) |
+
+<Callout type="warning">
+  Please **don't** open a public issue for a security vulnerability. Use the private security
+  advisory flow described in [Report an issue](/support/report-an-issue).
+</Callout>

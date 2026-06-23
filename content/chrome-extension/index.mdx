@@ -1,0 +1,54 @@
+---
+title: SFDT SF Helper — Chrome Extension
+description: A Chrome extension that augments Salesforce Flow Builder, Setup, Object Manager, and record pages with 29 opt-in productivity features — standalone, with an optional bridge to the sfdt CLI.
+---
+
+import { Callout, Cards } from 'nextra/components'
+
+# SFDT SF Helper — Chrome Extension
+
+**SFDT SF Helper** (`@sfdt/extension`) augments Salesforce Flow Builder and Setup with
+productivity features for admins and developers. It works completely standalone; an optional
+local **bridge** to the [`@sfdt/cli`](/cli) unlocks deploy, rollback, quality scoring, and
+AI-powered analysis directly from the canvas.
+
+- **Current version:** `0.3.2`
+- **Features:** 29, all opt-in
+- **Status:** pre-Web-Store (load unpacked today; submission pending)
+- **License:** MIT
+
+<Callout type="info">
+  The extension reads Salesforce metadata through **your existing browser session** — no
+  separate login, and nothing leaves your device. See [Privacy &
+  Permissions](/chrome-extension/privacy).
+</Callout>
+
+## Standalone vs. bridge-enabled
+
+Most features run with **no setup at all** — open a Salesforce tab and the ⚡ side button
+appears. A handful of features call your local sfdt CLI through the bridge:
+
+| Mode | What you get | Requires |
+| --- | --- | --- |
+| **Standalone** | 25 of 29 features: SOQL/REST/SOAP runners, org limits, Flow analysis, search, schema export, Apex execution, and more | Nothing — just install |
+| **Bridge-enabled** | Adds `flow-deploy`, `flow-version-manager`, `ai-assistant`, and `org-health` | `sfdt ui` running, or the native host installed |
+
+## Where it fits
+
+The extension is one of four workspaces in the [`sfdt` monorepo](https://github.com/scoobydrew83/sfdt):
+
+| Workspace | Role |
+| --- | --- |
+| [`@sfdt/cli`](/cli) | The npm CLI that owns deployment, testing, and release management |
+| `@sfdt/extension` | **This package** — the Chrome extension |
+| `@sfdt/host` | A tiny native-messaging host used when the CLI's HTTP bridge isn't running |
+| `@sfdt/flow-core` | Shared TypeScript library (Flow rules engine + scoring) used by the extension and the CLI |
+
+## Next steps
+
+<Cards>
+  <Cards.Card title="Install the extension" href="/chrome-extension/installation" arrow />
+  <Cards.Card title="Browse all 29 features" href="/chrome-extension/features" arrow />
+  <Cards.Card title="Connect the bridge" href="/chrome-extension/bridge" arrow />
+  <Cards.Card title="Privacy & permissions" href="/chrome-extension/privacy" arrow />
+</Cards>

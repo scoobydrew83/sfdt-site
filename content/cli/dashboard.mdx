@@ -1,0 +1,81 @@
+---
+title: Web Dashboard (sfdt ui)
+description: The local Lightning Design System dashboard — every page, live SSE command runners, the AI chat drawer, and its security model.
+---
+
+import { Callout } from 'nextra/components'
+
+# Web Dashboard
+
+`sfdt ui` starts a local Express server and opens a **Salesforce Lightning Design System**
+dashboard in your browser. It reads log/result files from your project's `logDir` (default
+`logs/`) and can run several commands live.
+
+```bash
+sfdt ui                   # opens http://localhost:7654
+sfdt ui --port 8080       # custom port
+sfdt ui --no-open         # start without opening the browser
+```
+
+<Callout type="info">
+  When installing from source, build the dashboard once with `npm run build:gui`. The published
+  npm package already includes a pre-built `gui/dist/`, so end users don't need to build it. If
+  `gui/dist/` is missing, `sfdt ui` shows a build-instructions page instead.
+</Callout>
+
+## Pages
+
+| Page | What it shows | Data source |
+|---|---|---|
+| **Dashboard** | Summary stat cards: last test run, preflight, drift | `preflight-latest.json`, `drift-latest.json`, `test-results/` |
+| **Test Runs** | Apex test history with coverage bands; run tests inline | `test-results/*.json` |
+| **Preflight** | Per-check pass/warn/fail; run preflight inline | `preflight-latest.json` |
+| **Drift Detection** | Filterable component table (All / Clean / Drift); run inline | `drift-latest.json` |
+| **Compare** | Source-only / target-only / both; side-by-side XML diff; export `package.xml` | `compare-latest.json` |
+| **Review** | AI code-review results across five categories | `review-latest.json` |
+| **Explain** | AI deployment-log analysis | `explain-latest.json` |
+| **Release Hub** | Manifest picker, changelog & release-note editing, deploy | `manifest/release/`, `release-notes/`, `CHANGELOG.md` |
+| **Pull** | Smart-delta / preview / full retrieve with live streaming | `/api/pull` (SSE) |
+| **Quality** | Code/test quality results; stub generator with dry-run preview | `quality-latest.json` |
+| **Scan** | Full metadata inventory with search & filter | `/api/scan` |
+| **Audit** | Org health: audit trail, licenses, MFA, unused Apex, API versions | `audit-latest.json` |
+| **Monitor** | Limits, errors, health score, backup history | `monitor-latest.json` |
+| **Flows** | Flow health scores, trigger conflicts, subflow graph | `/api/flow/quality` |
+| **Manifests** | Generated `package.xml` artifacts — preview & download | `manifest/release/*.xml` |
+| **Logs** | Searchable log viewer with pagination and raw output | `logs/*` |
+| **Dependencies** | D3 force-directed component dependency graph | `/api/dependencies` |
+| **Settings** | View/edit config; initialize a project from the GUI | `.sfdt/config.json` |
+| **Coverage** | Apex coverage trend across runs | `test-results/` |
+| **Dependency Check** | Preflight dependency validation (missing/broken refs) | `/api/dependencies/preflight` |
+
+Data appears automatically after running the corresponding CLI commands (`sfdt test`,
+`sfdt preflight`, `sfdt drift`, …) that write JSON result files.
+
+## Live command runners
+
+The Test Runs, Preflight, Drift, Compare, and Pull pages have **Run** buttons that trigger the
+underlying command over a Server-Sent Events stream — output appears line-by-line in real time,
+exactly like running the CLI.
+
+## AI chat drawer
+
+The toolbar's **Ask AI** button opens a sliding chat panel. Pages with relevant output (Review,
+Explain, Drift, Preflight) pre-fill the chat with that context so you can ask follow-ups without
+copy-pasting.
+
+## Security
+
+<Callout type="warning">
+  The dashboard is local-only and hardened against page-driven attacks:
+</Callout>
+
+- **Binds to `127.0.0.1`** — never exposed to the network.
+- **Per-launch auth token** prevents unauthorized access to a running process.
+- **CSRF protection** — all mutating routes require an `X-SFDT-CSRF` header.
+- **Read-only AI sandbox** — the AI chat's tool access is restricted to `Read,Grep,Glob` (no
+  Bash/Write/Edit), so a prompt injection in page context can't drive tool execution.
+- **Log redaction at ingest** — secrets are redacted before reaching the in-memory buffer or the
+  live SSE stream.
+
+The same bridge endpoints the dashboard exposes are what the Chrome extension talks to — see
+[The Bridge](/guides/the-bridge).

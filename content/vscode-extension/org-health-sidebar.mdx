@@ -1,0 +1,64 @@
+---
+title: The Org Health Sidebar
+description: A dedicated activity-bar view that renders the latest sfdt audit and monitor checks as a tree, with a status-bar roll-up.
+---
+
+import { Callout } from 'nextra/components'
+
+# The Org Health Sidebar
+
+The extension contributes an **SFDT** container to the activity bar, holding the **Org Health**
+tree view (`sfdtOrgHealth`). It visualises the latest results from `sfdt audit` and
+`sfdt monitor` without you having to read raw JSON.
+
+## What the tree shows
+
+The view has two top-level sections, each built from a CLI snapshot:
+
+| Section | Source snapshot |
+| --- | --- |
+| **Diagnostics & Audit** | `logs/audit-latest.json` |
+| **Monitoring** | `logs/monitor-latest.json` |
+
+Under each section, every check shows a status icon, a title, and a one-line summary. Expand a
+check to see its findings (up to 25 per check, then truncated). The status icons map to the
+CLI's check statuses:
+
+| Icon | Meaning |
+| --- | --- |
+| `$(pass)` | The check passed |
+| `$(warning)` | The check warned |
+| `$(error)` | The check failed or errored |
+
+## Re-running a single check
+
+Click any check or finding to **re-run just that check** — for example clicking the MFA row runs
+`sfdt audit mfa` rather than the whole audit. The tree and status bar refresh when it completes.
+
+## The status bar
+
+A left-aligned status-bar item shows the active org and a roll-up icon reflecting the **worst**
+status across both sections:
+
+- `$(error)` — at least one check fails or errors
+- `$(warning)` — at least one check warns
+- `$(pass)` — everything passes
+- `$(cloud)` — no snapshots exist yet (nothing has been run)
+
+The format is `$(icon) SFDT · <org-alias>`, or `$(icon) SFDT` when no org is set. Clicking it
+opens the [embedded dashboard](/vscode-extension/dashboard).
+
+## View title buttons
+
+The Org Health view header has two buttons:
+
+| Button | Command |
+| --- | --- |
+| Refresh ($(refresh)) | `sfdt.refresh` |
+| Open Dashboard ($(dashboard)) | `sfdt.openDashboard` |
+
+<Callout type="info">
+  Snapshots appear after you run an audit or monitor — use **SFDT: Run Org Audit** /
+  **SFDT: Run Org Monitor**, or the Refresh button. Until then the tree shows "not run yet"
+  placeholders and the status bar shows `$(cloud)`.
+</Callout>

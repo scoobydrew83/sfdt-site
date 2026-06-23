@@ -1,0 +1,42 @@
+---
+title: SFDT — Salesforce DevTools for VS Code
+description: A thin VS Code UI over the sfdt CLI — deploy, preflight, org audit & monitoring, docs, and the dashboard from the command palette and a dedicated Org Health sidebar.
+---
+
+import { Callout, Cards } from 'nextra/components'
+
+# SFDT — Salesforce DevTools for VS Code
+
+The **SFDT — Salesforce DevTools** extension (`@sfdt/vscode`) drives the
+[`@sfdt/cli`](/cli) from inside VS Code: deploy, preflight, org monitoring & audit, docs, and
+the sfdt dashboard — all from the command palette and a dedicated **Org Health** sidebar.
+
+- **Version:** `0.1.0`
+- **Publisher:** `sfdt`
+- **VS Code engine:** `^1.80.0`
+- **License:** MIT
+
+<Callout type="info">
+  The extension is a **thin UI shell**. All the real logic — audit, deploy, monitor, and the
+  rest — lives in the CLI. The extension spawns `sfdt`, reads the JSON snapshots it writes, and
+  renders them. That means it requires [`@sfdt/cli`](/cli/installation) to be installed.
+</Callout>
+
+## What it surfaces
+
+| Surface | What you get |
+| --- | --- |
+| **Command palette** | Run `deploy`, `preflight`, `audit`, `monitor`, `backup`, `docs`, and more — with a modal confirmation before anything destructive |
+| **Org Health sidebar** | A tree of the latest audit and monitor checks, each with a status icon and findings; click a check to re-run just that check |
+| **Status bar** | The active org plus a roll-up health icon; click to open the dashboard |
+| **Embedded dashboard** | The full `sfdt ui` web dashboard inside an editor tab |
+| **Output channel** | Live stdout/stderr from every CLI command |
+
+## Next steps
+
+<Cards>
+  <Cards.Card title="Install the extension" href="/vscode-extension/installation" arrow />
+  <Cards.Card title="Command reference" href="/vscode-extension/commands" arrow />
+  <Cards.Card title="Org Health sidebar" href="/vscode-extension/org-health-sidebar" arrow />
+  <Cards.Card title="Settings" href="/vscode-extension/settings" arrow />
+</Cards>

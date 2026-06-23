@@ -1,0 +1,49 @@
+---
+title: Keyboard Shortcuts & Triggers
+description: How features are triggered — the ⚡ side button menu, the canvas-search shortcut, and context-aware behavior across Salesforce pages.
+---
+
+import { Callout } from 'nextra/components'
+
+# Keyboard Shortcuts & Triggers
+
+Most features are launched from the ⚡ **side button** menu rather than global hotkeys, so they
+never collide with Salesforce's own shortcuts. One feature has a dedicated, configurable
+keyboard shortcut.
+
+## Keyboard shortcut
+
+| Action | Shortcut | Configurable? |
+| --- | --- | --- |
+| Open **Canvas Search** in Flow Builder | `Cmd`/`Ctrl`+`Shift`+`F` | Yes — set `shortcut` under `canvas-search` in [Settings](/chrome-extension/settings) |
+
+Inside Canvas Search, `Enter` cycles through matches and the canvas pans to centre each one.
+
+## The ⚡ side button
+
+The side button mounts in the **top frame only** on Salesforce Lightning and Setup pages. It
+does not appear on non-Salesforce pages, and it does not appear inside classic Visualforce
+iframes.
+
+Clicking it opens a menu pinned to its left. The menu lists only the features relevant to the
+**current context**:
+
+| Context | Example menu items |
+| --- | --- |
+| Generic Setup | Setup Tabs, Scheduled Flow Explorer, Trigger Conflicts, Subflow Caller Graph, SOQL Runner, Org Limits |
+| Setup → Flows list | Flow List Search, plus the Setup items above |
+| Flow Details (classic VF) | Flow Version Manager |
+| Flow Builder canvas | Canvas Search, Show Missing Descriptions, Run Health Check, AI Assistant, API Name Generator, Deploy / Rollback |
+| Compare Flows | Comparison Exporter |
+| Record / Object Manager | Inspect Record, Data Import, Field Creator, Export Schema for Prompt |
+
+## SPA navigation
+
+Salesforce is a single-page app. When you navigate — for example from Setup to Object Manager —
+the menu **refreshes** to match the new context without a full page reload.
+
+<Callout type="info">
+  Open the **Workspace tab** (side menu → Open Workspace ↗) to reach tools like Apex Anonymous,
+  Debug Log Viewer, and Saved SOQL in a dedicated tab. See
+  [The Workspace Tab](/chrome-extension/workspace).
+</Callout>

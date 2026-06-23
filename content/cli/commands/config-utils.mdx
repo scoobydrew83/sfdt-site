@@ -1,0 +1,67 @@
+---
+title: Config & Utility Commands
+description: config, completion, version, and update — read and write configuration, enable shell completion, and keep sfdt current.
+---
+
+# Config & Utilities
+
+---
+
+## `sfdt config`
+
+Read and write individual `.sfdt/config.json` values from the command line using dot notation.
+
+```bash
+sfdt config get defaultOrg
+sfdt config get deployment.coverageThreshold
+sfdt config set deployment.coverageThreshold 80
+sfdt config set features.ai true
+```
+
+| Subcommand | Description |
+|---|---|
+| `get <key>` | Print a value (dot notation, e.g. `deployment.coverageThreshold`) |
+| `set <key> <value>` | Set a value (dot notation) |
+
+Values are coerced automatically: `"true"`/`"false"` become booleans, numeric strings become
+numbers, everything else stays a string. See [Configuration](/cli/configuration) for the full
+schema.
+
+---
+
+## `sfdt completion`
+
+Prints a shell completion script for `bash`, `zsh`, or `fish`.
+
+```bash
+sfdt completion bash >> ~/.bashrc
+sfdt completion zsh >> ~/.zshrc
+sfdt completion fish > ~/.config/fish/completions/sfdt.fish
+```
+
+---
+
+## `sfdt version`
+
+Prints the current sfdt version.
+
+```bash
+sfdt version
+```
+
+---
+
+## `sfdt update`
+
+Updates sfdt to the latest version from npm.
+
+```bash
+sfdt update
+sfdt update --force
+```
+
+| Option | Description |
+|---|---|
+| `--force` | Force the update |
+
+If a self-update fails, sfdt prints an actionable error with a manual retry command.

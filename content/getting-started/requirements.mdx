@@ -1,0 +1,60 @@
+---
+title: Requirements
+description: Prerequisites for the CLI, the Chrome extension, and the VS Code extension.
+---
+
+import { Callout } from 'nextra/components'
+
+# Requirements
+
+## CLI (`@sfdt/cli`)
+
+**Required**
+
+| Tool | Version | Why |
+|---|---|---|
+| Node.js | ≥ 22.15.0 | Uses the built-in `node:sqlite` module (unflagged in Node 22.15) for the pull cache. |
+| Salesforce CLI (`sf`) | 2.x+ | Performs all Salesforce operations; must be authenticated to your target orgs. |
+| bash | 4.0+ | Several core scripts are Bash. macOS ships bash 3 — install a newer one with `brew install bash`. |
+| jq | 1.6+ | Required by several shell scripts. |
+
+**Optional**
+
+| Tool | Enables |
+|---|---|
+| [Claude Code CLI](https://www.npmjs.com/package/@anthropic-ai/claude-code) | AI features with the default `claude` provider. |
+| [Gemini CLI](https://www.npmjs.com/package/@google/gemini-cli) | AI features with the `gemini` provider. |
+| [Codex CLI](https://www.npmjs.com/package/@openai/codex) | AI features with the `openai` provider. |
+| [GitHub CLI](https://cli.github.com/) (`gh`) | PR creation during deployments. |
+
+<Callout type="warning">
+  AI is never required. With AI disabled (`features.ai: false`), commands still run and
+  `sfdt explain` falls back to heuristics. See [CLI → AI providers](/cli/ai-providers).
+</Callout>
+
+## Chrome extension (`@sfdt/extension`)
+
+- **Google Chrome** (or a Chromium-based browser: Edge, Brave, Chromium, Vivaldi) with
+  Manifest V3 support.
+- A logged-in Salesforce session (Lightning or Classic). The extension reads metadata via the
+  Tooling/REST API using your existing session.
+- **Optional** — the CLI running `sfdt ui` to unlock bridge features (deploy, rollback,
+  quality scoring, AI). Without it, the 25+ standalone features still work.
+- **Optional** — the native-messaging host (`sfdt extension install-host`) if you can't keep
+  `sfdt ui` running.
+
+## VS Code extension (`@sfdt/vscode`)
+
+- **VS Code** `^1.80.0` or newer.
+- **`@sfdt/cli`** installed and on your `PATH` (or point `sfdt.cliPath` at it). The extension
+  is a thin UI — all work is done by the CLI.
+- A workspace folder that has been initialized with `sfdt init` (so `logs/` snapshots and
+  `.sfdt/` config exist).
+- **Optional** — a configured default org, set via the `SFDT: Set Default Org` command or
+  the `sfdt.defaultOrg` setting.
+
+## Supported platforms
+
+The CLI and extensions run on **macOS** and **Linux** today. Windows support for the CLI is on
+the [roadmap](https://github.com/scoobydrew83/sfdt) (the native host already ships a Windows
+manifest). For Windows CI, use the [Docker image](/cli/docker).

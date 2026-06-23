@@ -1,0 +1,54 @@
+---
+title: Troubleshooting
+description: Common symptoms across the SFDT suite and how to fix them.
+---
+
+import { Callout } from 'nextra/components'
+
+# Troubleshooting
+
+A cross-product symptom → fix table. For product-specific detail, see
+[Chrome → Troubleshooting](/chrome-extension/troubleshooting) and
+[VS Code → Troubleshooting](/vscode-extension/troubleshooting).
+
+## First, run the doctor
+
+```bash
+sfdt doctor --extension     # checks the bridge, native host, kill-switch file, telemetry
+sfdt doctor --extension --json
+```
+
+## CLI
+
+| Symptom | Likely cause / fix |
+|---|---|
+| `sfdt: command not found` | Global npm bin not on `PATH`, or you need `npm link` for a source checkout. |
+| Errors about `node:sqlite` | Node older than 22.15.0. Upgrade Node — see [Requirements](/getting-started/requirements). |
+| `jq: command not found` / script errors | Install `jq` (1.6+) and ensure bash 4+ (`brew install bash jq` on macOS). |
+| `sf` not found / auth errors | Install and authenticate the Salesforce CLI (`sf org login web`). |
+| Deploy fails with a wall of errors | `sfdt explain --latest` (AI + heuristics), or open the dashboard's **Explain** page. |
+| Config warns about `packageDirectories` | A path in `sfdx-project.json` doesn't exist on disk — fix the path or create the folder. |
+
+## Bridge / extensions
+
+| Symptom | Likely cause / fix |
+|---|---|
+| Extension says "Bridge not running" | Start `sfdt ui` in a SFDT-initialized project, then pair the token. |
+| "Bridge returned major version mismatch" | The extension and CLI bridge contracts differ at the major version — update both to compatible versions. |
+| A feature is silently disabled | Check the [kill switch](/chrome-extension/kill-switch): `sfdt feature-flags list`. |
+| Native host not detected | `sfdt extension install-host --extension-id <id>`, then `sfdt extension status`. |
+| Token rejected | Re-copy `~/.sfdt/bridge-token` into options and **Test connection**. |
+
+## VS Code
+
+| Symptom | Likely cause / fix |
+|---|---|
+| "sfdt not found" | Set `sfdt.cliPath` to the binary, or put `sfdt` on `PATH`. |
+| Org Health sidebar empty | Run `SFDT: Run Org Audit` / `SFDT: Run Org Monitor` to generate snapshots. |
+| Commands target the wrong org | Set a default with `SFDT: Set Default Org` (`sfdt.defaultOrg`). |
+| Dashboard won't open | Port in use — change `sfdt.dashboardPort`, or close a running `sfdt ui`. |
+
+<Callout type="info">
+  Console logs from the Chrome extension are tagged `[SFUT]`. Informational lines are expected;
+  red errors indicate a regression worth [reporting](/support/report-an-issue).
+</Callout>

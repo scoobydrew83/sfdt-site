@@ -1,0 +1,155 @@
+---
+title: Metadata & Source Control Commands
+description: manifest, pull, drift, compare, and scan — generate manifests from git diffs and keep source and orgs in sync.
+---
+
+import { Callout } from 'nextra/components'
+
+# Metadata & Source Control
+
+---
+
+## `sfdt manifest`
+
+Generates a `package.xml` from a git diff. Understands Salesforce metadata file naming to map
+changed files to their types and member names. Optionally runs AI to flag likely missing
+dependencies.
+
+```bash
+sfdt manifest                                    # diff main...HEAD → preview-package.xml
+sfdt manifest --base develop                     # diff from develop
+sfdt manifest --base abc1234                     # diff from a specific commit SHA
+sfdt manifest --name 1.2.0                       # named release → rl-1.2.0-package.xml
+sfdt manifest --package feature-a                # scope diff to one package directory
+sfdt manifest --package all --name 1.2.0         # all packages → rl-1.2.0-package.xml
+sfdt manifest --output deploy/pkg.xml            # custom output path
+sfdt manifest --destructive dist/del.xml         # also write destructiveChanges.xml
+sfdt manifest --print                            # print to stdout instead of writing
+sfdt manifest --ai-cleanup                       # run AI dependency check
+```
+
+| Option | Description |
+|---|---|
+| `--base <ref>` | Base git ref to diff from (default `main`); branch names or SHAs |
+| `--head <ref>` | Head git ref to diff to (default `HEAD`) |
+| `--name <label>` | Release label for the filename: semver, free-form, or `today` (→ `YYYY-MM-DD`) |
+| `--package <name\|all>` | Scope the diff to one package directory (matched by last path segment) |
+| `--output <path>` | Output path, overriding the computed path |
+| `--destructive <path>` | Also write a `destructiveChanges.xml` for deleted components |
+| `--ai-cleanup` | Run AI dependency analysis on the manifest |
+| `--no-ai-cleanup` | Skip AI analysis even when `features.ai` is on |
+| `--print` | Print to stdout instead of writing a file |
+
+**Output filename convention:**
+
+| Scenario | Output path |
+|---|---|
+| No `--name` | `manifest/release/preview-package.xml` |
+| `--name 1.2.0` (all packages) | `manifest/release/rl-1.2.0-package.xml` |
+| `--name 1.2.0 --package feature-a` | `manifest/release/rl-1.2.0-feature-a-package.xml` |
+| With `manifestLayout: subpath` | `manifest/release/feature-a/rl-1.2.0-package.xml` |
+
+<Callout type="info">
+  **Merge-base resolution:** when `--base` is a branch name, sfdt computes the merge-base with
+  `HEAD` so commits already on the base branch are excluded. Pass an explicit SHA to diff from a
+  branch tip directly. The `--name` value must start with an alphanumeric character.
+</Callout>
+
+See [Multi-package projects](/cli/workflows/multi-package) for the scoped workflow.
+
+---
+
+## `sfdt pull`
+
+Pulls metadata from the configured default org into your local source, using a SQLite-backed
+cache so only components that changed in the org since the last pull are re-fetched.
+
+```bash
+sfdt pull             # incremental — only changed components
+sfdt pull --full      # force a full retrieve and rebuild the cache
+sfdt pull --status    # show cache status (last pull time, component counts)
+sfdt pull --dry-run   # preview without writing
+```
+
+What gets pulled is defined in `.sfdt/pull-config.json`:
+
+```json
+{
+  "metadataTypes": ["ApexClass", "ApexTrigger", "LightningComponentBundle", "CustomObject", "CustomField", "Layout", "FlexiPage", "PermissionSet", "Flow"],
+  "targetDir": "force-app/main/default"
+}
+```
+
+Cache behavior is tuned via `pullCache` in config (`enabled`, `parallelism`, `batchSize`). See
+[Incremental Pull](/cli/workflows/incremental-pull).
+
+---
+
+## `sfdt drift`
+
+Detects metadata drift between your local source files and a target org — i.e. changes made
+directly in the org without being committed. Result written to `logs/drift-latest.json`.
+
+```bash
+sfdt drift
+sfdt drift --org staging
+```
+
+| Option | Description |
+|---|---|
+| `--org <alias>` | Target org (defaults to `config.defaultOrg`) |
+| `--json` | Structured output |
+
+Drift does a deep per-component **content** diff — it tells you which components differ.
+
+---
+
+## `sfdt compare`
+
+Compares the full metadata **inventory** between two orgs, or between local source and an org.
+Unlike drift, compare checks for the presence or absence of entire members.
+
+```bash
+sfdt compare                                  # local source vs default org
+sfdt compare --target sandbox-uat             # local source vs a named sandbox
+sfdt compare --source prod --target sandbox   # org-to-org comparison
+sfdt compare --output deploy/missing.xml      # write source-only items as package.xml
+```
+
+| Option | Description |
+|---|---|
+| `--source <alias\|local>` | Source side; `local` or an org alias (default `local`) |
+| `--target <alias>` | Target org (defaults to `config.defaultOrg`) |
+| `--output <file>` | Write a `package.xml` of source-only items to this path |
+
+Results land in `logs/compare-latest.json` and the dashboard's Compare page (filter by
+`source-only` / `target-only` / `both`, plus a per-component XML diff).
+
+### Drift vs Compare
+
+| Question | Tool |
+|---|---|
+| Has anyone changed metadata in the org directly? | `sfdt drift` |
+| What metadata exists in one org but not the other? | `sfdt compare` |
+| Is my local source the authoritative version of what's deployed? | `sfdt drift` |
+| What needs deploying to bring a sandbox up to par with prod? | `sfdt compare` |
+| Generate a manifest of what's missing from the target? | `sfdt compare --output missing.xml` |
+
+---
+
+## `sfdt scan`
+
+Fetches a complete metadata inventory from an org and writes it to a file (`logs/scan-latest.json`
+when launched from the dashboard).
+
+```bash
+sfdt scan
+sfdt scan --org production --output inventory.json --format json
+sfdt scan --format table
+```
+
+| Option | Description |
+|---|---|
+| `--org <alias>` | Org to scan (defaults to `config.defaultOrg`) |
+| `--output <file>` | Output file |
+| `--format <json\|table>` | Output format |

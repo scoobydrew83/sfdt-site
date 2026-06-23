@@ -1,0 +1,74 @@
+---
+title: Deploy a Feature Branch to Sandbox
+description: Validate, test, generate a manifest, deploy, and smoke-test a feature branch end to end.
+---
+
+import { Steps, Callout } from 'nextra/components'
+
+# Deploy a Feature Branch to Sandbox
+
+The everyday inner loop: take a feature branch from "code complete" to "deployed and verified in
+a sandbox."
+
+<Steps>
+
+### Check out the branch
+
+```bash
+git checkout feature/my-feature
+```
+
+### Verify the changelog is current
+
+```bash
+sfdt changelog check
+```
+
+Exits `1` if you have uncommitted changes but an empty `[Unreleased]` — a cheap gate that keeps
+your history documented.
+
+### Validate the branch
+
+```bash
+sfdt preflight
+```
+
+Checks branch naming, test presence, and changelog state. Add `--strict` to fail on warnings.
+
+### Run Apex tests
+
+```bash
+sfdt test
+```
+
+If tests fail and AI is enabled, sfdt offers a failure analysis with concrete fixes.
+
+### Generate a manifest from the git diff
+
+```bash
+sfdt manifest
+```
+
+Diffs `main...HEAD` and writes `manifest/release/preview-package.xml`. Add `--ai-cleanup` to
+have AI flag likely missing dependencies.
+
+### Deploy
+
+```bash
+sfdt deploy
+```
+
+Preflight runs again internally; pass `--skip-preflight` to skip the repeat.
+
+### Smoke-test
+
+```bash
+sfdt smoke
+```
+
+</Steps>
+
+<Callout type="info">
+  Targeting a non-default sandbox? Add `--org <alias>` to `deploy`, `smoke`, and `manifest` is
+  diff-based so it's org-agnostic.
+</Callout>

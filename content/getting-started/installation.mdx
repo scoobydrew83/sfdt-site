@@ -1,0 +1,115 @@
+---
+title: Installation
+description: Install the SFDT CLI, the Chrome extension, and the VS Code extension.
+---
+
+import { Tabs, Steps, Callout } from 'nextra/components'
+
+# Installation
+
+Most people start with the **CLI** and add the extensions later. The CLI is the only piece that
+must be installed for the others to do anything privileged (deploy, rollback, AI), because the
+extensions delegate that work to it over the [bridge](/guides/the-bridge).
+
+## 1. Install the CLI
+
+<Tabs items={['npm (global)', 'From source']}>
+  <Tabs.Tab>
+```bash
+npm install -g @sfdt/cli
+sfdt version
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```bash
+git clone https://github.com/scoobydrew83/sfdt.git
+cd sfdt
+npm install
+npm link            # makes `sfdt` available globally from your checkout
+npm run build:gui   # build the local web dashboard
+```
+  </Tabs.Tab>
+</Tabs>
+
+<Callout type="warning">
+  SFDT requires **Node.js ≥ 22.15.0** (it uses the built-in `node:sqlite` module), the
+  **Salesforce CLI** (`sf`), **bash 4+**, and **jq**. See [Requirements](/getting-started/requirements)
+  for the full list and macOS notes.
+</Callout>
+
+Then initialize any Salesforce DX project:
+
+<Steps>
+### Authenticate the Salesforce CLI
+
+```bash
+sf org login web --alias my-dev-org
+```
+
+### Initialize SFDT in your project
+
+```bash
+cd your-salesforce-project
+sfdt init
+```
+
+This creates a `.sfdt/` directory with your config. See
+[CLI → Configuration](/cli/configuration).
+
+### Deploy
+
+```bash
+sfdt deploy
+```
+</Steps>
+
+Keep the CLI current with `sfdt update`. Enable shell completion with
+`sfdt completion zsh` (or `bash` / `fish`).
+
+## 2. Install the Chrome extension
+
+The extension is **pending Chrome Web Store submission**, so for now you load it unpacked from a
+source build:
+
+<Steps>
+### Build it
+
+```bash
+# from the sfdt repo root
+npm install
+npm run build:ext   # builds flow-core + the extension
+```
+
+### Load it in Chrome
+
+Open `chrome://extensions`, enable **Developer mode**, click **Load unpacked**, and select
+`extension/.output/chrome-mv3`. Note the **extension ID** Chrome assigns — you'll need it if you
+set up the native-messaging fallback.
+</Steps>
+
+Full details: [Chrome Extension → Installation](/chrome-extension/installation).
+
+## 3. Install the VS Code extension
+
+`@sfdt/vscode` is **private / unpublished**, so install it from a packaged VSIX or from source:
+
+```bash
+# from the sfdt repo, in the vscode/ workspace
+npm run package          # produces a .vsix
+# In VS Code: Extensions panel → ⋯ → "Install from VSIX…"
+```
+
+It requires the CLI on your `PATH` (or set `sfdt.cliPath`) and a workspace that has been
+`sfdt init`-ed. Full details: [VS Code Extension → Installation](/vscode-extension/installation).
+
+## 4. (Optional) Connect the extensions to the CLI
+
+To unlock deploy / rollback / quality / AI from the browser or editor, start the local bridge:
+
+```bash
+cd your-salesforce-project
+sfdt ui      # serves http://localhost:7654 and the bridge
+```
+
+Then pair the extension with the token at `~/.sfdt/bridge-token`. See
+[The bridge](/guides/the-bridge).

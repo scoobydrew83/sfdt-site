@@ -1,0 +1,67 @@
+---
+title: FAQ
+description: Frequently asked questions across the SFDT CLI and extensions.
+---
+
+# Frequently asked questions
+
+## General
+
+**Is SFDT affiliated with Salesforce?**
+No. SFDT is an independent, open-source (MIT) project. "Salesforce" and "Flow Builder" are
+trademarks of Salesforce, Inc.
+
+**Do I have to use AI?**
+No. AI is optional and off-by-default-capable. Set `features.ai: false` and everything still
+works; `sfdt explain` falls back to heuristics. See [AI across SFDT](/guides/ai-across-sfdt).
+
+**Does my code or org data leave my machine?**
+No. The dashboard and bridge bind to `127.0.0.1`, Salesforce calls use your existing session,
+and AI prompts go to a provider key **you** supply. See [Security & privacy](/guides/security).
+
+**Which platforms are supported?**
+macOS and Linux today. Windows CLI support is on the roadmap; for Windows CI use the
+[Docker image](/cli/docker).
+
+## CLI
+
+**Does SFDT work with my project?**
+Yes — it works with **any** Salesforce DX project. Nothing is hardcoded; run `sfdt init` and go.
+
+**Why Node ≥ 22.15.0?**
+The pull cache uses the built-in `node:sqlite` module, which is unflagged starting in Node
+22.15. See [Requirements](/getting-started/requirements).
+
+**`sfdt: command not found` after install?**
+Ensure your global npm bin is on `PATH` (`npm prefix -g`). If you installed from source, run
+`npm link` in the repo.
+
+**How do I update?**
+`sfdt update` (add `--force` if needed). It prints a manual retry command if a self-update
+fails.
+
+## Chrome extension
+
+**Where do I get it?**
+It's pending Chrome Web Store submission. For now, build from source and load unpacked — see
+[Chrome → Installation](/chrome-extension/installation).
+
+**A feature isn't doing anything.**
+It may need the bridge (e.g. `flow-deploy`, `ai-assistant`) — start `sfdt ui` and pair the
+token. Or it may be turned off in options, or disabled by the
+[kill switch](/chrome-extension/kill-switch). Run `sfdt doctor --extension`.
+
+**Does it collect telemetry?**
+Only if you opt in, and even then it's local-only with no PII and no network egress. See
+[Chrome → Privacy](/chrome-extension/privacy).
+
+## VS Code extension
+
+**Do I need the CLI installed?**
+Yes. The VS Code extension is a thin UI over `@sfdt/cli` — install the CLI and make sure it's on
+`PATH` (or set `sfdt.cliPath`). See [VS Code → Installation](/vscode-extension/installation).
+
+**The Org Health sidebar is empty.**
+Run an audit or monitor first (`SFDT: Run Org Audit` / `SFDT: Run Org Monitor`). The tree reads
+`logs/audit-latest.json` and `logs/monitor-latest.json`; until they exist you'll see a
+placeholder. See [VS Code → Org Health sidebar](/vscode-extension/org-health-sidebar).

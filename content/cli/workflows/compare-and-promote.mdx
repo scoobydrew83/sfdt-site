@@ -1,0 +1,46 @@
+---
+title: Compare & Promote Between Orgs
+description: Find what's missing between source and an org (or between two orgs) and promote it with an exported package.xml.
+---
+
+import { Steps } from 'nextra/components'
+
+# Compare & Promote Between Orgs
+
+`sfdt compare` enumerates metadata members on both sides and reports what's `source-only`,
+`target-only`, or in `both`. Export the source-only set as a `package.xml` to promote it.
+
+## Audit what's in production but not in source
+
+```bash
+sfdt compare --source local --target production
+```
+
+Then open `sfdt ui` → **Compare** and filter by `target-only` to see what exists in production
+but isn't in your repo (often manual changes that need to be reclaimed into source).
+
+## Promote sandbox changes to production
+
+<Steps>
+
+### Compare and export the diff
+
+```bash
+sfdt compare --source staging --target production --output deploy/promote.xml
+```
+
+This writes a `package.xml` of everything present in `staging` but missing from `production`.
+
+### Deploy the exported manifest
+
+```bash
+sf project deploy start --manifest deploy/promote.xml --target-org production
+```
+
+</Steps>
+
+## Drift vs Compare
+
+Reach for **compare** when you care about the *presence* of members across orgs. Reach for
+**drift** when you care about *content* differences between local source and one org. See the
+[Drift vs Compare table](/cli/commands/metadata#drift-vs-compare).

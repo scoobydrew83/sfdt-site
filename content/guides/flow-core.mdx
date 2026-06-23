@@ -1,0 +1,46 @@
+---
+title: flow-core (shared engine)
+description: The shared TypeScript library that gives every SFDT surface the same Flow analysis and scoring.
+---
+
+import { Callout } from 'nextra/components'
+
+# flow-core — the shared engine
+
+`@sfdt/flow-core` is the reason a Flow health score shown in the Chrome extension matches what
+`sfdt` prints in the terminal: both call the **same** library. It is a workspace-only TypeScript
+package (not published to npm) consumed by both the CLI and the extension.
+
+## What it provides
+
+- **Flow normalization** — turns raw Flow metadata XML into a stable, analyzable shape.
+- **Rules engine** — the checks behind Flow health: missing descriptions, risky patterns,
+  API-version issues, and more, grouped into issue families with severities.
+- **Scoring** — the numeric health score and the severity breakdown (High / Medium / Low / Info)
+  surfaced by `flow-health-check` in the extension and the **Flows** page in the dashboard.
+- **The bridge contract** — `bridge-contract.ts` defines the versioned wire protocol (request
+  kinds, fields, error codes) that keeps the CLI and the extensions compatible. See
+  [The bridge](/guides/the-bridge).
+
+## Why it matters to you
+
+Because the engine is shared, you get **consistent results everywhere**:
+
+- A Flow that scores well in the extension's **Flow Health Check** will score the same when the
+  CLI evaluates it.
+- The deploy/rollback/quality requests the extension sends over the bridge are validated against
+  the same contract the CLI implements, so version drift is caught (warn on minor, refuse on
+  major mismatch).
+
+<Callout type="info">
+  flow-core is an internal workspace library — there's nothing to install separately. It ships
+  inside the CLI and is bundled into the extension at build time. If you build from source, the
+  extension's build (`npm run build:ext`) compiles flow-core first.
+</Callout>
+
+## For contributors
+
+flow-core lives at `packages/flow-core/` in the
+[sfdt repository](https://github.com/scoobydrew83/sfdt). Adding a rule or evolving the bridge
+contract here updates both the CLI and the extension in lockstep — bump the contract's minor
+version for additive changes, major for breaking ones.

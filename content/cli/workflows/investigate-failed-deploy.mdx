@@ -1,0 +1,51 @@
+---
+title: Investigate a Failed Deployment
+description: Use sfdt explain and the dashboard Review/Explain pages to diagnose deployment failures fast.
+---
+
+import { Steps, Callout } from 'nextra/components'
+
+# Investigate a Failed Deployment
+
+When a deploy fails, `sfdt explain` turns a wall of Salesforce error output into a root cause and
+a fix list — offline first, then AI if enabled.
+
+## Analyze the latest log
+
+```bash
+sfdt explain
+```
+
+Reads the most recent log in `logs/`, runs the offline heuristic scan, and (if AI is on) adds a
+structured Root Cause / Failing Components / Suggested Fixes / References report.
+
+## Pipe a failure straight in
+
+```bash
+sf project deploy start --manifest manifest/release/preview-package.xml 2>&1 | sfdt explain --from-stdin
+```
+
+`--from-stdin` reads the log from the pipe, so you can analyze a failure the instant it happens
+without saving a file first.
+
+## Analyze a specific log
+
+```bash
+sfdt explain logs/deploy-2026-04.log
+sfdt explain --latest   # explicit "most recent"
+```
+
+<Callout type="info">
+  The heuristic scan recognizes missing fields, unknown Apex symbols, undefined types, coverage
+  failures, and access errors — so `sfdt explain` is useful even with `features.ai: false`.
+</Callout>
+
+## In the dashboard
+
+Run `sfdt ui` and open:
+
+- **Explain** — AI-powered log analysis with the same report, rendered.
+- **Review** — AI code review of the current branch (`sfdt review`), useful when the failure is a
+  code issue rather than a packaging one.
+
+Both pages have an **Ask AI** drawer pre-filled with the page context for follow-up questions.

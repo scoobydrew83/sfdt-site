@@ -1,0 +1,61 @@
+---
+title: CI/CD Integration
+description: Run sfdt non-interactively in pipelines — exit codes, JSON output, GitHub Actions, and Docker.
+---
+
+import { Callout } from 'nextra/components'
+
+# CI/CD Integration
+
+sfdt is built to run unattended. When `stdin` is not a TTY, commands run **non-interactively** —
+confirmation prompts are skipped and the command exits with an appropriate code.
+
+## Non-interactive mode
+
+- When `stdin` isn't a TTY, sfdt skips confirm prompts and proceeds with safe defaults.
+- The VS Code extension and other automated callers set `SFDT_NON_INTERACTIVE=true` so the CLI
+  never hangs waiting for input.
+- Destructive data operations require an explicit flag non-interactively (e.g.
+  `sfdt data delete <set> --yes`).
+
+## Exit codes
+
+All sfdt commands exit `0` on success and `1` on failure. Gate subsequent steps with `set -e` or
+by checking `$?`. `sfdt changelog check` exits `1` when the changelog needs updating, so it works
+as a pre-merge gate.
+
+## JSON output
+
+Most operational commands accept `--json` for machine-readable output — `audit`, `monitor`,
+`drift`, `rollback`, `doctor`, `extension status`, and others. Pipe it into `jq` for assertions.
+
+## GitHub Actions
+
+```yaml
+- name: Preflight and deploy
+  run: |
+    sfdt preflight
+    sfdt test
+    sfdt deploy --skip-preflight
+  env:
+    SFDX_AUTH_URL: ${{ secrets.SFDX_AUTH_URL }}
+```
+
+Explain failures automatically:
+
+```yaml
+- name: Explain failure
+  if: failure()
+  run: sfdt explain --latest
+```
+
+<Callout type="warning">
+  For AI commands in CI, install and authenticate **Gemini** or **OpenAI** before running sfdt.
+  Claude requires an interactive session and isn't suitable for CI. See
+  [AI Providers](/cli/ai-providers).
+</Callout>
+
+## Docker
+
+For a self-contained toolchain (Node + `sf` CLI + git/jq/bash), run sfdt from the official Docker
+image — see [Docker](/cli/docker).

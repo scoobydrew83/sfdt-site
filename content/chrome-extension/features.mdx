@@ -1,0 +1,87 @@
+---
+title: Features
+description: All 29 opt-in features of the SFDT SF Helper Chrome extension, grouped by the Salesforce context where they run.
+---
+
+import { Callout } from 'nextra/components'
+
+# Features
+
+The extension ships **29 features**. Every feature is **opt-in** — toggle it on or off in the
+[options page](/chrome-extension/settings) — and any feature can be
+[remotely disabled](/chrome-extension/kill-switch) without a Web Store re-review.
+
+Features are surfaced through the ⚡ **side button** menu, which adapts to the page you're on
+(Setup, a Flow list, the Flow canvas, a record page, or the standalone
+[Workspace tab](/chrome-extension/workspace)).
+
+<Callout type="info">
+  Features marked **🔌 Bridge** require a running [sfdt CLI bridge](/chrome-extension/bridge).
+  Everything else runs standalone against your existing Salesforce session.
+</Callout>
+
+## Flow Builder
+
+| Id | What it does |
+| --- | --- |
+| `canvas-search` | `Cmd`/`Ctrl`+`Shift`+`F` search across canvas nodes; matches get a gold highlight, `Enter` cycles through them and pans the canvas to centre each match |
+| `flow-health-check` | Scores the open Flow against the `@sfdt/flow-core` rules engine — severity grid, issue families, and a flow-profile metrics panel; copies the report as JSON |
+| `missing-description-flags` | Flags Flow nodes and the Flow itself when they lack a description, with inline ⚠ markers |
+| `api-name-generator` | Generates API names from labels using a configurable case style (also works in Object Manager) |
+| `ai-assistant` 🔌 | Token estimates plus AI answers about the current Flow via the bridge (Claude / Gemini / OpenAI) |
+| `flow-deploy` 🔌 | Deploys the current Flow via the bridge (`sfdt deploy --metadata Flow:...`) |
+
+## Setup → Flows
+
+| Id | What it does |
+| --- | --- |
+| `flow-list-search` | Fuzzy search over the Flow Definitions list, with status and type filters |
+| `scheduled-flow-explorer` | Lists every schedule-triggered Flow with its next run time and a relative descriptor (list or calendar view) |
+| `flow-trigger-explorer-enhancer` | Adds bulk fetch and visual grouping to the native Flow Trigger Explorer |
+| `trigger-conflicts` | Detects record-triggered Flows that overlap on the same Object · Timing · Event |
+| `subflow-graph` | SVG graph of subflow invocation relationships, with depth metrics and cycle detection |
+| `comparison-exporter` | Exports an org-vs-org Flow comparison report as TSV |
+| `flow-version-manager` 🔌 | Side panel of active/draft Flow versions with one-click activate / rollback |
+
+## Setup & navigation
+
+| Id | What it does |
+| --- | --- |
+| `setup-tabs` | Adds an Automation Home plus reorderable tabs to the Setup tab bar (classic + Lightning) |
+
+## Salesforce APIs (Setup, Flow Builder, Trigger Explorer)
+
+| Id | What it does |
+| --- | --- |
+| `soql-runner` | Run SOQL (REST or Tooling) with field/object autocomplete, history, CSV export, and a LangGraph node generator |
+| `org-limits` | Live governor-limit usage, sorted by pressure and colour-banded |
+| `rest-explore` | Fire arbitrary `GET`/`POST`/`PATCH`/`PUT`/`DELETE` against `/services/data/...` with a response viewer and history |
+| `soap-explore` | Build and send SOAP API requests with a payload editor and response viewer |
+| `event-monitor` | Subscribe to and monitor platform / streaming events live |
+
+## Record & Object Manager pages
+
+| Id | What it does |
+| --- | --- |
+| `inspect-record` | View a record's complete field set — including empty and system fields — via the REST API |
+| `data-import` | Guided CSV data import into the org |
+| `field-creator` | Bulk-create multiple custom fields at once |
+| `metadata-retrieve` | Retrieve and deploy metadata directly from the browser |
+| `export-for-prompt` | Copy a dense Markdown schema for an object to the clipboard for pasting into an LLM prompt |
+
+## Workspace tab
+
+These run inside the standalone [Workspace tab](/chrome-extension/workspace):
+
+| Id | What it does |
+| --- | --- |
+| `apex-anonymous` | Execute anonymous Apex with compile/runtime results and saved snippets |
+| `debug-log-viewer` | List recent `ApexLog` records and view full log bodies |
+| `saved-soql` | Browse bookmarked and recent SOQL and load any query straight into the runner |
+| `org-switcher` | Switch the Workspace between logged-in orgs (discovered from session cookies) |
+| `org-health` 🔌 | Reads the latest audit/monitor snapshots and shows checks with status bands and findings |
+
+<Callout type="info">
+  Adding a feature is a one-file change — see `extension/features/` and the registry in
+  `extension/lib/feature-registry.ts`.
+</Callout>

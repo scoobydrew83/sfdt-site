@@ -1,0 +1,89 @@
+---
+title: Connecting the Bridge to the CLI
+description: Unlock deploy, rollback, quality scoring, AI, and org-health features by connecting the extension to a local sfdt CLI over HTTP or native messaging.
+---
+
+import { Callout, Steps, Tabs } from 'nextra/components'
+
+# Connecting the Bridge to the CLI
+
+The extension runs standalone, but four features — `flow-deploy`, `flow-version-manager`,
+`ai-assistant`, and `org-health` — call your **local** sfdt CLI through the **bridge**. The
+bridge is a localhost-only channel; nothing it carries ever leaves your machine.
+
+For a conceptual deep-dive shared with the VS Code extension, see
+[Guides → The bridge](/guides/the-bridge).
+
+## HTTP transport (recommended)
+
+The CLI's `sfdt ui` command starts a local server that also mounts the bridge.
+
+<Steps>
+
+### Install and initialise the CLI
+
+```bash
+npm install -g @sfdt/cli
+cd your-salesforce-project
+sfdt init        # one-time .sfdt/ setup
+```
+
+### Start the local server
+
+```bash
+sfdt ui          # starts http://localhost:7654 + the bridge
+```
+
+### Pair the extension
+
+1. Open the extension's [options page](/chrome-extension/settings).
+2. Paste the bridge token from `~/.sfdt/bridge-token`.
+3. Click **Test connection**.
+
+</Steps>
+
+<Callout type="info">
+  The token file is created on the first request to the running server, with `0600`
+  permissions. Treat it like a password — it authorises commands against your orgs.
+</Callout>
+
+## Native-messaging fallback
+
+If you can't keep `sfdt ui` running, the extension can talk to the CLI through Chrome's native
+messaging instead. Install the native host once per browser:
+
+```bash
+sfdt extension install-host --extension-id <your-extension-id>
+sfdt extension status     # verify which browsers have the host
+```
+
+The host (`com.sfdt.host`) ships with the CLI and supports Chrome, Edge, Brave, Chromium, and
+Vivaldi on macOS, Linux, and Windows. Set the preferred transport in the options page
+(`auto`, `localhost`, or `native`).
+
+<Callout type="warning">
+  The extension's built manifest requests `storage`, `clipboardWrite`, and `cookies` plus
+  localhost host permissions. The native-messaging transport is provided by the CLI-installed
+  host; if your browser prompts for additional permission when enabling it, that is expected.
+</Callout>
+
+## Versioned wire protocol
+
+The bridge speaks a versioned contract (currently **v1.2**, defined in
+`packages/flow-core/src/bridge-contract.ts`):
+
+- **Minor mismatch** (e.g. `1.1` vs `1.2`) — the extension **warns** but continues; the protocol
+  is additive and backward-compatible.
+- **Major mismatch** (e.g. `1.x` vs `2.0`) — the extension **refuses** to send requests.
+
+Request kinds include `ping`, `version`, `deploy`, `rollback`, `quality`, `ai`, `scan`,
+`compare`, `org-health`, and `telemetry.snapshot`.
+
+## Verifying the connection
+
+```bash
+sfdt doctor --extension
+```
+
+This checks the bridge, the native host, the kill-switch file, and the telemetry snapshot. See
+[Troubleshooting](/chrome-extension/troubleshooting).

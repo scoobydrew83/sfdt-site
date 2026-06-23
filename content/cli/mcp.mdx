@@ -1,0 +1,127 @@
+---
+title: MCP Server
+description: Drive sfdt as a tool from Claude Code, Cursor, or any MCP client — tools, safety gates, context parking, and client setup.
+---
+
+import { Callout } from 'nextra/components'
+
+# MCP Server
+
+The `sfdt` Model Context Protocol (MCP) server exposes Salesforce release-management, testing, and
+governance tools directly to agentic workflows — Claude Code, Cursor, Copilot, or any standard MCP
+client.
+
+## Start the server
+
+```bash
+sfdt mcp start
+```
+
+This starts a **JSON-RPC 2.0 stdio** stream on standard input/output. All operational logs are
+routed to `stderr` to keep the RPC channel clean. The server is stateless per request — every
+tool call shells out to the sfdt CLI.
+
+## Configuration
+
+Configure it under the `mcp` key in `.sfdt/config.json`:
+
+```json
+{
+  "mcp": {
+    "enabled": true,
+    "parking": {
+      "enabled": true,
+      "thresholdBytes": 50000,
+      "ttlSeconds": 86400,
+      "cacheScope": "session"
+    }
+  }
+}
+```
+
+## Exposed tools
+
+### Pre-deployment validation
+
+| Tool | Arguments |
+|---|---|
+| `sfdt_preflight` | `strict` (boolean, optional) |
+| `sfdt_validate` | `targetOrg` (required), `manifest`, `testLevel`, `testClasses` |
+
+### Deployment & rollback (safety-gated)
+
+<Callout type="error">
+  Modifying operations require `confirmExecution: true` as an explicit safety gate. Omit it (or
+  set it false) and the tool returns a validation error and aborts.
+</Callout>
+
+| Tool | Arguments |
+|---|---|
+| `sfdt_deploy` | `targetOrg` (req), `manifest`, `testLevel`, `testClasses`, `destructiveTiming`, `confirmExecution` (req) |
+| `sfdt_quick_deploy` | `validationJobId` (req), `targetOrg` (req), `confirmExecution` (req) |
+| `sfdt_rollback` | `confirmExecution` (req) |
+
+### Analysis & observe
+
+| Tool | Arguments |
+|---|---|
+| `sfdt_drift` | `org` (optional) |
+| `sfdt_compare` | `source` (req), `target` (req) |
+| `sfdt_quality` | `generateStubs`, `fixPlan` |
+| `sfdt_logs` | `type` — `preflight` \| `drift` \| `deploy` \| `rollback` \| `quality` |
+
+### Context budget governance
+
+| Tool | Arguments |
+|---|---|
+| `sfdt_get_parked_result` | `ref` (req) — e.g. `parked://<uuid>` |
+
+## Context parking
+
+When a tool result exceeds `mcp.parking.thresholdBytes` (default 50 KB), the server writes the
+full payload to `.sfdt/cache/parked/<uuid>.json` and returns a lightweight envelope instead:
+
+```json
+{
+  "_parked": true,
+  "ref": "parked://<uuid>",
+  "byteSize": 123456,
+  "rowCount": 42,
+  "preview": "...",
+  "ttlMs": 86400000,
+  "cacheScope": "session"
+}
+```
+
+<Callout type="info">
+  The envelope carries SEP-2549 cache metadata — `ttlMs` + `cacheScope` (replacing the older
+  `expiresAt`) — aligned with the MCP 2026-07-28 release candidate. Treat `ttlMs` as relative to
+  when you received the envelope. Retrieve the full payload with `sfdt_get_parked_result`.
+</Callout>
+
+Purge expired parked files:
+
+```bash
+sfdt mcp cleanup
+```
+
+## Client setup
+
+### Claude Code
+
+```json
+{
+  "mcpServers": {
+    "sfdt": {
+      "command": "node",
+      "args": ["/absolute/path/to/sfdt/bin/sfdt.js", "mcp", "start"]
+    }
+  }
+}
+```
+
+### Cursor
+
+1. **Settings → Features → MCP → + Add New MCP Server**.
+2. Name: `sfdt`; Type: `stdio`.
+3. Command: `node /absolute/path/to/sfdt/bin/sfdt.js mcp start`.

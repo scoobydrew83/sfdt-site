@@ -1,0 +1,58 @@
+---
+title: Troubleshooting the Chrome Extension
+description: Diagnose bridge, native-host, kill-switch, and side-button issues with sfdt doctor and the extension CLI commands.
+---
+
+import { Callout } from 'nextra/components'
+
+# Troubleshooting
+
+## Run the doctor
+
+The fastest first step is the bundled diagnostic, which checks the bridge, the native host, the
+kill-switch file, and the telemetry snapshot:
+
+```bash
+sfdt doctor --extension
+sfdt doctor --extension --json   # machine-readable
+sfdt doctor --extension --port 8080
+```
+
+## Check the native host
+
+```bash
+sfdt extension status            # which browsers have the host installed
+sfdt extension status --json
+```
+
+## Inspect telemetry
+
+```bash
+sfdt extension stats             # top features by activation count
+sfdt extension stats --json
+sfdt extension stats --limit 10
+```
+
+## Console logging
+
+Open DevTools on the Salesforce tab (`Cmd`/`Ctrl`+`Opt`/`Alt`+`I` → Console). The extension tags
+its messages with `[SFUT]`:
+
+- `[SFUT]` informational messages are expected (e.g. `[SFUT] Shell mounted.`).
+- Anything **red** is a regression worth reporting.
+
+## Common issues
+
+| Symptom | Likely cause | Fix |
+| --- | --- | --- |
+| Bridge feature says "Bridge not running" | `sfdt ui` isn't running | Start `sfdt ui`, then **Test connection** in [options](/chrome-extension/settings) |
+| "Test connection" fails | Wrong or stale token | Re-copy `~/.sfdt/bridge-token`; rotate it if needed and re-pair |
+| A feature is missing from the menu | It's toggled off, or [kill-switched](/chrome-extension/kill-switch) | Check the options page; run `sfdt feature-flags list` |
+| ⚡ side button doesn't appear | You're not on a Salesforce page, or it's inside a VF iframe | The button mounts only in the top frame of Salesforce pages |
+| Native messaging not used | Host not installed for this browser | `sfdt extension install-host --extension-id <id>`; verify with `sfdt extension status` |
+| Major protocol mismatch warning | Extension and CLI versions diverged | Update both to the latest; see [Bridge](/chrome-extension/bridge#versioned-wire-protocol) |
+
+<Callout type="info">
+  Still stuck? Open an issue with the `area: extension` label at
+  [github.com/scoobydrew83/sfdt/issues](https://github.com/scoobydrew83/sfdt/issues).
+</Callout>

@@ -1,0 +1,49 @@
+---
+title: Multi-Package Projects
+description: Scope manifests and deploys to individual packageDirectories with --package, --name, and --source-dir.
+---
+
+import { Callout } from 'nextra/components'
+
+# Multi-Package Projects
+
+If your `sfdx-project.json` defines multiple `packageDirectories`, sfdt can scope manifests and
+deploys to one directory at a time. The package name is the **last segment** of the directory
+path — e.g. `force-app/feature-a` → `feature-a`.
+
+## Scope a manifest to one package
+
+```bash
+sfdt manifest --package feature-a
+sfdt manifest --package feature-a --name 1.2.0   # → rl-1.2.0-feature-a-package.xml
+sfdt manifest --package all --name 1.2.0         # span all packages → rl-1.2.0-package.xml
+```
+
+The git diff is restricted to that package's directory, so the resulting `package.xml` contains
+only its components.
+
+## Organize outputs per package
+
+Set `manifestLayout` to `subpath` in `.sfdt/config.json` to write each package's manifests into
+its own subdirectory:
+
+```json
+{ "manifestLayout": "subpath" }
+```
+
+Result: `manifest/release/feature-a/rl-1.2.0-package.xml`.
+
+## Deploy a folder directly
+
+When you want to deploy exactly what's in a directory without generating a manifest:
+
+```bash
+sfdt deploy --source-dir force-app/feature-a
+```
+
+This runs `sf project deploy start --source-dir` under the hood, bypassing manifest selection.
+
+<Callout type="info">
+  Since v0.12.0, config load **warns** when a `packageDirectories` path in `sfdx-project.json`
+  doesn't exist on disk, instead of failing later at deploy/manifest time.
+</Callout>

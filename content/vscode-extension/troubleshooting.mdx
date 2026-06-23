@@ -1,0 +1,31 @@
+---
+title: Troubleshooting the VS Code Extension
+description: Fixes for the most common SFDT VS Code issues — CLI not found, empty sidebar, no org, and dashboard problems.
+---
+
+import { Callout } from 'nextra/components'
+
+# Troubleshooting
+
+Because the extension is a thin shell over the CLI, most issues come down to the CLI not being
+found, the workspace not being initialised, or no org being set.
+
+| Symptom | Cause | Fix |
+| --- | --- | --- |
+| "CLI not found" / commands fail immediately | `sfdt` isn't on `PATH` | Install [`@sfdt/cli`](/cli/installation), or set [`sfdt.cliPath`](/vscode-extension/settings) to the absolute binary path |
+| Sidebar shows `$(cloud)` / "not run yet" | No snapshots exist | Run **SFDT: Run Org Audit** and **SFDT: Run Org Monitor** (or Refresh) |
+| Commands target the wrong org | `sfdt.defaultOrg` empty or stale | Run **SFDT: Set Default Org**, or edit `sfdt.defaultOrg` |
+| Status bar shows `SFDT` with no org name | No default org configured | Set one via **SFDT: Set Default Org** |
+| Dashboard tab never opens | `sfdt ui` failed to start, or the port is busy | Check the **SFDT** output channel; change `sfdt.dashboardPort` |
+| "No workspace" type errors | Project not initialised | Open a Salesforce DX project and run `sfdt init` so the CLI can write `logs/` |
+
+## Where to look
+
+- **SFDT output channel** — every command streams its full stdout/stderr here. Open it from the
+  Output panel and select **SFDT** in the dropdown.
+- **CLI doctor** — for bridge/extension-stack issues, run `sfdt doctor` in a terminal.
+
+<Callout type="info">
+  Still stuck? Open an issue at
+  [github.com/scoobydrew83/sfdt/issues](https://github.com/scoobydrew83/sfdt/issues).
+</Callout>

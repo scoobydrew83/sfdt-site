@@ -1,0 +1,60 @@
+---
+title: Prepare a Production Release
+description: Generate changelog entries, cut a version, build manifests and release notes, deploy, and announce.
+---
+
+import { Steps, Callout } from 'nextra/components'
+
+# Prepare a Production Release
+
+Cut a versioned release from `main` with documented changes, manifests, release notes, a git
+tag, and a Slack announcement.
+
+<Steps>
+
+### Merge the feature into main
+
+```bash
+git checkout main
+git merge --no-ff feature/my-feature
+```
+
+### Generate changelog entries
+
+```bash
+sfdt changelog generate
+```
+
+AI reads recent commits and proposes `[Unreleased]` entries, categorized into Added / Changed /
+Fixed / Deprecated / Removed / Security. You approve before they're appended.
+
+### Cut the version in the changelog
+
+```bash
+sfdt changelog release 1.5.0
+```
+
+Moves `[Unreleased]` to a dated `[1.5.0]` section.
+
+### Run the release workflow
+
+```bash
+sfdt release 1.5.0
+```
+
+This generates versioned manifests in `manifest/release/`, optionally writes AI release notes to
+`release-notes/`, then walks you through commit → tag (`v1.5.0`) → deploy → push. Every git step
+is an optional confirm prompt.
+
+### Announce
+
+```bash
+sfdt notify release-created --version 1.5.0
+```
+
+</Steps>
+
+<Callout type="warning">
+  `sfdt notify` requires `features.notifications: true` and a Slack webhook URL in config. See
+  [`sfdt notify`](/cli/commands/org-health#sfdt-notify).
+</Callout>

@@ -1,0 +1,27 @@
+---
+title: Guides
+description: Cross-product concepts that span the CLI and both extensions.
+---
+
+import { Cards } from 'nextra/components'
+
+# Guides
+
+These guides cover the concepts that are shared across the whole SFDT suite — the things that
+are easier to understand once, in one place, than repeated in each product's docs.
+
+<Cards>
+  <Cards.Card title="The bridge" href="/guides/the-bridge" arrow />
+  <Cards.Card title="AI across SFDT" href="/guides/ai-across-sfdt" arrow />
+  <Cards.Card title="flow-core (shared engine)" href="/guides/flow-core" arrow />
+  <Cards.Card title="Security & privacy" href="/guides/security" arrow />
+</Cards>
+
+- **[The bridge](/guides/the-bridge)** — how the browser and editor extensions talk to a
+  locally-running CLI, the two transports, the token, and protocol versioning.
+- **[AI across SFDT](/guides/ai-across-sfdt)** — how AI works in the CLI, the dashboard, and
+  the extension; choosing a provider; and the read-only safety sandbox.
+- **[flow-core](/guides/flow-core)** — the shared library that gives every surface the same
+  Flow analysis and scoring.
+- **[Security & privacy](/guides/security)** — the local-only model, the bridge token, CSRF
+  protection, log redaction, and the AI tool sandbox.

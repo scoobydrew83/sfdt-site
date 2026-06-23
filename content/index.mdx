@@ -1,0 +1,68 @@
+---
+title: SFDT — Salesforce DevTools
+description: Deploy, test, and ship Salesforce changes with confidence — a CLI, a Chrome extension, and a VS Code extension that share one engine.
+---
+
+import { Cards } from 'nextra/components'
+
+<div style={{ textAlign: 'center', padding: '3rem 0 1rem' }}>
+  <span className="sfdt-hero-tag">Salesforce DevTools</span>
+  <h1 style={{ fontSize: '2.6rem', fontWeight: 800, margin: '0.5rem 0 0.75rem', lineHeight: 1.1 }}>
+    Ship Salesforce changes<br />with confidence.
+  </h1>
+  <p style={{ fontSize: '1.15rem', opacity: 0.75, maxWidth: 640, margin: '0 auto' }}>
+    <strong>SFDT</strong> is a suite of developer tools for Salesforce DX: a production-grade
+    command-line tool, a Chrome extension for Flow Builder &amp; Setup, and a VS Code extension —
+    all backed by one shared engine.
+  </p>
+</div>
+
+<div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap', margin: '1.5rem 0 2.5rem' }}>
+  [Get started →](/getting-started)&nbsp;&nbsp;
+  [Install the CLI](/cli/installation)&nbsp;&nbsp;
+  [Browse commands](/cli/commands)
+</div>
+
+## Three tools, one engine
+
+<div className="sfdt-card-grid">
+  <a className="sfdt-card" href="/cli">
+    <span className="sfdt-card-emoji">⌨️</span>
+    <h3>@sfdt/cli</h3>
+    <p>35 commands for deploy, test, quality, release, and org health — plus a local web dashboard, an MCP server, and a plugin system. Works with any Salesforce DX project.</p>
+  </a>
+  <a className="sfdt-card" href="/chrome-extension">
+    <span className="sfdt-card-emoji">🧩</span>
+    <h3>Chrome Extension</h3>
+    <p>29 opt-in productivity features for Flow Builder, Setup, Object Manager, and record pages — SOQL/REST/SOAP runners, org tools, and AI, with an optional bridge to the CLI.</p>
+  </a>
+  <a className="sfdt-card" href="/vscode-extension">
+    <span className="sfdt-card-emoji">🆚</span>
+    <h3>VS Code Extension</h3>
+    <p>Drive the CLI from your editor: deploy, preflight, org audit &amp; monitoring, docs, and the dashboard — from the command palette and a dedicated Org Health sidebar.</p>
+  </a>
+</div>
+
+## Why SFDT
+
+- **Built for Salesforce DX** — no project-specific values are hardcoded. Point it at any repo and run `sfdt init`.
+- **Safe by default** — preflight validation, pre-rollback backups, post-deploy smoke tests, and a local-only, token-protected bridge.
+- **AI when you want it, never required** — code review, error explanation, PR descriptions, and release notes work with Claude, Gemini, or OpenAI — and degrade gracefully to heuristics when AI is off.
+- **One shared engine** — the `@sfdt/flow-core` library and a versioned bridge contract keep the CLI, Chrome extension, and VS Code extension in lockstep.
+
+## Where to next
+
+<Cards>
+  <Cards.Card title="Getting Started" href="/getting-started" arrow />
+  <Cards.Card title="CLI command reference" href="/cli/commands" arrow />
+  <Cards.Card title="The bridge explained" href="/guides/the-bridge" arrow />
+  <Cards.Card title="Support & FAQ" href="/support" arrow />
+</Cards>
+
+---
+
+<p style={{ fontSize: '0.85rem', opacity: 0.6 }}>
+  SFDT is an independent open-source project (MIT). It is not affiliated with, endorsed by, or
+  sponsored by Salesforce, Inc. “Salesforce”, “Flow Builder”, and related marks are trademarks of
+  Salesforce, Inc.
+</p>

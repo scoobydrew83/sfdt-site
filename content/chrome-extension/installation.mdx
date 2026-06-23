@@ -1,0 +1,80 @@
+---
+title: Installing the Chrome Extension
+description: Build the SFDT SF Helper extension from source and load it unpacked into Chrome. Web Store submission is pending.
+---
+
+import { Callout, Steps } from 'nextra/components'
+
+# Installing the Chrome Extension
+
+The extension is **pre-Web-Store**. Until it is published you build it from source and load it
+as an unpacked extension. This takes about a minute.
+
+## From source (current method)
+
+<Steps>
+
+### Clone and install
+
+```bash
+git clone https://github.com/scoobydrew83/sfdt.git
+cd sfdt
+npm install
+```
+
+### Build the extension
+
+```bash
+npm run build:ext
+```
+
+This builds `@sfdt/flow-core` and then the extension (via [WXT](https://wxt.dev)). The output
+lands in:
+
+```text
+extension/.output/chrome-mv3/
+├── manifest.json
+├── background.js
+├── content-scripts/content.js
+├── options.html
+├── app.html
+└── icon/{16,32,48,128}.png
+```
+
+### Load it into Chrome
+
+1. Open `chrome://extensions/`.
+2. Toggle **Developer mode** on (top-right).
+3. Click **Load unpacked** and select `extension/.output/chrome-mv3/`.
+4. The extension appears as **SFDT SF Helper**. Note the assigned **extension ID** — you'll
+   need it if you set up the [native-messaging fallback](/chrome-extension/bridge#native-messaging-fallback).
+
+</Steps>
+
+<Callout type="info">
+  Open any Salesforce Lightning or Setup page and the ⚡ side button should appear in the
+  top-right. If it doesn't, see [Troubleshooting](/chrome-extension/troubleshooting).
+</Callout>
+
+## Rebuilding after updates
+
+After pulling new changes, rebuild and reload:
+
+```bash
+cd sfdt
+npm run build:ext
+```
+
+Then click the reload icon on the extension card in `chrome://extensions/` and refresh your
+Salesforce tab. You do not need to re-pair the bridge unless the bridge token was rotated.
+
+## From the Chrome Web Store
+
+Pending submission. This page will be updated with the store link once the extension is
+published. Store listing assets live in `extension/store-assets/`.
+
+## Supported browsers
+
+The build target is Chrome (Manifest V3). The native-messaging host the CLI installs also
+supports Edge, Brave, Chromium, and Vivaldi — see
+[`sfdt extension install-host`](/cli/commands/platform-bridge).

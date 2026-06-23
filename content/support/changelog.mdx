@@ -1,0 +1,52 @@
+---
+title: Changelog
+description: Recent highlights across the SFDT suite, with links to the full changelogs.
+---
+
+import { Callout } from 'nextra/components'
+
+# Changelog
+
+SFDT follows [Keep a Changelog](https://keepachangelog.com/) and
+[Semantic Versioning](https://semver.org/). Each workspace maintains its own changelog in the
+repository; this page summarizes recent highlights.
+
+<Callout type="info">
+  Canonical sources:
+  [CLI `CHANGELOG.md`](https://github.com/scoobydrew83/sfdt/blob/main/CHANGELOG.md) ·
+  [Extension `CHANGELOG.md`](https://github.com/scoobydrew83/sfdt/blob/main/extension/CHANGELOG.md)
+</Callout>
+
+## `@sfdt/cli` — 0.12.0
+
+Aligns the built-in [MCP server](/cli/mcp) with the 2026-07-28 RC of the Model Context Protocol,
+hardens the dashboard's AI streaming path against prompt injection, and adds a batch of CLI
+robustness work.
+
+- **MCP RC alignment** — the parking envelope uses SEP-2549 `ttlMs` + `cacheScope` (new
+  `mcp.parking.cacheScope` config, default `"session"`); `tools/call` reads and validates a W3C
+  Trace Context.
+- **AI sandboxed to read-only tools** — both the streaming dashboard chat and all non-streaming
+  AI invocations default to `Read,Grep,Glob`, closing the prompt-injection surface. See
+  [Security & privacy](/guides/security).
+- **Shared git-ref / source-dir validation** — `manifest` and `pr-description` now validate
+  `--base`/`--head` refs (and reject `..`); `pr-description` scopes its diff to the merge-base.
+- **Earlier config diagnostics** — warns when `sfdx-project.json` `packageDirectories` paths
+  don't exist on disk.
+
+## `@sfdt/extension` — 0.3.2
+
+A WXT/Chrome MV3 extension with **29** opt-in features.
+
+- **0.3.0 — Workspace & Apex** — added the standalone **Workspace** tab plus `apex-anonymous`,
+  `debug-log-viewer`, `org-switcher`, and `saved-soql`; the Salesforce API client now works from
+  the `chrome-extension://` origin.
+- **0.2.0** — added `export-for-prompt` and a SOQL → LangGraph node generator; hardened the
+  bridge with per-call timeouts and idempotent retries; kill-switch retry logic.
+- **0.1.0** — added `inspect-record`, `data-import`, `field-creator`, `metadata-retrieve`,
+  `soap-explore`, and `event-monitor`; SOQL autocomplete.
+
+## `@sfdt/vscode` — 0.1.0
+
+Initial release of the VS Code extension: command palette integration, the **Org Health**
+sidebar (audit + monitor snapshots), a status bar item, and an embedded dashboard webview.

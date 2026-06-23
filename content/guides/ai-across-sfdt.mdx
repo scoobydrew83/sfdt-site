@@ -1,0 +1,71 @@
+---
+title: AI across SFDT
+description: How AI works in the CLI, the dashboard, and the extension — providers, commands, and the safety sandbox.
+---
+
+import { Callout, Tabs } from 'nextra/components'
+
+# AI across SFDT
+
+AI in SFDT is **optional, provider-agnostic, and pass-through**. SFDT never ships its own model
+or API key — it shells out to a provider CLI you install and authenticate, using your account
+and your billing. With AI off, every command still runs (and `sfdt explain` falls back to
+heuristics).
+
+## Providers
+
+You choose one provider in `.sfdt/config.json` (or during `sfdt init`):
+
+<Tabs items={['Claude (default)', 'Gemini', 'OpenAI']}>
+  <Tabs.Tab>
+```bash
+npm install -g @anthropic-ai/claude-code
+```
+```json
+{ "ai": { "provider": "claude" } }
+```
+Claude's interactive mode can read your repository files directly with tool use.
+  </Tabs.Tab>
+  <Tabs.Tab>
+```bash
+npm install -g @google/gemini-cli
+```
+```json
+{ "ai": { "provider": "gemini", "model": "" } }
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```bash
+npm install -g @openai/codex
+```
+```json
+{ "ai": { "provider": "openai", "model": "" } }
+```
+  </Tabs.Tab>
+</Tabs>
+
+Disable everything with `features.ai: false`. Full details: [CLI → AI providers](/cli/ai-providers).
+
+## Where AI shows up
+
+| Surface | AI-powered features |
+|---|---|
+| **CLI** | `explain`, `review`, `pr-description`, `release`, `changelog generate`, `quality --fix-plan`, `manifest --ai-cleanup`, `test --analyze`, `ai prompt` |
+| **Dashboard** (`sfdt ui`) | The **Review** and **Explain** pages, plus a contextual **Ask AI** chat drawer on Review/Explain/Drift/Preflight |
+| **Chrome extension** | The `ai-assistant` feature — token estimates, prompt templates, and answers about the current Flow (routed through the bridge to your provider) |
+
+## The read-only safety sandbox
+
+AI features see attacker-influenceable content: git diffs, org output, deployment logs, and —
+in the extension — Salesforce page context. To stop a prompt injection from driving destructive
+tool calls, SFDT sandboxes AI invocations to **read-only tools** by default.
+
+<Callout type="warning">
+  Both the streaming dashboard chat and all non-streaming AI invocations
+  (`sfdt ai`, `pr-description`, AI-assisted `test`, the GUI `/api/ai/*` endpoints) default the
+  allowed tool set to **`Read,Grep,Glob`** across the Claude/Gemini/Codex providers — denying
+  `Bash`/`Write`/`Edit`. Callers may pass an explicit `allowedTools` to override.
+</Callout>
+
+This is part of SFDT's broader local-only, defense-in-depth posture — see
+[Security & privacy](/guides/security).

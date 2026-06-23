@@ -1,0 +1,47 @@
+---
+title: Commands
+description: The full SFDT command palette for VS Code — command ids, titles, and which ones require confirmation.
+---
+
+import { Callout } from 'nextra/components'
+
+# Commands
+
+Every command is available from the Command Palette (`Cmd`/`Ctrl`+`Shift`+`P`). Each one spawns
+the [`sfdt` CLI](/cli) with `SFDT_NON_INTERACTIVE=true`, streams output to the **SFDT** output
+channel, and refreshes the [Org Health sidebar](/vscode-extension/org-health-sidebar) when it
+finishes.
+
+## Command reference
+
+| Command id | Palette title | Notes |
+| --- | --- | --- |
+| `sfdt.refresh` | SFDT: Refresh Org Health | Re-reads the audit/monitor snapshots and updates the tree + status bar |
+| `sfdt.setOrg` | SFDT: Set Default Org | Prompts for an org alias and saves it to `sfdt.defaultOrg` (workspace) |
+| `sfdt.openDashboard` | SFDT: Open Dashboard | Spawns `sfdt ui` and embeds it in an editor tab |
+| `sfdt.audit` | SFDT: Run Org Audit | Runs `sfdt audit all` (read-only) |
+| `sfdt.monitor` | SFDT: Run Org Monitor | Runs `sfdt monitor all` (read-only) |
+| `sfdt.backup` | SFDT: Backup Org Metadata | Runs `sfdt monitor backup` |
+| `sfdt.preflight` | SFDT: Run Preflight Checks | Runs `sfdt preflight` |
+| `sfdt.deploy` | SFDT: Deploy | **Destructive** — requires a modal confirmation before running |
+| `sfdt.docs` | SFDT: Generate Documentation | Runs `sfdt docs generate` |
+| `sfdt.runCommand` | SFDT: Run Command… | Quick-pick of the full command catalog, including `drift`, `scan`, and `quality` |
+
+<Callout type="warning">
+  `SFDT: Deploy` can modify your org, so it always prompts with a modal confirmation first.
+  Read-only commands (audit, monitor, preflight, drift, scan, quality) run without confirmation.
+</Callout>
+
+## Org targeting
+
+When [`sfdt.defaultOrg`](/vscode-extension/settings) is set, the extension appends
+`--org <alias>` to each command. When it's empty, the CLI falls back to the project's configured
+default org (from `.sfdt/config.json` or `sfdx-project.json`).
+
+## How output is rendered
+
+The extension does not parse command stdout to build the sidebar. Instead, after any command
+completes, it re-reads the JSON snapshots the CLI writes —
+`logs/audit-latest.json` and `logs/monitor-latest.json` — and rebuilds the tree from those.
+Progress is shown as a VS Code notification, and full output streams to the **SFDT** output
+channel.

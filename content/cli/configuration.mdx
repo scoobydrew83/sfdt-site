@@ -1,0 +1,190 @@
+---
+title: Configuration
+description: The .sfdt/ directory, the config.json schema, and reading or writing values with sfdt config get/set.
+---
+
+import { Callout, FileTree } from 'nextra/components'
+
+# Configuration
+
+Running `sfdt init` creates a `.sfdt/` directory in your project root. Every command reads it.
+
+## The `.sfdt/` directory
+
+<FileTree>
+  <FileTree.Folder name=".sfdt" defaultOpen>
+    <FileTree.File name="config.json" />
+    <FileTree.File name="environments.json" />
+    <FileTree.File name="test-config.json" />
+    <FileTree.File name="pull-config.json" />
+    <FileTree.File name="*.local.json" />
+    <FileTree.Folder name="plugins" />
+    <FileTree.Folder name="cache" />
+    <FileTree.Folder name="data" />
+    <FileTree.File name="feature-flags.json" />
+    <FileTree.File name="telemetry-snapshot.json" />
+    <FileTree.File name="bridge-token" />
+  </FileTree.Folder>
+</FileTree>
+
+| File | What it holds |
+|---|---|
+| `config.json` | Core settings: org aliases, feature flags, AI provider, coverage threshold (see below) |
+| `environments.json` | Named environments and org aliases |
+| `test-config.json` | Test classes, coverage threshold, test level |
+| `pull-config.json` | Metadata types to pull from the org (see [Incremental Pull](/cli/workflows/incremental-pull)) |
+| `*.local.json` | Optional environment-specific overrides — git-ignore these |
+| `plugins/` | Optional local CLI plugins (`.js`/`.mjs`) — see [Plugins](/cli/plugins) |
+| `cache/` | Pull delta cache (SQLite) and parked MCP results |
+| `data/` | Data-set definitions for `sf data tree` |
+| `feature-flags.json` | Kill-switch list for Chrome extension features |
+| `telemetry-snapshot.json` | Latest opt-in extension telemetry snapshot |
+| `bridge-token` | Auto-created `0600` bearer token for the local bridge |
+
+<Callout type="warning">
+  Add `.sfdt/*.local.json` to your `.gitignore` so machine-specific overrides never get
+  committed.
+</Callout>
+
+## `config.json` reference
+
+A representative `config.json`:
+
+```json
+{
+  "projectName": "My Salesforce Project",
+  "defaultOrg": "my-dev-org",
+  "deployment": {
+    "coverageThreshold": 75,
+    "backupBeforeRollback": true,
+    "preflight": {
+      "enforceTests": false,
+      "enforceBranchNaming": false,
+      "enforceChangelog": false
+    }
+  },
+  "features": {
+    "ai": true,
+    "notifications": false,
+    "releaseManagement": true
+  },
+  "ai": { "provider": "claude", "model": "" },
+  "pullCache": { "enabled": true, "parallelism": 5, "batchSize": 100 },
+  "mcp": { "enabled": false, "parking": { "enabled": true } },
+  "plugins": []
+}
+```
+
+### Top-level keys
+
+| Key | Type | Description |
+|---|---|---|
+| `projectName` | string | Display name used in logs and notifications |
+| `defaultOrg` | string | Default Salesforce org alias |
+| `releaseNotesDir` | string | Release-notes output directory (default `release-notes`) |
+| `manifestDir` | string | Manifest output directory (default `manifest/release`) |
+| `manifestLayout` | enum | `flat` (default) or `subpath` for per-package subdirectories |
+| `changelogDir` | string | Per-package changelog directory (default `changelogs`) |
+| `logDir` | string | CLI log directory (default `logs`) |
+| `plugins` | array | npm package names to load as plugins |
+| `pluginOptions.autoDiscover` | boolean | Auto-load `sfdt-plugin-*` packages and `.sfdt/plugins/*.js` (default `false`) |
+
+### `deployment`
+
+| Key | Type | Default | Description |
+|---|---|---|---|
+| `deployment.coverageThreshold` | number | `75` | Minimum Apex test coverage percent |
+| `deployment.backupBeforeRollback` | boolean | `true` | Capture an org snapshot before `sfdt rollback` |
+| `deployment.preflight.enforceTests` | boolean | `false` | Promote "no tests" from warning to failure |
+| `deployment.preflight.enforceBranchNaming` | boolean | `false` | Enforce branch-naming convention |
+| `deployment.preflight.enforceChangelog` | boolean | `false` | Require an `[Unreleased]` changelog entry |
+
+### `features`
+
+Feature toggles. All default to `true` except `notifications`.
+
+| Key | Description |
+|---|---|
+| `features.ai` | AI-powered commands |
+| `features.notifications` | Slack integration |
+| `features.releaseManagement` | Release workflow |
+| `features.monitoring` | Org monitoring |
+| `features.audit` | Audit-trail analysis |
+| `features.docs` | Docs generation |
+| `features.data` | Data import/export |
+| `features.scratch` | Scratch-org management |
+
+### `ai`
+
+| Key | Type | Description |
+|---|---|---|
+| `ai.provider` | enum | `claude` (default), `gemini`, or `openai` |
+| `ai.model` | string | Optional model override (the provider CLI handles selection) |
+
+See [AI Providers](/cli/ai-providers) for full setup.
+
+### `pullCache`
+
+| Key | Type | Default | Description |
+|---|---|---|---|
+| `pullCache.enabled` | boolean | `true` | Enable the SQLite-backed incremental pull cache |
+| `pullCache.parallelism` | number | `5` | Concurrent retrieval threads |
+| `pullCache.batchSize` | number | `100` | Components per retrieve batch |
+| `pullCache.retrieveTimeoutSeconds` | number | `360` | Retrieve timeout |
+
+### `mcp`
+
+| Key | Type | Default | Description |
+|---|---|---|---|
+| `mcp.enabled` | boolean | `false` | Enable the MCP server |
+| `mcp.parking.enabled` | boolean | `true` | Park oversized tool results |
+| `mcp.parking.thresholdBytes` | number | `50000` | Size limit before a result is parked |
+| `mcp.parking.ttlSeconds` | number | `86400` | TTL before parked cache files are deleted |
+| `mcp.parking.cacheScope` | enum | `session` | SEP-2549 cache scope: `global`, `user`, or `session` |
+
+See the [MCP Server](/cli/mcp) page for details.
+
+### `audit`, `monitoring`, `docs`, `data`, `scratch`
+
+| Key | Default | Description |
+|---|---|---|
+| `audit.auditTrailLookbackDays` | `30` | Setup-audit-trail lookback window |
+| `audit.licenseWarnThreshold` | `0.9` | License-usage warn threshold (0–1) |
+| `audit.inactiveUserDays` | `90` | Days before a user is "inactive" |
+| `audit.minApiVersion` | `45` | Minimum acceptable API version |
+| `monitoring.backupDir` | `monitoring-backup` | Metadata-backup output directory |
+| `monitoring.limitWarnThreshold` | `0.8` | Governor-limit warn threshold (0–1) |
+| `monitoring.errorLookbackDays` | `7` | Apex-error lookback window |
+| `monitoring.healthMinScore` | `80` | Minimum acceptable Security Health Check score |
+| `docs.outputDir` | `docs` | Generated-docs output directory |
+| `docs.ai` | `true` | Include an AI overview in generated docs |
+| `docs.diagrams` | `true` | Generate Mermaid diagrams |
+| `data.dir` | `.sfdt/data` | Data-set definition directory |
+| `scratch.definitionFile` | `config/project-scratch-def.json` | Scratch-org definition |
+| `scratch.durationDays` | `7` | Scratch-org lifetime |
+| `scratch.poolSize` | `0` | Pre-created scratch-org pool size |
+
+### `notifications`
+
+```json
+{
+  "features": { "notifications": true },
+  "notifications": {
+    "slack": { "webhookUrl": "https://hooks.slack.com/services/T.../B.../..." }
+  }
+}
+```
+
+## Reading & writing config
+
+Use dot notation from the command line:
+
+```bash
+sfdt config get defaultOrg
+sfdt config get deployment.coverageThreshold
+sfdt config set deployment.coverageThreshold 80
+sfdt config set features.ai true
+```
+
+Values are coerced automatically: `"true"`/`"false"` become booleans, numeric strings become
+numbers, everything else stays a string.

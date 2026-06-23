@@ -1,0 +1,74 @@
+---
+title: Incremental Pull
+description: Define metadata pull groups and use the SQLite delta cache to keep large-org retrieves fast.
+---
+
+import { Callout } from 'nextra/components'
+
+# Incremental Pull
+
+`sfdt pull` retrieves metadata from your default org into local source. A SQLite-backed cache
+tracks what's been retrieved and each component's modification date, so subsequent pulls fetch
+only what changed in the org — a big win on large orgs.
+
+## Define what gets pulled
+
+`.sfdt/pull-config.json` lists the metadata types and the target directory:
+
+```json
+{
+  "metadataTypes": [
+    "ApexClass",
+    "ApexTrigger",
+    "LightningComponentBundle",
+    "CustomObject",
+    "CustomField",
+    "Layout",
+    "FlexiPage",
+    "PermissionSet",
+    "Flow"
+  ],
+  "targetDir": "force-app/main/default"
+}
+```
+
+Add or remove types to control the scope.
+
+## Pull modes
+
+```bash
+sfdt pull             # incremental — only changed components
+sfdt pull --full      # force a full retrieve and rebuild the cache
+sfdt pull --status    # show cache status (last pull time, component counts)
+sfdt pull --dry-run   # preview without writing
+```
+
+Use `sfdt pull` after an admin makes changes directly in the org to bring source back in sync.
+Use `--full` to reset the cache after major changes or if you suspect the cache is stale.
+
+## Tune the cache
+
+Cache behavior is set under `pullCache` in `.sfdt/config.json`:
+
+```json
+{
+  "pullCache": {
+    "enabled": true,
+    "parallelism": 5,
+    "batchSize": 100,
+    "retrieveTimeoutSeconds": 360
+  }
+}
+```
+
+| Key | Effect |
+|---|---|
+| `enabled` | Turn the delta cache on/off |
+| `parallelism` | Concurrent retrieval threads |
+| `batchSize` | Components per retrieve batch |
+| `retrieveTimeoutSeconds` | Per-retrieve timeout |
+
+<Callout type="info">
+  The cache lives in `.sfdt/cache/`. It's safe to delete — the next `sfdt pull --full` rebuilds
+  it.
+</Callout>

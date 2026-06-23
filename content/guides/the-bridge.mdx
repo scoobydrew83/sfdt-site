@@ -1,0 +1,110 @@
+---
+title: The bridge
+description: How the Chrome and VS Code extensions talk to a locally-running sfdt CLI.
+---
+
+import { Steps, Callout } from 'nextra/components'
+
+# The bridge
+
+The **bridge** is how SFDT's clients — the Chrome extension and (indirectly) the VS Code
+extension — reach the CLI to run privileged work on your machine: deploying a Flow, rolling
+back, scoring quality with `flow-core`, or calling an AI provider. It is **local-only and
+token-protected**; nothing crosses the network.
+
+## When you need it
+
+The Chrome extension runs ~25 features completely standalone (canvas search, SOQL/REST/SOAP
+runners, org limits, Flow health checks, …). You only need the bridge for the handful of
+features that act on your machine or your provider account:
+
+- `flow-deploy` — deploy the current Flow
+- `flow-version-manager` — activate / roll back Flow versions
+- `ai-assistant` — send a prompt to your configured AI provider
+- `org-health` — read the CLI's audit/monitor snapshots
+
+The VS Code extension always shells out to the CLI directly, and additionally embeds the
+dashboard (which the CLI serves) via the bridge server.
+
+## Two transports
+
+```text
+            ┌──────────────────────────────────────────────┐
+ extension ─┤ (1) HTTP localhost   → http://127.0.0.1:7654  │→ sfdt ui server
+            │     bearer token from ~/.sfdt/bridge-token    │
+            │ (2) native messaging → com.sfdt.host (stdio)  │→ @sfdt/host
+            └──────────────────────────────────────────────┘
+```
+
+### 1. HTTP localhost (default)
+
+Run `sfdt ui` in any SFDT-initialized project. It binds an Express server to `127.0.0.1`
+(default port **7654**) that serves the dashboard and the bridge endpoints. The extension
+authenticates with a bearer token.
+
+### 2. Native messaging (fallback)
+
+If you can't keep `sfdt ui` running, Chrome can launch a tiny native host
+(`@sfdt/host`, registered as `com.sfdt.host`) on demand over stdio. The host mirrors the same
+request handlers as the HTTP server, so features behave identically.
+
+## Pairing the Chrome extension
+
+<Steps>
+### Start the server
+
+```bash
+cd your-salesforce-project
+sfdt ui            # http://localhost:7654 + bridge
+```
+
+### Copy the bridge token
+
+The token is generated on first request and stored at `~/.sfdt/bridge-token` (mode `0600`).
+
+### Paste it into the extension
+
+Open the extension's options page, paste the token into the bridge settings, choose a transport
+(`auto`, `localhost`, or `native`), and click **Test connection**.
+</Steps>
+
+For the native fallback instead:
+
+```bash
+sfdt extension install-host --extension-id <your extension id>
+sfdt extension status      # verify which browsers have the host
+```
+
+## Protocol versioning
+
+Both transports speak the versioned contract in `@sfdt/flow-core/bridge-contract.ts` (currently
+**v1.2**). Request kinds include `ping`, `version`, `deploy`, `rollback`, `quality`, `ai`,
+`scan`, `compare`, `org-health`, and `telemetry.snapshot`.
+
+- **Minor bump** (e.g. 1.1 → 1.2) — additive and backward-compatible (a new kind, a new
+  optional field, a new error code).
+- **Major bump** (e.g. 1.x → 2.0) — breaking. The extension **refuses** to send across a major
+  mismatch and **warns** on a minor mismatch.
+
+## Health checks & the kill switch
+
+```bash
+sfdt doctor --extension     # bridge reachable? native host? kill-switch file? telemetry?
+sfdt extension status       # native host install state per browser
+```
+
+Every bridge `ping` also returns the server-side **kill switch** — features listed in
+`<project>/.sfdt/feature-flags.json` are disabled in the extension regardless of the user's
+toggle, no Web Store re-review required:
+
+```bash
+sfdt feature-flags disable canvas-search
+sfdt feature-flags list
+sfdt feature-flags enable canvas-search
+sfdt feature-flags clear
+```
+
+<Callout type="info">
+  Related reading: [Chrome → Bridge](/chrome-extension/bridge),
+  [CLI → Web dashboard](/cli/dashboard), and [Security & privacy](/guides/security).
+</Callout>

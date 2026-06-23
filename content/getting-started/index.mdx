@@ -1,0 +1,61 @@
+---
+title: Overview
+description: What SFDT is, the three tools in the suite, and which one to reach for.
+---
+
+import { Cards, Callout } from 'nextra/components'
+
+# The SFDT suite at a glance
+
+**SFDT** ("Salesforce DevTools") is a set of tools that make deploying, testing, and shipping
+Salesforce DX changes safer and faster. It is built around one shared engine, so the same Flow
+analysis, rules, and deployment logic power every surface — your terminal, your browser, and
+your editor.
+
+The project is a single open-source monorepo with four workspaces:
+
+| Workspace | What it is | Status |
+|---|---|---|
+| **`@sfdt/cli`** | The npm command-line tool — deploy, test, quality, release, org health, AI, and a local web dashboard. | Published to npm |
+| **`@sfdt/extension`** | A Chrome extension for Salesforce Flow Builder & Setup productivity. | Pre-Web-Store |
+| **`@sfdt/host`** | A tiny native-messaging host — a fallback transport the extension uses when the CLI's HTTP bridge isn't running. | Bundled with the CLI |
+| **`@sfdt/flow-core`** | A shared TypeScript library — Flow normalization, the rules engine, scoring, and the versioned bridge contract. | Workspace-only |
+
+<Callout type="info">
+  The CLI is the heart of the suite. The Chrome and VS Code extensions are thin clients that
+  can talk to a locally-running CLI over the **bridge** to unlock deploy, rollback, quality
+  scoring, and AI — but each works standalone too.
+</Callout>
+
+## Which tool should I use?
+
+<Cards>
+  <Cards.Card title="I live in the terminal / CI → CLI" href="/cli" arrow />
+  <Cards.Card title="I work in Flow Builder & Setup → Chrome extension" href="/chrome-extension" arrow />
+  <Cards.Card title="I work in VS Code → VS Code extension" href="/vscode-extension" arrow />
+</Cards>
+
+- **`@sfdt/cli`** — the complete toolkit. Everything (deploy, preflight, rollback, tests,
+  quality, release management, org audit/monitoring, AI, MCP server) lives here. This is also
+  what CI pipelines run.
+- **Chrome extension** — for admins and developers working inside Salesforce. Flow health
+  checks, canvas search, SOQL/REST/SOAP runners, org limits, and 25+ more features, right on
+  the page.
+- **VS Code extension** — drives the CLI from your editor: deploy, preflight, org audit &
+  monitoring, docs, and the dashboard, from the command palette and an Org Health sidebar.
+
+## How they fit together
+
+All three share `@sfdt/flow-core` and a **versioned bridge contract**. When you run
+`sfdt ui`, the CLI starts a local, token-protected HTTP server on `127.0.0.1`. The browser and
+VS Code extensions connect to it to run privileged operations on your machine — nothing leaves
+your computer. See [Architecture](/getting-started/architecture) and
+[The bridge](/guides/the-bridge) for the full picture.
+
+## Next steps
+
+<Cards>
+  <Cards.Card title="Install the suite" href="/getting-started/installation" arrow />
+  <Cards.Card title="Quickstart: init → deploy" href="/getting-started/quickstart" arrow />
+  <Cards.Card title="Requirements" href="/getting-started/requirements" arrow />
+</Cards>

@@ -1,0 +1,84 @@
+---
+title: Architecture
+description: How the CLI, the extensions, the native host, and flow-core fit together.
+---
+
+import { Callout, FileTree } from 'nextra/components'
+
+# Architecture
+
+SFDT is one monorepo with four workspaces and a deliberately simple boundary between them: the
+**CLI owns all privileged work**, and everything else is a client that either runs standalone
+or delegates to the CLI over a local, token-protected **bridge**.
+
+## The four workspaces
+
+| Workspace | Runtime | Responsibility |
+|---|---|---|
+| `@sfdt/cli` | Node.js + Bash | All Salesforce DevOps: deploy, test, quality, release, org health, AI, the web dashboard, the MCP server. |
+| `@sfdt/extension` | Chrome MV3 (WXT) | In-page productivity for Flow Builder & Setup. Calls the CLI over the bridge for deploy/rollback/quality/AI. |
+| `@sfdt/host` | Node.js | A native-messaging host — the fallback transport the extension uses when `sfdt ui` isn't running. |
+| `@sfdt/flow-core` | TypeScript | Shared library: Flow normalization, the rules engine, scoring, and the **versioned bridge contract**. |
+
+## Inside the CLI
+
+The CLI uses a hybrid Node.js + shell design. A Commander.js layer handles parsing, config, and
+output; battle-tested shell scripts perform the actual `sf` CLI operations.
+
+```text
+User → bin/sfdt.js → src/cli.js (Commander program)
+                        → src/commands/*.js  (per-command logic + UI)
+                        → src/lib/*          (config, ai, output, org-inventory, git-utils)
+                        → src/lib/script-runner.js
+                              loads .sfdt/config.json → flattens to SFDT_* env vars
+                              → spawns scripts/*.sh via execa (TTY passthrough)
+                                    → sf CLI, git, jq, standard UNIX tools
+```
+
+Key decisions:
+
+- **Config is the contract.** `.sfdt/config.json` (and companions) are flattened into
+  `SFDT_*` environment variables that the shell scripts read. See
+  [CLI → Configuration](/cli/configuration).
+- **AI is optional and degrades gracefully.** The AI layer checks for the configured provider
+  CLI at runtime and returns nothing when it's absent, so every AI-enhanced command still runs.
+- **Pure ESM, no transpilation.** Targets Node.js 22+.
+
+## The bridge: how clients reach the CLI
+
+When you run `sfdt ui`, the CLI starts a local Express server bound to `127.0.0.1` that serves
+both the web dashboard and a **bridge** the browser/editor extensions call:
+
+```text
+Chrome / VS Code extension
+        │  (1) HTTP localhost transport  →  http://127.0.0.1:7654/api/bridge/*
+        │      bearer token from ~/.sfdt/bridge-token
+        ▼
+   sfdt ui server  ──▶  same command logic as the CLI
+        ▲
+        │  (2) native-messaging fallback  →  com.sfdt.host (stdio)
+        │      installed via `sfdt extension install-host`
+Chrome native host (@sfdt/host)
+```
+
+- **Transport 1 — HTTP localhost (default).** Requires `sfdt ui` to be running. The extension
+  authenticates with the token in `~/.sfdt/bridge-token`.
+- **Transport 2 — native messaging (fallback).** Works without a running server; Chrome
+  launches the `@sfdt/host` process on demand. Install it with
+  `sfdt extension install-host --extension-id <id>`.
+
+Both transports speak the same **versioned wire protocol** defined in
+`@sfdt/flow-core/bridge-contract.ts`. The extension warns on minor version mismatches and
+refuses to send on major mismatches. Read the deep dive in [The bridge](/guides/the-bridge).
+
+<Callout type="info">
+  Everything stays on your machine. The bridge binds to localhost only, traffic to your
+  Salesforce org uses your existing session, and AI prompts go to a provider key **you** supply.
+  See [Security](/guides/security) and the extension's [Privacy](/chrome-extension/privacy) page.
+</Callout>
+
+## Shared engine: flow-core
+
+`@sfdt/flow-core` is why a Flow health score in the Chrome extension matches `sfdt`'s output:
+both call the same rules engine. It also defines the bridge contract that keeps all three
+surfaces compatible. See [Guides → flow-core](/guides/flow-core).

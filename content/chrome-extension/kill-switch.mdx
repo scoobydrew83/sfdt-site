@@ -1,0 +1,46 @@
+---
+title: Remote Kill Switch
+description: Disable any extension feature remotely — without a Chrome Web Store re-review — using the sfdt CLI feature-flags commands.
+---
+
+import { Callout } from 'nextra/components'
+
+# Remote Kill Switch
+
+Any feature can be disabled remotely, **without a Chrome Web Store re-review**. This is useful
+if a feature misbehaves against a particular org or Salesforce release and you want it gone
+immediately across every browser that pairs with your CLI.
+
+## How it works
+
+The extension reads `<project>/.sfdt/feature-flags.json` on **every bridge ping**. An entry
+there **overrides** the user's per-feature toggle. The result is cached in
+`chrome.storage.local` under `sfut.killswitch.cache` for up to 24 hours.
+
+```json
+{
+  "disabledFeatures": ["canvas-search", "flow-deploy"]
+}
+```
+
+## Managing flags from the CLI
+
+```bash
+sfdt feature-flags disable canvas-search   # turn a feature off
+sfdt feature-flags list                    # what's currently disabled
+sfdt feature-flags enable canvas-search    # turn it back on
+sfdt feature-flags clear                   # re-enable everything
+```
+
+The feature ids are the same ones listed on the [Features](/chrome-extension/features) page.
+
+<Callout type="info">
+  Because the flags file is read on bridge pings, the kill switch only takes effect when the
+  extension can reach the [bridge](/chrome-extension/bridge). Without a bridge, the user's local
+  toggles apply.
+</Callout>
+
+<Callout type="warning">
+  A kill-switched feature stays disabled even if the user has it toggled on. To restore normal
+  user control, `enable` the feature or `clear` all flags.
+</Callout>

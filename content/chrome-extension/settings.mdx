@@ -1,0 +1,66 @@
+---
+title: Settings & Options
+description: The registry-driven options page — per-feature toggles, bridge configuration, opt-in telemetry, and per-feature settings.
+---
+
+import { Callout } from 'nextra/components'
+
+# Settings & Options
+
+The options page opens in its own tab (`options.html`). Reach it from the ⚡ side menu →
+⚙ **Settings**, or right-click the extension → **Options**. The page is **registry-driven**:
+adding a feature with a settings schema makes its controls appear automatically.
+
+All settings live in `chrome.storage.local` inside your Chrome profile. Nothing is synced to
+other browsers or transmitted off your device.
+
+## Per-feature toggles
+
+Every one of the [29 features](/chrome-extension/features) can be switched on or off
+individually. A feature with no explicit toggle is enabled by default.
+
+## Bridge settings
+
+Configure how the extension reaches the [sfdt CLI](/chrome-extension/bridge):
+
+| Setting | Values | Default |
+| --- | --- | --- |
+| `token` | Bearer token from `~/.sfdt/bridge-token` | empty |
+| `preferredTransport` | `auto` \| `localhost` \| `native` | `auto` |
+| `localhostPort` | Port `sfdt ui` listens on | `7654` |
+
+Use **Test connection** after pasting a token to confirm the bridge is reachable.
+
+## Per-feature settings (examples)
+
+Features that declare a settings schema render their own controls. A few examples:
+
+| Feature | Setting | Default |
+| --- | --- | --- |
+| `canvas-search` | `shortcut` | `Ctrl+Shift+F` |
+| `canvas-search` | `highlightColour` | `#FFD700` (gold) |
+| `api-name-generator` | `namingPattern` (`Snake_Case` \| `PascalCase` \| `camelCase`) | `Snake_Case` |
+| `scheduled-flow-explorer` | `defaultView` (`list` \| `calendar`) | `list` |
+
+## Telemetry (opt-in, local-only)
+
+Telemetry is **off by default**. When you check **Enable local telemetry**, the extension keeps
+per-feature counters in `chrome.storage.local`. Counts roll over each calendar month and are
+capped at 500 distinct feature ids. Nothing leaves the browser profile. See
+[Privacy](/chrome-extension/privacy) for the full schema.
+
+When the bridge is reachable **and** telemetry is enabled, opening the options page pushes a
+snapshot to `<project>/.sfdt/telemetry-snapshot.json` so the CLI can render it with
+`sfdt extension stats`.
+
+## Storage keys
+
+| Key | What it holds | When written |
+| --- | --- | --- |
+| `sfut.settings` | Per-feature toggles, AI provider preferences, bridge token | When you save the options page |
+| `sfut.killswitch.cache` | The most-recent server-disabled feature list | After every successful bridge ping |
+| `sfut.telemetry` | Opt-in local feature-use counters | Only when telemetry is enabled |
+
+<Callout type="info">
+  Clear everything from `chrome://extensions` → SFDT SF Helper → **Site data** → Remove all.
+</Callout>

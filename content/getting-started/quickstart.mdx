@@ -1,0 +1,79 @@
+---
+title: Quickstart
+description: From zero to your first deploy in about five minutes.
+---
+
+import { Steps, Callout } from 'nextra/components'
+
+# Quickstart
+
+This walkthrough takes a freshly-authenticated Salesforce DX project from nothing to a
+validated deploy. It assumes you've [installed the CLI](/getting-started/installation) and the
+Salesforce CLI (`sf`).
+
+<Steps>
+### Log in to an org
+
+```bash
+sf org login web --alias my-dev-org
+```
+
+### Initialize SFDT
+
+```bash
+cd your-salesforce-project
+sfdt init
+```
+
+`sfdt init` is interactive. It writes a `.sfdt/` directory containing `config.json` (org
+aliases, coverage threshold, AI provider, feature flags) and a few companion files. You can
+edit them later or with `sfdt config set <key> <value>`.
+
+### Run preflight
+
+```bash
+sfdt preflight
+```
+
+Preflight runs a checklist of pre-deployment validations (git state, branch naming, tests,
+changelog — whichever you've enabled). Use `--strict` to fail on warnings.
+
+### Run tests
+
+```bash
+sfdt test
+```
+
+The enhanced runner executes Apex tests in parallel and enforces your configured coverage
+threshold (default **75%**). Add `--analyze` to get an AI explanation of any failures.
+
+### Deploy
+
+```bash
+sfdt deploy
+```
+
+`sfdt deploy` runs preflight first (skip with `--skip-preflight`), deploys to your default
+org, and can tag and open a PR. Use `--dry-run` to validate without deploying, or
+`--source-dir <path>` to deploy a specific folder.
+
+### Smoke-test the deploy
+
+```bash
+sfdt smoke
+```
+</Steps>
+
+<Callout type="info">
+  Prefer a UI? Run `sfdt ui` to open the local dashboard at
+  [http://localhost:7654](http://localhost:7654) and run tests, preflight, drift, and compares
+  from your browser. See [CLI → Web dashboard](/cli/dashboard).
+</Callout>
+
+## Where to go next
+
+- **Ship a release** → [Production release workflow](/cli/workflows/production-release)
+- **Understand a failed deploy** → [Investigate a failed deploy](/cli/workflows/investigate-failed-deploy)
+- **Work inside Salesforce** → [Chrome extension](/chrome-extension)
+- **Work in your editor** → [VS Code extension](/vscode-extension)
+- **Full command list** → [CLI command reference](/cli/commands)

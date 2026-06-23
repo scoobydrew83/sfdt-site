@@ -1,0 +1,140 @@
+---
+title: Installing the SFDT CLI
+description: Install @sfdt/cli from npm, meet the requirements, initialize a project, and enable shell completion.
+---
+
+import { Callout, Steps, Tabs } from 'nextra/components'
+
+# Installation
+
+## Install from npm
+
+<Tabs items={['npm', 'pnpm', 'yarn']}>
+  <Tabs.Tab>
+```bash
+npm install -g @sfdt/cli
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```bash
+pnpm add -g @sfdt/cli
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```bash
+yarn global add @sfdt/cli
+```
+  </Tabs.Tab>
+</Tabs>
+
+Verify the install:
+
+```bash
+sfdt version
+```
+
+## Requirements
+
+| Requirement | Notes |
+|---|---|
+| **Node.js** `>= 22.15.0` | Uses the built-in `node:sqlite` module, unflagged in Node 22.15+ |
+| **Salesforce CLI** (`sf`) | Installed and authenticated to your target orgs |
+| **bash** `4.0+` | macOS ships bash 3.2 — install a newer one with `brew install bash` |
+| **jq** `1.6+` | Required by several shell scripts |
+
+**Optional integrations:**
+
+| Tool | Enables |
+|---|---|
+| [Claude Code CLI](https://www.npmjs.com/package/@anthropic-ai/claude-code) | AI features with the `claude` provider (default) |
+| [Gemini CLI](https://www.npmjs.com/package/@google/gemini-cli) | AI features with the `gemini` provider |
+| [Codex CLI](https://www.npmjs.com/package/@openai/codex) | AI features with the `openai` provider |
+| [GitHub CLI](https://cli.github.com/) (`gh`) | PR creation during deployments |
+
+<Callout type="info">
+  AI is entirely optional. See [AI Providers](/cli/ai-providers) for setup, or skip it — every
+  AI command degrades gracefully when AI is disabled.
+</Callout>
+
+## Initialize a project
+
+Run `sfdt init` once from your Salesforce DX project root. It walks you through an interactive
+setup and creates the `.sfdt/` configuration directory.
+
+<Steps>
+
+### Change into your project
+
+```bash
+cd your-salesforce-project
+```
+
+### Run the initializer
+
+```bash
+sfdt init
+```
+
+It asks for a project name, default org alias, coverage threshold, and whether to enable AI
+(and which provider). It also scans your `packageDirectories` for Apex test classes
+(`*Test.cls`) to populate `test-config.json` automatically.
+
+### Ignore local overrides
+
+Add environment-specific overrides to your `.gitignore`:
+
+```bash
+echo '.sfdt/*.local.json' >> .gitignore
+```
+
+</Steps>
+
+See [Configuration](/cli/configuration) for the full schema of what `sfdt init` creates.
+
+## Updating
+
+```bash
+sfdt update          # update to the latest version from npm
+sfdt update --force  # force the update
+```
+
+If a self-update fails, sfdt prints an actionable error with a manual retry command (typically
+`npm install -g @sfdt/cli@latest`).
+
+## Install from source
+
+For development or to track `main`:
+
+```bash
+git clone https://github.com/scoobydrew83/sfdt.git
+cd sfdt
+npm install
+npm link              # makes `sfdt` available globally from your checkout
+npm run build:gui     # build the web dashboard (see the Web Dashboard page)
+npm test
+npm run lint
+```
+
+After `npm link`, the `sfdt` command points to your local checkout.
+
+## Shell completion
+
+Print a completion script for your shell and source it from your profile:
+
+<Tabs items={['bash', 'zsh', 'fish']}>
+  <Tabs.Tab>
+```bash
+sfdt completion bash >> ~/.bashrc
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```bash
+sfdt completion zsh >> ~/.zshrc
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```bash
+sfdt completion fish > ~/.config/fish/completions/sfdt.fish
+```
+  </Tabs.Tab>
+</Tabs>

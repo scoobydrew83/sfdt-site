@@ -1,0 +1,104 @@
+---
+title: AI Providers
+description: Configure Claude, Gemini, or OpenAI for SFDT's AI features, choose which commands use AI, and understand the read-only tool sandbox.
+---
+
+import { Callout, Tabs } from 'nextra/components'
+
+# AI Providers
+
+SFDT's AI features are optional and provider-agnostic. They work with **Claude**, **Gemini**, or
+**OpenAI**, configured during `sfdt init` or by editing `.sfdt/config.json`. Every AI command
+degrades gracefully when AI is disabled — heuristic fallbacks run where applicable (e.g.
+`sfdt explain`), and AI-only commands print how to enable it.
+
+## Enable AI
+
+```json
+{
+  "features": { "ai": true },
+  "ai": { "provider": "claude", "model": "" }
+}
+```
+
+## Providers
+
+<Tabs items={['Claude (default)', 'Gemini', 'OpenAI']}>
+  <Tabs.Tab>
+Requires the [Claude Code CLI](https://www.npmjs.com/package/@anthropic-ai/claude-code):
+
+```bash
+npm install -g @anthropic-ai/claude-code
+```
+
+```json
+{ "ai": { "provider": "claude" } }
+```
+
+Claude runs interactively and can read your repository files directly via tools, giving it full
+project context. No API key goes in sfdt config — Claude Code handles its own auth.
+
+<Callout type="warning">
+  Claude's interactive mode is **not suitable for CI**. Use Gemini or OpenAI for CI-based AI.
+</Callout>
+  </Tabs.Tab>
+  <Tabs.Tab>
+Requires the [Gemini CLI](https://www.npmjs.com/package/@google/gemini-cli):
+
+```bash
+npm install -g @google/gemini-cli
+```
+
+```json
+{ "ai": { "provider": "gemini", "model": "" } }
+```
+
+Authentication and model selection are handled by the Gemini CLI. Suitable for CI.
+  </Tabs.Tab>
+  <Tabs.Tab>
+Requires the [Codex CLI](https://www.npmjs.com/package/@openai/codex):
+
+```bash
+npm install -g @openai/codex
+```
+
+```json
+{ "ai": { "provider": "openai", "model": "" } }
+```
+
+Authentication and model selection are handled by the Codex CLI. Suitable for CI.
+  </Tabs.Tab>
+</Tabs>
+
+## Which commands use AI
+
+| Command | AI role |
+|---|---|
+| `sfdt test` | Failure analysis on test failure |
+| `sfdt quality --fix-plan` | Prioritized, file-specific fix plan |
+| `sfdt manifest --ai-cleanup` | Missing-dependency detection |
+| `sfdt explain` | Deep log analysis (after the offline heuristic scan) |
+| `sfdt review` | Code review across five categories |
+| `sfdt pr-description` | GitHub/Slack content generation |
+| `sfdt release` | Release-note generation |
+| `sfdt changelog generate` | Changelog entries from commits |
+| `sfdt ai prompt` | Ad-hoc prompts |
+
+## Disabling AI
+
+```json
+{ "features": { "ai": false } }
+```
+
+All AI steps are skipped. AI-only commands (`review`, `pr-description`) exit with an error
+explaining how to enable it. Heuristic fallbacks still run in `sfdt explain`.
+
+## Security: the read-only tool sandbox
+
+<Callout type="info">
+  All AI invocations default to a **read-only tool sandbox** (`Read,Grep,Glob`) across the
+  Claude/Gemini/Codex providers. AI-influenced content — diffs, org output, browser context —
+  cannot drive `Bash`/`Write`/`Edit`. This closes the prompt-injection surface for both the
+  streaming dashboard chat and the request/response CLI paths. Callers may pass an explicit
+  allowed-tools list to override.
+</Callout>

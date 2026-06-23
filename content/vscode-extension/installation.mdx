@@ -1,0 +1,68 @@
+---
+title: Installing the VS Code Extension
+description: Requirements and install methods for the SFDT VS Code extension — currently distributed as a VSIX or built from source.
+---
+
+import { Callout, Steps } from 'nextra/components'
+
+# Installing the VS Code Extension
+
+## Requirements
+
+| Requirement | Notes |
+| --- | --- |
+| **VS Code** | `^1.80.0` or later |
+| **`@sfdt/cli`** | Installed and on your `PATH` (or set [`sfdt.cliPath`](/vscode-extension/settings)). The extension shells out to it for everything. |
+| **An initialised workspace** | A Salesforce DX project where you've run `sfdt init`, so the CLI can write its `logs/` snapshots |
+| **A default org** *(optional)* | Set via the `SFDT: Set Default Org` command or [`sfdt.defaultOrg`](/vscode-extension/settings) |
+
+<Callout type="warning">
+  Install and configure the CLI first. Without `@sfdt/cli` on `PATH`, every command fails with a
+  "CLI not found" error. See [CLI → Installation](/cli/installation).
+</Callout>
+
+## Marketplace status
+
+The extension is currently **private / unpublished** — it is not yet on the VS Code Marketplace.
+Install it from a VSIX or from source.
+
+## From a VSIX
+
+<Steps>
+
+### Build the VSIX
+
+```bash
+git clone https://github.com/scoobydrew83/sfdt.git
+cd sfdt/vscode
+npm install
+npm run package      # runs the build, then `vsce package`
+```
+
+This produces a `.vsix` file in the `vscode/` directory.
+
+### Install it
+
+In VS Code, open the Command Palette → **Extensions: Install from VSIX…** → select the `.vsix`.
+Or from the terminal:
+
+```bash
+code --install-extension sfdt-vscode-0.1.0.vsix
+```
+
+</Steps>
+
+## From source (development)
+
+```bash
+cd sfdt/vscode
+npm install
+npm run watch        # esbuild in watch mode
+```
+
+Then press `F5` in VS Code to launch an Extension Development Host with the extension loaded.
+
+<Callout type="info">
+  The extension activates lazily — it has no eager activation events, so it loads on first use
+  (opening the SFDT sidebar or running a command).
+</Callout>

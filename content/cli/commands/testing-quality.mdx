@@ -1,0 +1,113 @@
+---
+title: Testing & Quality Commands
+description: test, quality, and changelog — run Apex tests, analyze code and test quality, and manage changelog files.
+---
+
+import { Callout } from 'nextra/components'
+
+# Testing & Quality
+
+---
+
+## `sfdt test`
+
+Runs Apex tests against the configured org using the enhanced test runner. If tests fail and AI
+is enabled, sfdt offers to analyze the failures. Results land in `logs/test-results/` and the
+dashboard.
+
+```bash
+sfdt test
+sfdt test --analyze
+sfdt test --legacy
+sfdt test --dry-run
+```
+
+| Option | Description |
+|---|---|
+| `--legacy` | Use the legacy test runner instead of the enhanced one |
+| `--analyze` | Run the test analyzer after tests complete, regardless of pass/fail |
+| `--dry-run` | Preview without running |
+
+**AI on failure:** when tests fail and AI is available, sfdt prompts to analyze the failures —
+it checks for missing test data, SOQL governor-limit violations, null-pointer exceptions, and
+assertion failures, then suggests specific fixes. Set `features.ai: false` to skip the prompt.
+
+---
+
+## `sfdt quality`
+
+Static code-quality analysis with optional AI fix plan. Can analyze code structure, test
+quality, or both.
+
+```bash
+sfdt quality                    # code analyzer only (default)
+sfdt quality --tests            # test analyzer only
+sfdt quality --all              # both analyzers
+sfdt quality --fix-plan         # analyzer + AI fix plan
+sfdt quality --generate-stubs   # generate @IsTest stubs for untested Apex
+sfdt quality --generate-stubs --dry-run  # preview stubs without writing files
+```
+
+| Option | Description |
+|---|---|
+| `--tests` | Run the test analyzer only |
+| `--all` | Run both the code and test analyzers |
+| `--fix-plan` | Send analysis output to AI for a prioritized, file-specific fix plan |
+| `--generate-stubs` | Generate `@IsTest` stub classes for Apex without a test class |
+| `--dry-run` | Preview `--generate-stubs` output without writing files |
+
+<Callout type="info">
+  The AI fix plan groups issues by severity (critical / high / medium / low) with file locations
+  and concrete suggestions, focused on Salesforce concerns: governor limits, CRUD/FLS, bulk-safe
+  patterns, and coverage gaps.
+</Callout>
+
+---
+
+## `sfdt changelog`
+
+Manages changelog files. Three subcommands. All accept `--package <name>` to scope to a package
+changelog (`changelogs/<name>.md`); without it, they operate on the global `CHANGELOG.md`.
+
+### `sfdt changelog generate`
+
+Uses AI to analyze recent git commits and generate `[Unreleased]` entries, categorized into
+Added / Changed / Fixed / Deprecated / Removed / Security.
+
+```bash
+sfdt changelog generate
+sfdt changelog generate --limit 30
+sfdt changelog generate --package marketing
+```
+
+| Option | Description |
+|---|---|
+| `--limit <n>` | Number of commits to analyze (default `20`) |
+| `--package <name>` | Scope to a package changelog |
+
+Requires `features.ai: true`.
+
+### `sfdt changelog release`
+
+Moves the `[Unreleased]` section to a new versioned section stamped with the current date. Edits
+in place; does not commit.
+
+```bash
+sfdt changelog release 1.5.0
+sfdt changelog release 1.5.0 --package marketing
+```
+
+| Argument / Option | Description |
+|---|---|
+| `<version>` | Semver version (`X.Y.Z`) |
+| `--package <name>` | Target a package changelog |
+
+### `sfdt changelog check`
+
+Validates that the changelog is in sync with git state — warns if you have uncommitted changes
+but an empty `[Unreleased]`. Exits `1` if the changelog needs updating, so it works as a CI gate.
+
+```bash
+sfdt changelog check
+sfdt changelog check --package marketing
+```

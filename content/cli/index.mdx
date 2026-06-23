@@ -1,0 +1,79 @@
+---
+title: SFDT CLI Overview
+description: Production-grade CLI for Salesforce DX deployment, testing, quality analysis, and release management — the engine behind the whole SFDT suite.
+---
+
+import { Cards, Callout } from 'nextra/components'
+
+# SFDT CLI
+
+`@sfdt/cli` is a production-grade command-line tool for Salesforce DX deployment, testing,
+quality analysis, and release management. It works with **any** Salesforce DX project — no
+project-specific values are hardcoded. Point it at a repo, run `sfdt init`, and go.
+
+The CLI is also the **engine** behind the rest of the suite: the Chrome extension and the VS
+Code extension both drive the CLI through a local bridge.
+
+<Callout type="info">
+  Current version: **v0.12.0**. The CLI is published on
+  [npm as `@sfdt/cli`](https://www.npmjs.com/package/@sfdt/cli).
+</Callout>
+
+## What it does
+
+- **Interactive deployment workflows** with preflight validation, tagging, and PR creation.
+- **Automated release manifest generation** from git diffs (`sfdt manifest`, `sfdt release`).
+- **Parallel Apex test execution** with configurable coverage enforcement.
+- **Code & test quality analysis** with optional AI-powered fix plans.
+- **Pre-release validation checklist** (`sfdt preflight`).
+- **Deployment rollback** with pre-rollback org state backup.
+- **Post-deploy smoke testing** (`sfdt smoke`).
+- **Org metadata drift detection** and **org-to-org comparison**.
+- **Multi-package project support** — scope manifests and deploys to individual
+  `packageDirectories`.
+- **AI features** — code review, error-log interpretation, PR descriptions, changelog and
+  release-note generation — that work with Claude, Gemini, or OpenAI and degrade gracefully
+  when AI is off.
+- **Local web dashboard** (`sfdt ui`) for test results, preflight, drift, and org comparison.
+- **Org health** — audit and monitoring checks, metadata backups, docs generation.
+- **Plugin architecture** — extend sfdt with `sfdt-plugin-*` npm packages or local scripts.
+- **MCP server** — drive sfdt as a tool from Claude Code, Cursor, or any MCP client.
+- **Slack notifications** for deployment events.
+
+## How it works
+
+sfdt is a Node.js CLI that wraps a set of shell scripts which drive the Salesforce CLI (`sf`).
+Configuration lives in a `.sfdt/` directory at your project root. Every command reads that
+configuration and exposes it to the shell scripts via `SFDT_*` environment variables. Because
+nothing is hardcoded, the same tool works across any Salesforce DX project.
+
+See [Architecture](/getting-started/architecture) for the full picture.
+
+## Repository layout
+
+`@sfdt/cli` is one of four workspaces in the `sfdt` monorepo:
+
+| Workspace | What it is | Status |
+|---|---|---|
+| **`@sfdt/cli`** (`/src`, `/bin`, `/scripts`) | The npm CLI documented here. | Published to npm |
+| **`@sfdt/extension`** (`/extension`) | Chrome extension for Flow Builder + Setup. Talks to the CLI via the local bridge. | Pre-Web-Store |
+| **`@sfdt/host`** (`/host`) | Native messaging host used as the extension's fallback transport when `sfdt ui` isn't running. | Bundled with CLI |
+| **`@sfdt/flow-core`** (`/packages/flow-core`) | Shared TypeScript library — Flow normalization, rules engine, scoring, and the versioned bridge contract. | Workspace-only |
+
+## Quick start
+
+```bash
+npm install -g @sfdt/cli
+cd your-salesforce-project
+sfdt init
+sfdt deploy
+```
+
+## Where to next
+
+<Cards>
+  <Cards.Card title="Installation" href="/cli/installation" arrow />
+  <Cards.Card title="Configuration" href="/cli/configuration" arrow />
+  <Cards.Card title="Command Reference" href="/cli/commands" arrow />
+  <Cards.Card title="Workflows" href="/cli/workflows" arrow />
+</Cards>

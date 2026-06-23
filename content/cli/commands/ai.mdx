@@ -1,0 +1,115 @@
+---
+title: AI & Intelligence Commands
+description: explain, review, pr-description, and ai prompt — AI-powered error analysis, code review, and content generation.
+---
+
+import { Callout } from 'nextra/components'
+
+# AI & Intelligence
+
+<Callout type="info">
+  These commands use the AI provider configured in `.sfdt/config.json`. See
+  [AI Providers](/cli/ai-providers) for setup. `sfdt explain` also runs an offline heuristic
+  scan, so it works even with AI disabled.
+</Callout>
+
+---
+
+## `sfdt explain`
+
+Analyzes a Salesforce deployment error log. Always runs a fast heuristic scan first
+(offline-capable), then optionally passes the log to AI for a deeper analysis.
+
+```bash
+sfdt explain                          # analyze the most recent log in logs/
+sfdt explain logs/deploy-2026-04.log  # analyze a specific file
+sfdt explain --from-stdin             # pipe a log from another command
+sf project deploy start ... 2>&1 | sfdt explain --from-stdin
+sfdt explain --latest                 # explicitly use the most recent log
+```
+
+| Option | Description |
+|---|---|
+| `[file]` | Path to a log file to analyze |
+| `--from-stdin` | Read log content from stdin (pipe-friendly) |
+| `--latest` | Explicitly use the most recently modified log |
+
+**Heuristic patterns (no AI required):** missing fields on objects, unknown Apex symbols,
+undefined types, coverage failures, insufficient access, duplicate values, inaccessible entities.
+
+**AI analysis (when enabled):** a structured report with Root Cause, Failing Components,
+Suggested Fixes (with file paths and commands), and References. Logs over 512 KB are truncated to
+the tail before being sent.
+
+---
+
+## `sfdt review`
+
+AI-powered code review of your current branch versus a base branch. Reports findings across five
+categories, each rated CRITICAL / HIGH / MEDIUM / LOW with a line reference.
+
+```bash
+sfdt review
+sfdt review --base develop
+sfdt review --base origin/main
+```
+
+| Option | Description |
+|---|---|
+| `--base <branch>` | Base branch to diff against (default `main`) |
+
+**What it checks:**
+
+- **Governor Limits & Performance** — SOQL/DML in loops, unbulkified ops, missing `LIMIT`.
+- **Security** — missing CRUD/FLS checks, SOQL injection, sensitive data in debug logs.
+- **Null Safety & Error Handling** — missing null checks, unhandled `@AuraEnabled` exceptions.
+- **Test Coverage** — changed Apex without test updates, missing assertions, no bulk tests.
+- **LWC Best Practices** — wire vs imperative misuse, missing cleanup in `disconnectedCallback`.
+
+Requires `features.ai: true`.
+
+---
+
+## `sfdt pr-description`
+
+Generates a GitHub PR description or Slack announcement from the changes between two refs. Reads
+the commit log and the metadata-component breakdown. Also callable as `sfdt pr-desc`.
+
+```bash
+sfdt pr-description                       # GitHub format, main...HEAD, to stdout
+sfdt pr-description --format slack         # Slack mrkdwn
+sfdt pr-description --format markdown      # plain markdown
+sfdt pr-description --base develop         # diff from develop
+sfdt pr-description --output pr-body.md    # write to a file
+sfdt pr-description --commit-limit 50      # include up to 50 commits
+```
+
+| Option | Description |
+|---|---|
+| `--base <ref>` | Base branch/ref (default `main`) |
+| `--head <ref>` | Head ref (default `HEAD`) |
+| `--format <fmt>` | `github`, `slack`, or `markdown` (default `github`) |
+| `--output <path>` | Write to a file instead of stdout |
+| `--commit-limit <n>` | Max commits in the AI context (default `30`) |
+
+Pipe straight into the GitHub CLI:
+
+```bash
+sfdt pr-description | gh pr create --title "feat: ..." --body-file /dev/stdin
+```
+
+Requires `features.ai: true`.
+
+---
+
+## `sfdt ai prompt`
+
+Run a prompt directly through the configured AI provider and print the result — useful for
+ad-hoc queries from scripts or the terminal.
+
+```bash
+sfdt ai prompt "Summarize the latest deployment log"
+sfdt ai prompt "What does FIELD_CUSTOM_VALIDATION_EXCEPTION mean in Salesforce?"
+```
+
+Requires `features.ai: true`.
