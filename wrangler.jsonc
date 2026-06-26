@@ -3,7 +3,7 @@
   // The site is a Next.js static export (output: 'export') written to ./out,
   // served as assets-only — there is no Worker script (no "main").
   // Deploy with `wrangler deploy` (the Cloudflare build runs `npx wrangler deploy`).
-  "name": "sfdt-docs",
+  "name": "sfdt-site",
   "compatibility_date": "2026-06-22",
   "assets": {
     "directory": "./out",
