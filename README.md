@@ -1,7 +1,15 @@
+<div align="center">
+
+<img src="./public/logo.png" alt="SFDT logo" width="88" height="88" />
+
 # sfdt-site
 
 The documentation & support site for the **SFDT** suite — the `@sfdt/cli` command-line tool,
 the SFDT Chrome extension, and the SFDT VS Code extension.
+
+🌐 **Live at [sfdt.dev](https://sfdt.dev/)**
+
+</div>
 
 Built with [Nextra 4](https://nextra.site) (Next.js App Router), statically exported, and
 deployed to **Cloudflare Pages**.

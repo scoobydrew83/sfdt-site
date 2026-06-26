@@ -1,8 +1,11 @@
 /* Site-specific tweaks layered on top of nextra-theme-docs. */
 
 :root {
-  --sfdt-blue: #1b96ff;
-  --sfdt-blue-dark: #0d9dda;
+  /* SFDT brand gradient — sampled from the Chrome extension logo (indigo → violet). */
+  --sfdt-blue: #6742e2;
+  --sfdt-blue-dark: #4349dd;
+  --sfdt-violet: #8b39ea;
+  --sfdt-gradient: linear-gradient(135deg, #4349dd 0%, #8b39ea 100%);
 }
 
 /* Product cards used on the landing and section index pages. */
@@ -30,7 +33,7 @@
 .sfdt-card:hover {
   border-color: var(--sfdt-blue);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(27, 150, 255, 0.12);
+  box-shadow: 0 6px 20px rgba(103, 66, 226, 0.18);
 }
 
 .sfdt-card h3 {
@@ -59,7 +62,7 @@
   letter-spacing: 0.02em;
   padding: 0.2rem 0.6rem;
   border-radius: 999px;
-  background: rgba(27, 150, 255, 0.12);
+  background: rgba(103, 66, 226, 0.12);
   color: var(--sfdt-blue);
   margin-bottom: 0.75rem;
 }

@@ -24,23 +24,14 @@ export const metadata = {
 
 const logo = (
   <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700 }}>
-    <span
+    <img
+      src="/logo.png"
+      alt=""
       aria-hidden
-      style={{
-        display: 'inline-flex',
-        width: 24,
-        height: 24,
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: 6,
-        background: 'linear-gradient(135deg, #0d9dda 0%, #1b96ff 100%)',
-        color: '#fff',
-        fontSize: 14,
-        fontWeight: 800
-      }}
-    >
-      ⚡
-    </span>
+      width={24}
+      height={24}
+      style={{ display: 'inline-block', borderRadius: 6 }}
+    />
     <span>
       SFDT
       <span style={{ opacity: 0.6, fontWeight: 500 }}> Docs</span>
@@ -75,10 +66,10 @@ export default async function RootLayout({ children }) {
   return (
     <html lang="en" dir="ltr" suppressHydrationWarning>
       <Head
-        color={{ hue: 200, saturation: 90 }}
+        color={{ hue: 254, saturation: 78 }}
         backgroundColor={{ dark: '#0b0f14', light: '#ffffff' }}
       >
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="icon" href="/favicon.png" type="image/png" />
       </Head>
       <body>
         <Layout
