@@ -8,6 +8,13 @@
   --sfdt-gradient: linear-gradient(135deg, #4349dd 0%, #8b39ea 100%);
 }
 
+/* On the dark theme, the brand purple at the default 55% lightness fails WCAG contrast
+   on the near-black background (~2.8:1). Lighten the primary in dark mode only so links and
+   active nav clear AA. Light mode keeps the deeper 55% (high contrast on white). */
+html.dark {
+  --nextra-primary-lightness: 70%;
+}
+
 /* Product cards used on the landing and section index pages. */
 .sfdt-card-grid {
   display: grid;
