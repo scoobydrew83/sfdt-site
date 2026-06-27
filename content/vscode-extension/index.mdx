@@ -1,18 +1,19 @@
 ---
 title: SFDT — Salesforce DevTools for VS Code
-description: A thin VS Code UI over the sfdt CLI — deploy, preflight, org audit & monitoring, docs, and the dashboard from the command palette and a dedicated Org Health sidebar.
+description: A full command center for the sfdt CLI in VS Code — a grouped Commands tree, a live Status panel, the Org Health view, an org picker, the embedded dashboard, and per-org window theming.
 ---
 
 import { Callout, Cards } from 'nextra/components'
 
 # SFDT — Salesforce DevTools for VS Code
 
-The **SFDT — Salesforce DevTools** extension (`@sfdt/vscode`) drives the
-[`@sfdt/cli`](/cli) from inside VS Code: deploy, preflight, org monitoring & audit, docs, and
-the sfdt dashboard — all from the command palette and a dedicated **Org Health** sidebar.
+The **SFDT — Salesforce DevTools** extension drives the [`@sfdt/cli`](/cli) from inside VS Code.
+As of **v0.2.0** it is a full **command center**: a grouped Commands tree for the entire CLI, a
+live Status panel, the Org Health view, an org picker, the embedded dashboard, and per-org window
+theming.
 
 - **Marketplace:** [`sfdt.sfdt-devtools`](https://marketplace.visualstudio.com/items?itemName=sfdt.sfdt-devtools)
-- **Version:** `0.1.0`
+- **Version:** `0.2.0`
 - **Publisher:** `sfdt`
 - **VS Code engine:** `^1.80.0`
 - **License:** MIT
@@ -25,13 +26,15 @@ the sfdt dashboard — all from the command palette and a dedicated **Org Health
 
 ## What it surfaces
 
+The SFDT activity-bar container holds three views plus a status bar:
+
 | Surface | What you get |
 | --- | --- |
-| **Command palette** | Run `deploy`, `preflight`, `audit`, `monitor`, `backup`, `docs`, and more — with a modal confirmation before anything destructive |
-| **Org Health sidebar** | A tree of the latest audit and monitor checks, each with a status icon and findings; click a check to re-run just that check |
-| **Status bar** | The active org plus a roll-up health icon; click to open the dashboard |
-| **Embedded dashboard** | The full `sfdt ui` web dashboard inside an editor tab |
-| **Output channel** | Live stdout/stderr from every CLI command |
+| **Commands** view | A grouped tree of the *entire* CLI surface (30+ commands / 50+ subcommands) across six categories. Click to run in a dedicated **SFDT** integrated terminal (live output, interactive prompts); destructive commands confirm first. Right-click to Run, Copy, or Open docs. |
+| **Status** view | The active org (alias, instance URL, connection), git branch, an Org Health rollup, and `sfdt`/`sf` versions with an "update available" hint. An **org picker** switches the target org from `sf org list`. |
+| **Org Health** view | A tree of the latest `audit`, `monitor`, `scan`, and `drift` results; click a check to re-run it. Auto-refreshes when a `logs/*-latest.json` snapshot changes. |
+| **Embedded dashboard** | The full `sfdt ui` web dashboard inside an editor tab (authenticated via the CLI launch token). |
+| **Onboarding & theming** | A welcome flow when the CLI is missing or the project isn't initialized, plus per-org window tinting (prod = red, sandbox = orange, scratch = green). |
 
 ## Next steps
 

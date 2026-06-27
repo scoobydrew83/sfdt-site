@@ -1,11 +1,11 @@
 ---
 title: Settings
-description: The three workspace-scoped settings for the SFDT VS Code extension — CLI path, default org, and dashboard port.
+description: The workspace-scoped settings for the SFDT VS Code extension — CLI path, default org, dashboard port, and per-org window theming.
 ---
 
 # Settings
 
-The extension contributes three settings under the `sfdt.*` namespace. All are
+The extension contributes four settings under the `sfdt.*` namespace. All are
 workspace-scoped, so different projects can target different orgs and CLI binaries.
 
 | Setting | Type | Default | Description |
@@ -13,6 +13,7 @@ workspace-scoped, so different projects can target different orgs and CLI binari
 | `sfdt.cliPath` | string | `"sfdt"` | Path to the sfdt CLI binary. Defaults to `sfdt` on your `PATH`; set an absolute path if the CLI isn't found. |
 | `sfdt.defaultOrg` | string | `""` | Org alias passed to commands via `--org`. Empty uses the project's configured `defaultOrg`. |
 | `sfdt.dashboardPort` | number | `7654` | Port the `sfdt ui` dashboard server listens on. |
+| `sfdt.orgColor` | boolean | `true` | Tint the VS Code window by org type (production = red, sandbox = orange, scratch/developer = green) to prevent wrong-org mistakes. |
 
 ## Example `settings.json`
 
@@ -20,7 +21,8 @@ workspace-scoped, so different projects can target different orgs and CLI binari
 {
   "sfdt.cliPath": "sfdt",
   "sfdt.defaultOrg": "dev-sandbox",
-  "sfdt.dashboardPort": 7654
+  "sfdt.dashboardPort": 7654,
+  "sfdt.orgColor": true
 }
 ```
 
@@ -35,6 +37,7 @@ If `sfdt` isn't on your `PATH` (for example when using a Node version manager), 
 
 ## Setting the org interactively
 
-You can set `sfdt.defaultOrg` without editing JSON: run **SFDT: Set Default Org**
-(`sfdt.setOrg`) and enter an alias. Clear it (set it back to empty) to fall back to the project's
-configured default org.
+You can set `sfdt.defaultOrg` without editing JSON: click **Select Org** in the **Status** view
+title bar (or run **SFDT: Select Org**, `sfdt.pickOrg`). It lists your authenticated orgs from
+`sf org list`; pick one and it's saved to `sfdt.defaultOrg` (workspace). Clear it (set it back to
+empty) to fall back to the project's configured default org.

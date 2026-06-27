@@ -5,24 +5,30 @@ description: A dedicated activity-bar view that renders the latest sfdt audit an
 
 import { Callout } from 'nextra/components'
 
-# The Org Health Sidebar
+# The Sidebar Views
 
-The extension contributes an **SFDT** container to the activity bar, holding the **Org Health**
-tree view (`sfdtOrgHealth`). It visualises the latest results from `sfdt audit` and
-`sfdt monitor` without you having to read raw JSON.
+The extension contributes an **SFDT** container to the activity bar holding three views —
+**Commands**, **Status**, and **Org Health** — plus a status-bar item. This page covers the
+**Org Health** view (`sfdtOrgHealth`); see [Commands](/vscode-extension/commands) for the command
+tree and the Status view (org, branch, versions, org picker).
+
+The **Org Health** view visualises the latest results from `sfdt audit`, `sfdt monitor`,
+`sfdt scan`, and `sfdt drift` without you having to read raw JSON.
 
 ## What the tree shows
 
-The view has two top-level sections, each built from a CLI snapshot:
+The view has up to four top-level sections, each built from a CLI snapshot:
 
 | Section | Source snapshot |
 | --- | --- |
 | **Diagnostics & Audit** | `logs/audit-latest.json` |
 | **Monitoring** | `logs/monitor-latest.json` |
+| **Metadata Inventory** | `logs/scan-latest.json` |
+| **Drift** | `logs/drift-latest.json` |
 
-Under each section, every check shows a status icon, a title, and a one-line summary. Expand a
-check to see its findings (up to 25 per check, then truncated). The status icons map to the
-CLI's check statuses:
+Under the audit and monitor sections, every check shows a status icon, a title, and a one-line
+summary. Expand a check to see its findings (up to 25 per check, then truncated). The status icons
+map to the CLI's check statuses:
 
 | Icon | Meaning |
 | --- | --- |
@@ -32,8 +38,9 @@ CLI's check statuses:
 
 ## Re-running a single check
 
-Click any check or finding to **re-run just that check** — for example clicking the MFA row runs
-`sfdt audit mfa` rather than the whole audit. The tree and status bar refresh when it completes.
+Click any check to **re-run just that check** — for example clicking the MFA row runs
+`sfdt audit mfa` rather than the whole audit, in the **SFDT** integrated terminal. The views
+auto-refresh when the snapshot file updates.
 
 ## The status bar
 

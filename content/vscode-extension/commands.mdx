@@ -1,47 +1,49 @@
 ---
 title: Commands
-description: The full SFDT command palette for VS Code — command ids, titles, and which ones require confirmation.
+description: The SFDT Commands tree for VS Code — the entire sfdt CLI grouped into categories, run in an integrated terminal.
 ---
 
 import { Callout } from 'nextra/components'
 
 # Commands
 
-Every command is available from the Command Palette (`Cmd`/`Ctrl`+`Shift`+`P`). Each one spawns
-the [`sfdt` CLI](/cli) with `SFDT_NON_INTERACTIVE=true`, streams output to the **SFDT** output
-channel, and refreshes the [Org Health sidebar](/vscode-extension/org-health-sidebar) when it
-finishes.
+The **Commands** view is a grouped tree of the *entire* sfdt CLI surface — 30+ commands and 50+
+subcommands. Click a command to run it in a dedicated **SFDT** integrated terminal: live, colored,
+streaming output with support for interactive prompts (org selection, confirmations). Subcommands
+nest under their parent.
 
-## Command reference
+## Categories
 
-| Command id | Palette title | Notes |
-| --- | --- | --- |
-| `sfdt.refresh` | SFDT: Refresh Org Health | Re-reads the audit/monitor snapshots and updates the tree + status bar |
-| `sfdt.setOrg` | SFDT: Set Default Org | Prompts for an org alias and saves it to `sfdt.defaultOrg` (workspace) |
-| `sfdt.openDashboard` | SFDT: Open Dashboard | Spawns `sfdt ui` and embeds it in an editor tab |
-| `sfdt.audit` | SFDT: Run Org Audit | Runs `sfdt audit all` (read-only) |
-| `sfdt.monitor` | SFDT: Run Org Monitor | Runs `sfdt monitor all` (read-only) |
-| `sfdt.backup` | SFDT: Backup Org Metadata | Runs `sfdt monitor backup` |
-| `sfdt.preflight` | SFDT: Run Preflight Checks | Runs `sfdt preflight` |
-| `sfdt.deploy` | SFDT: Deploy | **Destructive** — requires a modal confirmation before running |
-| `sfdt.docs` | SFDT: Generate Documentation | Runs `sfdt docs generate` |
-| `sfdt.runCommand` | SFDT: Run Command… | Quick-pick of the full command catalog, including `drift`, `scan`, and `quality` |
+| Group | Commands |
+| --- | --- |
+| **Deploy & Release** | deploy, preflight, rollback, release, manifest, pr-description, changelog (generate / release / check), smoke |
+| **Org Health** | audit (all + audittrail / licenses / mfa / unused-apex / inactive-users / api-versions), monitor (all + limits / errors / health), backup, scan, drift, doctor |
+| **Quality & Analysis** | quality, test, review, flow (scan / conflicts) |
+| **Documentation** | docs (generate / diagram), explain, compare |
+| **Data & Scratch Orgs** | data (list / export / import / delete), scratch (create / list / delete / pool status / pool fill) |
+| **Project & Tools** | init, config, pull, Open Dashboard, mcp start, extension (status / stats), update |
+
+## Running, copying, and docs
+
+- **Click** a command to run it in the SFDT terminal.
+- **Right-click** any command for **Run**, **Copy command** (the exact `sfdt …` invocation), or
+  **Open docs** (the matching page on this site).
+- **Search** the whole catalog with **SFDT: Run Command…** (`sfdt.searchCommands`) — it matches on
+  label, description, and argv.
 
 <Callout type="warning">
-  `SFDT: Deploy` can modify your org, so it always prompts with a modal confirmation first.
-  Read-only commands (audit, monitor, preflight, drift, scan, quality) run without confirmation.
+  Destructive commands — **deploy**, **rollback**, **backup**, **data delete**, and **scratch
+  delete** — prompt with a modal confirmation before running. Read-only commands run immediately.
 </Callout>
 
 ## Org targeting
 
-When [`sfdt.defaultOrg`](/vscode-extension/settings) is set, the extension appends
-`--org <alias>` to each command. When it's empty, the CLI falls back to the project's configured
-default org (from `.sfdt/config.json` or `sfdx-project.json`).
+When [`sfdt.defaultOrg`](/vscode-extension/settings) is set (use the Status view's **Select Org**
+button), the extension appends `--org <alias>` to each command. When it's empty, the CLI falls
+back to the project's configured default org (from `.sfdt/config.json` or `sfdx-project.json`).
 
-## How output is rendered
+## How views refresh
 
-The extension does not parse command stdout to build the sidebar. Instead, after any command
-completes, it re-reads the JSON snapshots the CLI writes —
-`logs/audit-latest.json` and `logs/monitor-latest.json` — and rebuilds the tree from those.
-Progress is shown as a VS Code notification, and full output streams to the **SFDT** output
-channel.
+The extension watches `logs/*-latest.json` and rebuilds the **Org Health** and **Status** views
+whenever a snapshot changes — so running `audit`, `monitor`, `scan`, or `drift` (from the terminal
+or anywhere else) updates the trees automatically.
