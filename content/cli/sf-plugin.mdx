@@ -1,0 +1,96 @@
+---
+title: Salesforce CLI Plugin
+description: Run every sfdt command as `sf sfdt <command>` by installing the @sfdt/plugin Salesforce CLI plugin.
+---
+
+import { Callout, Tabs } from 'nextra/components'
+
+# Salesforce CLI Plugin
+
+`@sfdt/plugin` is a [Salesforce CLI (`sf`)](https://developer.salesforce.com/docs/platform/salesforce-cli-plugin/guide/conceptual-overview.html)
+plugin that exposes the entire `sfdt` command set as **`sf sfdt <command>`**. If your team
+standardizes on `sf plugins install` for tooling, this is the install path for you.
+
+<Callout type="info">
+  This is a **thin wrapper**, not a reimplementation. Each `sf sfdt` command forwards to the
+  bundled `@sfdt/cli` binary and streams its output verbatim, so every command, flag, exit code,
+  and `--json` envelope is **identical** to running `sfdt` directly. The plugin pulls in `@sfdt/cli`
+  as a dependency, so it's self-contained and tracks the matching CLI release.
+</Callout>
+
+## Install
+
+```bash
+sf plugins install @sfdt/plugin
+```
+
+<Callout type="warning">
+  As an unsigned third-party plugin, `sf` shows a one-time security prompt on install. Confirm to
+  proceed. (Salesforce only suppresses this for allowlisted plugins.)
+</Callout>
+
+Verify it's loaded:
+
+```bash
+sf plugins        # lists @sfdt/plugin
+sf sfdt --help    # lists every sfdt command as an sf topic
+```
+
+## Usage
+
+Anything you'd run as `sfdt <command>` becomes `sf sfdt <command>`:
+
+```bash
+sf sfdt init
+sf sfdt deploy --dry-run --org myorg
+sf sfdt preflight --strict
+sf sfdt audit --json | jq '.result.summary'
+sf sfdt scratch create --alias dev --days 7
+sf sfdt drift --org production --json
+```
+
+Nested subcommands and flags work exactly as in the standalone CLI:
+
+```bash
+sf sfdt scratch pool fill --size 5
+sf sfdt data export my-set --org dev
+sf sfdt feature-flags disable canvas-search
+```
+
+See the [Command Reference](/cli/commands) for the full list — every command there is available
+under `sf sfdt`.
+
+## JSON output
+
+`--json` emits the same Salesforce-native `{ status, result, warnings }` envelope as the standalone
+CLI (`status` is the numeric exit code), so `sf sfdt` output composes natively in `sf`-based
+pipelines. See [CI/CD → JSON output](/cli/ci-cd#json-output) for the full shape.
+
+```bash
+sf sfdt drift --json | jq '.result.driftStatus'
+```
+
+## How it works
+
+- Command files are **code-generated** from the CLI's command tree, so the plugin always mirrors
+  the current `sfdt` commands — there is no separately maintained command list to drift out of date.
+- Each command forwards its arguments to the bundled `sfdt` binary and propagates the exit code, so
+  scripting and CI gating behave identically.
+- The plugin and `@sfdt/cli` are released together, so an install resolves to a matching CLI version.
+
+## Requirements
+
+The wrapped commands need the same runtime prerequisites as the standalone CLI — `sf`, `git`, and
+`bash` on your `PATH`. See [Requirements](/cli/installation#requirements).
+
+## Updating & removing
+
+```bash
+sf plugins update              # updates installed plugins, including @sfdt/plugin
+sf plugins uninstall @sfdt/plugin
+```
+
+<Callout type="info">
+  Prefer a standalone binary, Homebrew, or Docker instead? See the other
+  [installation methods](/cli/installation).
+</Callout>

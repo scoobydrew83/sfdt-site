@@ -27,7 +27,41 @@ as a pre-merge gate.
 ## JSON output
 
 Most operational commands accept `--json` for machine-readable output — `audit`, `monitor`,
-`drift`, `rollback`, `doctor`, `extension status`, and others. Pipe it into `jq` for assertions.
+`drift`, `rollback`, `doctor`, `scan`, `data`, `docs`, `flow`, `scratch`, `feature-flags`,
+`extension status`, and others.
+
+`--json` emits a **Salesforce-native envelope** on stdout, matching the shape `sf` itself uses so
+sfdt composes in the same pipelines:
+
+```jsonc
+// success
+{
+  "status": 0,            // numeric exit code (0 = success)
+  "result": { /* … */ },  // the command payload
+  "warnings": []
+}
+// failure
+{
+  "status": 1,            // exit code: 1 general, 2 config, 3 connectivity
+  "name": "Error",
+  "message": "…",
+  "exitCode": 1,
+  "warnings": []
+}
+```
+
+Pipe it into `jq` and read the payload from `.result`:
+
+```bash
+sfdt drift --json | jq '.result.driftStatus'
+sfdt audit --json | jq '.status'          # 0 when healthy
+```
+
+<Callout type="info">
+  The envelope is a **stdout** contract. The on-disk snapshot files some commands also write
+  (`logs/audit-latest.json`, `logs/monitor-latest.json`, …) keep their raw payload shape — they are
+  the `result` payload without the envelope wrapper.
+</Callout>
 
 ## GitHub Actions
 

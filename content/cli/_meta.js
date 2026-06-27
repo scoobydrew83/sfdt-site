@@ -7,6 +7,7 @@ export default {
   dashboard: 'Web Dashboard',
   'ai-providers': 'AI Providers',
   plugins: 'Plugins',
+  'sf-plugin': 'Salesforce CLI Plugin',
   mcp: 'MCP Server',
   docker: 'Docker',
   'ci-cd': 'CI/CD'
