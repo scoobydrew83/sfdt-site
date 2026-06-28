@@ -37,7 +37,9 @@ directly in a browser is unaffected: it uses its own theme toggle and remembers 
 </Callout>
 
 <Callout type="warning">
-  Because the dashboard runs a local server, the embedded webview is bound to `127.0.0.1`. If the
-  panel never reveals, the server probably failed to start — check the **SFDT** output channel
-  and confirm the port is free.
+  The dashboard runs a local server bound to `127.0.0.1`. If its port is already taken, the
+  extension recovers automatically when the occupant is a leftover sfdt dashboard from a previous
+  session — it stops that stale server and retries. If the port is held by an **unrelated**
+  process, the extension never kills it; instead it shows an error with an **Open Settings**
+  action so you can point [`sfdt.dashboardPort`](/vscode-extension/settings) at a free port.
 </Callout>
