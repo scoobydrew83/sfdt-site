@@ -10,7 +10,20 @@ import { Callout } from 'nextra/components'
 Click the ⚡ side button on any Salesforce page and choose **Open Workspace ↗** to launch a
 standalone full-page tab at `chrome-extension://<id>/app.html`. The Workspace hosts the heavier
 tools in their own browser tab, so opening a query runner or executing Apex never disturbs the
-Salesforce page you were on — and closing a tool's modal no longer loses your place.
+Salesforce page you were on.
+
+## Tools open as tabs
+
+Inside the Workspace, each tool opens as a **tab in the main area** — not a pop-up modal. Open
+several at once (SOQL, Apex, REST…), switch between them freely from the tab bar, and **every
+tab keeps its state**: a half-written query, a loaded form, or streaming results are all still
+there when you switch back. Only a tab's **×** closes it, so a stray click can never discard your
+work. Closing a tab also cleanly stops any live work it owned (e.g. an event-monitor stream).
+
+<Callout type="info">
+  On a Salesforce page (outside the Workspace), the same tools still open as a centered overlay —
+  there, clicking the backdrop dismisses it, returning you to the page you were on.
+</Callout>
 
 ## Org targeting
 
