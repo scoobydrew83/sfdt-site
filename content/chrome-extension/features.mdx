@@ -84,9 +84,9 @@ These run inside the standalone [Workspace tab](/chrome-extension/workspace):
 | `dependency-explorer` | "What references this / what does this reference" for Apex, Flows, fields, pages, and LWC via `MetadataComponentDependency` |
 | `org-switcher` | Switch the Workspace between logged-in orgs (discovered from session cookies) |
 | `flow-quality` 🔌 | Scores a Flow's quality via the bridge — fully wired, renders a score card |
-| `drift-check` 🔌 | Metadata drift check via the bridge (currently a server-side stub — surfaces the bridge response + hint) |
-| `metadata-scan` 🔌 | Metadata inventory scan via the bridge (currently a server-side stub — surfaces the bridge response + hint) |
-| `org-compare` 🔌 | Org-vs-org comparison via the bridge (currently a server-side stub — surfaces the bridge response + hint) |
+| `drift-check` 🔌 | Metadata drift via the bridge — returns the latest `sfdt drift` snapshot, filtered by component |
+| `metadata-scan` 🔌 | Live metadata inventory via the bridge (same logic as `sfdt scan`) |
+| `org-compare` 🔌 | Live org-vs-org / org-vs-local comparison via the bridge (same logic as `sfdt compare`) |
 | `org-health` 🔌 | Reads the latest audit/monitor **snapshots** from the CLI (bridge); see `org-health-live` for the live, no-bridge version |
 
 <Callout type="info">

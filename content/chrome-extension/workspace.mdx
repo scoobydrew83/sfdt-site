@@ -68,9 +68,9 @@ rebuilding every tool's session. This is the `org-switcher` feature.
 | `org-health-live` | Runs health checks **live** against the org (coverage, inactive users, license use, API-version spread, limits near cap) — no bridge needed |
 | `dependency-explorer` | "What references this / what does this reference" via `MetadataComponentDependency`, for Apex, Flows, fields, pages, and LWC |
 | `flow-quality` 🔌 | Scores a Flow's quality via the [bridge](/chrome-extension/bridge) — fully wired, renders a score card |
-| `drift-check` 🔌 | Metadata drift check via the bridge — see note below |
-| `metadata-scan` 🔌 | Metadata inventory scan via the bridge — see note below |
-| `org-compare` 🔌 | Org-vs-org comparison via the bridge — see note below |
+| `drift-check` 🔌 | Metadata drift via the bridge — returns the latest `sfdt drift` snapshot, filtered by component |
+| `metadata-scan` 🔌 | Live metadata inventory via the bridge (same as `sfdt scan`) |
+| `org-compare` 🔌 | Live org-vs-org / org-vs-local metadata comparison via the bridge (same as `sfdt compare`) |
 | `org-limits` | Live governor-limit usage |
 | `org-switcher` | Switch between logged-in orgs |
 | `org-health` 🔌 | Latest audit/monitor **snapshots** from the CLI (requires the [bridge](/chrome-extension/bridge)) — see `org-health-live` above for the no-bridge version |
@@ -78,9 +78,9 @@ rebuilding every tool's session. This is the `org-switcher` feature.
 <Callout type="info">
   **Bridge-backed tools** (`flow-quality`, `drift-check`, `metadata-scan`, `org-compare`) need a
   running [sfdt CLI bridge](/chrome-extension/bridge) — start it with `sfdt ui` in your Salesforce
-  project. `flow-quality` is fully working today. `drift-check`, `metadata-scan`, and `org-compare`
-  surface the bridge response plus a hint: the CLI currently answers these `NOT_IMPLEMENTED`
-  server-side (stubs), and the extension UI is ready for when the server wires them up.
+  project. All four are wired end-to-end: `metadata-scan` and `org-compare` run live
+  (`fetchInventory` / `diffInventories`, the same logic as `sfdt scan` / `sfdt compare`),
+  `drift-check` returns the latest `sfdt drift` snapshot, and `flow-quality` scores the Flow.
 </Callout>
 
 <Callout type="info">
