@@ -1,6 +1,6 @@
 ---
 title: Testing & Quality Commands
-description: test, quality, and changelog — run Apex tests, analyze code and test quality, and manage changelog files.
+description: test, quality, coverage, and changelog — run Apex tests, analyze code and test quality, gate on coverage, and manage changelog files.
 ---
 
 import { Callout } from 'nextra/components'
@@ -60,6 +60,31 @@ sfdt quality --generate-stubs --dry-run  # preview stubs without writing files
   The AI fix plan groups issues by severity (critical / high / medium / low) with file locations
   and concrete suggestions, focused on Salesforce concerns: governor limits, CRUD/FLS, bulk-safe
   patterns, and coverage gaps.
+</Callout>
+
+---
+
+## `sfdt coverage`
+
+Reports Apex code coverage from the Tooling API — an **org-wide** percentage plus a **per-class**
+breakdown. Exits non-zero when org-wide coverage falls below `--threshold`, so it works as a CI
+gate. Coverage bands are shared with the Chrome extension and dashboard via `@sfdt/flow-core`.
+
+```bash
+sfdt coverage                              # org-wide + per-class, default 75% gate
+sfdt coverage --threshold 85               # fail under 85%
+sfdt coverage --org production --json
+```
+
+| Option | Description |
+|---|---|
+| `--threshold <pct>` | Fail (exit `1`) if org-wide coverage is below this percent (default `75`) |
+| `--org <alias>` | Target org (defaults to `config.defaultOrg`) |
+| `--json` | Structured output |
+
+<Callout type="info">
+  Coverage reflects the **last test run** in the org — run `sfdt test` first if the org-wide
+  figure shows as unknown. The text output lists the worst-covered classes below threshold first.
 </Callout>
 
 ---

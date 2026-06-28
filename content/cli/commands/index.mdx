@@ -7,7 +7,7 @@ import { Cards } from 'nextra/components'
 
 # Command Reference
 
-sfdt ships **35 commands**. They are grouped here by area. Every command accepts `--help`, and
+sfdt ships **37 commands**. They are grouped here by area. Every command accepts `--help`, and
 most operational commands accept `--json` for scripting and `--dry-run` to preview.
 
 <Cards>
@@ -41,6 +41,7 @@ most operational commands accept `--json` for scripting and `--dry-run` to previ
 | [`sfdt drift`](/cli/commands/metadata#sfdt-drift) | Detect metadata drift between local source and an org |
 | [`sfdt compare`](/cli/commands/metadata#sfdt-compare) | Compare metadata between two orgs or local vs org |
 | [`sfdt scan`](/cli/commands/metadata#sfdt-scan) | Fetch a full metadata inventory from an org |
+| [`sfdt dependencies`](/cli/commands/metadata#sfdt-dependencies) | Trace what a component references and what references it |
 
 ## Testing & Quality
 
@@ -48,6 +49,7 @@ most operational commands accept `--json` for scripting and `--dry-run` to previ
 |---|---|
 | [`sfdt test`](/cli/commands/testing-quality#sfdt-test) | Run Apex tests; optional AI failure analysis |
 | [`sfdt quality`](/cli/commands/testing-quality#sfdt-quality) | Code & test quality analysis; optional stubs / fix plan |
+| [`sfdt coverage`](/cli/commands/testing-quality#sfdt-coverage) | Report Apex coverage (org-wide + per-class); CI gate |
 | [`sfdt changelog`](/cli/commands/testing-quality#sfdt-changelog) | Manage changelog files (`generate`, `release`, `check`) |
 
 ## AI & Intelligence

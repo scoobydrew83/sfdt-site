@@ -63,12 +63,25 @@ rebuilding every tool's session. This is the `org-switcher` feature.
 | `metadata-retrieve` | Retrieve and deploy metadata |
 | `field-creator` | Bulk-create custom fields |
 | `data-import` | CSV data import wizard |
+| `apex-test-runner` | Run Apex tests (`runTestsAsynchronous`) and view pass/fail results inline — no bridge needed |
 | `apex-coverage` | Org-wide and per-class Apex code coverage, with deploy-threshold bands |
 | `org-health-live` | Runs health checks **live** against the org (coverage, inactive users, license use, API-version spread, limits near cap) — no bridge needed |
 | `dependency-explorer` | "What references this / what does this reference" via `MetadataComponentDependency`, for Apex, Flows, fields, pages, and LWC |
+| `flow-quality` 🔌 | Scores a Flow's quality via the [bridge](/chrome-extension/bridge) — fully wired, renders a score card |
+| `drift-check` 🔌 | Metadata drift check via the bridge — see note below |
+| `metadata-scan` 🔌 | Metadata inventory scan via the bridge — see note below |
+| `org-compare` 🔌 | Org-vs-org comparison via the bridge — see note below |
 | `org-limits` | Live governor-limit usage |
 | `org-switcher` | Switch between logged-in orgs |
-| `org-health` | Latest audit/monitor **snapshots** from the CLI (requires the [bridge](/chrome-extension/bridge)) — see `org-health-live` above for the no-bridge version |
+| `org-health` 🔌 | Latest audit/monitor **snapshots** from the CLI (requires the [bridge](/chrome-extension/bridge)) — see `org-health-live` above for the no-bridge version |
+
+<Callout type="info">
+  **Bridge-backed tools** (`flow-quality`, `drift-check`, `metadata-scan`, `org-compare`) need a
+  running [sfdt CLI bridge](/chrome-extension/bridge) — start it with `sfdt ui` in your Salesforce
+  project. `flow-quality` is fully working today. `drift-check`, `metadata-scan`, and `org-compare`
+  surface the bridge response plus a hint: the CLI currently answers these `NOT_IMPLEMENTED`
+  server-side (stubs), and the extension UI is ready for when the server wires them up.
+</Callout>
 
 <Callout type="info">
   The Workspace is also where you reach the ⚙ **Settings** (options) page. See

@@ -1,13 +1,13 @@
 ---
 title: Features
-description: All 29 opt-in features of the SFDT SF Helper Chrome extension, grouped by the Salesforce context where they run.
+description: All 37 opt-in features of the SFDT SF Helper Chrome extension, grouped by the Salesforce context where they run.
 ---
 
 import { Callout } from 'nextra/components'
 
 # Features
 
-The extension ships **29 features**. Every feature is **opt-in** — toggle it on or off in the
+The extension ships **37 features**. Every feature is **opt-in** — toggle it on or off in the
 [options page](/chrome-extension/settings) — and any feature can be
 [remotely disabled](/chrome-extension/kill-switch) without a Web Store re-review.
 
@@ -78,10 +78,15 @@ These run inside the standalone [Workspace tab](/chrome-extension/workspace):
 | `apex-anonymous` | Execute anonymous Apex with compile/runtime results and saved snippets |
 | `debug-log-viewer` | List recent `ApexLog` records and view full log bodies |
 | `saved-soql` | Browse bookmarked and recent SOQL and load any query straight into the runner |
+| `apex-test-runner` | Run Apex tests (`runTestsAsynchronous`) and view pass/fail results inline (Tooling API) |
 | `apex-coverage` | Org-wide and per-class Apex code coverage with deploy-threshold colour bands (Tooling API) |
 | `org-health-live` | Runs org-health checks **live** against the org — coverage, inactive users, license use, API-version spread, limits near cap (no bridge needed) |
 | `dependency-explorer` | "What references this / what does this reference" for Apex, Flows, fields, pages, and LWC via `MetadataComponentDependency` |
 | `org-switcher` | Switch the Workspace between logged-in orgs (discovered from session cookies) |
+| `flow-quality` 🔌 | Scores a Flow's quality via the bridge — fully wired, renders a score card |
+| `drift-check` 🔌 | Metadata drift check via the bridge (currently a server-side stub — surfaces the bridge response + hint) |
+| `metadata-scan` 🔌 | Metadata inventory scan via the bridge (currently a server-side stub — surfaces the bridge response + hint) |
+| `org-compare` 🔌 | Org-vs-org comparison via the bridge (currently a server-side stub — surfaces the bridge response + hint) |
 | `org-health` 🔌 | Reads the latest audit/monitor **snapshots** from the CLI (bridge); see `org-health-live` for the live, no-bridge version |
 
 <Callout type="info">

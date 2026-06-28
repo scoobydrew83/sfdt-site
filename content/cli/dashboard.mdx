@@ -40,12 +40,15 @@ sfdt ui --no-open         # start without opening the browser
 | **Scan** | Full metadata inventory with search & filter | `/api/scan` |
 | **Audit** | Org health: audit trail, licenses, MFA, unused Apex, API versions | `audit-latest.json` |
 | **Monitor** | Limits, errors, health score, backup history | `monitor-latest.json` |
+| **Scratch** | Scratch-org pool fill and active scratch orgs | `/api/scratch` |
+| **Data** | Defined `sf data tree` data sets | `/api/data` |
+| **Docs** | Docs config: output dir, diagrams, AI authoring | `/api/docs` |
 | **Flows** | Flow health scores, trigger conflicts, subflow graph | `/api/flow/quality` |
 | **Manifests** | Generated `package.xml` artifacts — preview & download | `manifest/release/*.xml` |
 | **Logs** | Searchable log viewer with pagination and raw output | `logs/*` |
 | **Dependencies** | D3 force-directed component dependency graph | `/api/dependencies` |
 | **Settings** | View/edit config; initialize a project from the GUI | `.sfdt/config.json` |
-| **Coverage** | Apex coverage trend across runs | `test-results/` |
+| **Coverage** | Live org-wide Apex coverage (with threshold band) plus the per-run coverage trend | `/api/coverage`, `test-results/` |
 | **Dependency Check** | Preflight dependency validation (missing/broken refs) | `/api/dependencies/preflight` |
 
 Data appears automatically after running the corresponding CLI commands (`sfdt test`,

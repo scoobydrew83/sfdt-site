@@ -149,11 +149,11 @@ See the [MCP Server](/cli/mcp) page for details.
 | Key | Default | Description |
 |---|---|---|
 | `audit.auditTrailLookbackDays` | `30` | Setup-audit-trail lookback window |
-| `audit.licenseWarnThreshold` | `0.9` | License-usage warn threshold (0–1) |
+| `audit.licenseWarnThreshold` | `0.75` | License-usage warn threshold (0–1) |
 | `audit.inactiveUserDays` | `90` | Days before a user is "inactive" |
 | `audit.minApiVersion` | `45` | Minimum acceptable API version |
 | `monitoring.backupDir` | `monitoring-backup` | Metadata-backup output directory |
-| `monitoring.limitWarnThreshold` | `0.8` | Governor-limit warn threshold (0–1) |
+| `monitoring.limitWarnThreshold` | `0.75` | Governor-limit warn threshold (0–1) |
 | `monitoring.errorLookbackDays` | `7` | Apex-error lookback window |
 | `monitoring.healthMinScore` | `80` | Minimum acceptable Security Health Check score |
 | `docs.outputDir` | `docs` | Generated-docs output directory |
@@ -163,6 +163,12 @@ See the [MCP Server](/cli/mcp) page for details.
 | `scratch.definitionFile` | `config/project-scratch-def.json` | Scratch-org definition |
 | `scratch.durationDays` | `7` | Scratch-org lifetime |
 | `scratch.poolSize` | `0` | Pre-created scratch-org pool size |
+
+<Callout type="info">
+  `audit.licenseWarnThreshold` and `monitoring.limitWarnThreshold` both default to `0.75` so the
+  CLI and the Chrome extension's live [`org-health-live`](/chrome-extension/workspace) tool band
+  org-health usage identically (shared via `@sfdt/flow-core`).
+</Callout>
 
 ### `notifications`
 

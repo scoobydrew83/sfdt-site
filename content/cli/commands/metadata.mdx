@@ -1,6 +1,6 @@
 ---
 title: Metadata & Source Control Commands
-description: manifest, pull, drift, compare, and scan — generate manifests from git diffs and keep source and orgs in sync.
+description: manifest, pull, drift, compare, scan, and dependencies — generate manifests from git diffs, keep source and orgs in sync, and trace metadata dependencies.
 ---
 
 import { Callout } from 'nextra/components'
@@ -153,3 +153,36 @@ sfdt scan --format table
 | `--org <alias>` | Org to scan (defaults to `config.defaultOrg`) |
 | `--output <file>` | Output file |
 | `--format <json\|table>` | Output format |
+
+---
+
+## `sfdt dependencies`
+
+Lists what a metadata component **references** and what **references it**, via the Tooling API's
+`MetadataComponentDependency` object — the same data the Salesforce "Where is this used?" view
+draws on. Resolution and grouping are shared with the Chrome extension and dashboard through
+`@sfdt/flow-core`, so all three report identically.
+
+```bash
+sfdt dependencies AccountTriggerHandler                       # ApexClass (default)
+sfdt dependencies AccountTrigger --type ApexTrigger
+sfdt dependencies My_Flow --type Flow
+sfdt dependencies Account.Industry --type CustomField
+sfdt dependencies myComponent --type LightningComponentBundle --org production --json
+```
+
+| Argument / Option | Description |
+|---|---|
+| `<name>` | Developer name of the component to resolve |
+| `--type <MetadataType>` | Metadata type to resolve (default `ApexClass`) |
+| `--org <alias>` | Target org (defaults to `config.defaultOrg`) |
+| `--json` | Structured output |
+
+Supported `--type` values: `ApexClass`, `ApexTrigger`, `ApexPage`, `Flow`, `CustomField`,
+`LightningComponentBundle`.
+
+<Callout type="info">
+  Output is two grouped lists — **references** (this component → others) and **referenced-by**
+  (others → this component) — each bucketed by metadata type. An unsupported `--type` or a name
+  that resolves to nothing surfaces a clean error / not-found message.
+</Callout>
