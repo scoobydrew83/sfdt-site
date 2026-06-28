@@ -78,8 +78,11 @@ These run inside the standalone [Workspace tab](/chrome-extension/workspace):
 | `apex-anonymous` | Execute anonymous Apex with compile/runtime results and saved snippets |
 | `debug-log-viewer` | List recent `ApexLog` records and view full log bodies |
 | `saved-soql` | Browse bookmarked and recent SOQL and load any query straight into the runner |
+| `apex-coverage` | Org-wide and per-class Apex code coverage with deploy-threshold colour bands (Tooling API) |
+| `org-health-live` | Runs org-health checks **live** against the org — coverage, inactive users, license use, API-version spread, limits near cap (no bridge needed) |
+| `dependency-explorer` | "What references this / what does this reference" for Apex, Flows, fields, pages, and LWC via `MetadataComponentDependency` |
 | `org-switcher` | Switch the Workspace between logged-in orgs (discovered from session cookies) |
-| `org-health` 🔌 | Reads the latest audit/monitor snapshots and shows checks with status bands and findings |
+| `org-health` 🔌 | Reads the latest audit/monitor **snapshots** from the CLI (bridge); see `org-health-live` for the live, no-bridge version |
 
 <Callout type="info">
   Adding a feature is a one-file change — see `extension/features/` and the registry in
