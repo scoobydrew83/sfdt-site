@@ -25,6 +25,12 @@ The panel retains its state when hidden, so the dashboard keeps running until yo
 The dashboard server port is controlled by [`sfdt.dashboardPort`](/vscode-extension/settings)
 (default `7654`). Change it if `7654` is already in use on your machine.
 
+## Theme
+
+The embedded dashboard follows your **VS Code light/dark theme** — the extension passes the editor's
+current theme to the dashboard, and the panel updates live when you switch themes. Opening `sfdt ui`
+directly in a browser is unaffected: it uses its own theme toggle and remembers your last choice.
+
 <Callout type="info">
   This is the same dashboard the CLI serves with `sfdt ui` and that the Chrome extension's bridge
   talks to. See [CLI → Web Dashboard](/cli/dashboard) for a full tour of its pages.
