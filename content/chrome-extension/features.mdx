@@ -83,8 +83,8 @@ These run inside the standalone [Workspace tab](/chrome-extension/workspace):
 | `org-health-live` | Runs org-health checks **live** against the org — coverage, inactive users, license use, API-version spread, limits near cap (no bridge needed) |
 | `dependency-explorer` | "What references this / what does this reference" for Apex, Flows, fields, pages, and LWC via `MetadataComponentDependency` |
 | `org-switcher` | Switch the Workspace between logged-in orgs (discovered from session cookies) |
-| `flow-quality` 🔌 | Scores a Flow's quality via the bridge — fully wired, renders a score card |
-| `drift-check` 🔌 | Metadata drift via the bridge — returns the latest `sfdt drift` snapshot, filtered by component |
+| `flow-quality` | Scores a Flow's quality — fetches its Metadata (Tooling) and runs `@sfdt/flow-core` in-browser; no bridge needed |
+| `drift-check` 🔌 | Metadata drift via the bridge — latest `sfdt drift` snapshot by default, or run live; filtered by component |
 | `metadata-scan` 🔌 | Live metadata inventory via the bridge (same logic as `sfdt scan`) |
 | `org-compare` 🔌 | Live org-vs-org / org-vs-local comparison via the bridge (same logic as `sfdt compare`) |
 | `org-health` 🔌 | Reads the latest audit/monitor **snapshots** from the CLI (bridge); see `org-health-live` for the live, no-bridge version |
