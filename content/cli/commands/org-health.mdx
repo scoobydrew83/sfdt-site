@@ -1,6 +1,6 @@
 ---
 title: Org Health & Operations Commands
-description: audit, monitor, docs, data, scratch, and notify — diagnose org health, back up metadata, generate docs, seed data, manage scratch orgs, and notify Slack.
+description: audit, monitor, docs, data, scratch, and notify — diagnose org health, back up metadata, generate docs, seed data, manage scratch orgs, and push notifications to Slack, Teams, email, webhook, or Loki.
 ---
 
 import { Callout } from 'nextra/components'
@@ -19,19 +19,36 @@ Diagnoses org health. Run a single check or `all`.
 sfdt audit all
 sfdt audit mfa
 sfdt audit licenses --org production --json
+sfdt audit all --notify          # also push the snapshot to notification channels
 ```
 
 | Check | What it inspects |
 |---|---|
 | `audittrail` | Recent Setup Audit Trail entries (lookback `audit.auditTrailLookbackDays`) |
 | `licenses` | License usage vs `audit.licenseWarnThreshold` |
-| `mfa` | Multi-factor-authentication coverage |
-| `unused-apex` | Apex classes with no recent references |
-| `inactive-users` | Users inactive beyond `audit.inactiveUserDays` |
-| `api-versions` | Components below `audit.minApiVersion` |
+| `mfa` | Active standard users with no registered MFA method |
+| `unused-apex` | Apex classes with zero test coverage (heuristic) |
+| `apex-unreferenced` | Apex classes with no inbound metadata dependency |
+| `inactive-users` | Active users with no recent login (beyond `audit.inactiveUserDays`) |
+| `api-versions` | Apex/triggers below `audit.minApiVersion` |
+| `inactive-flows` | Flow definitions with no active version |
+| `inactive-validations` | Validation rules that are not active |
+| `inactive-workflows` | Workflow rules that are not active (legacy automation) |
+| `unused-permsets` | Permission sets with no user or group assignment |
+| `connected-apps` | Connected apps that permit all users (admin approval off) |
+| `field-descriptions` | Custom fields missing a description |
+| `lint-access` | Custom objects with no Read access granted |
+| `lint-access-fields` | Custom fields with no Read access granted (field-level) |
 
 Results are written to `logs/audit-latest.json` (consumed by the dashboard and the VS Code Org
-Health sidebar).
+Health sidebar). `audit all` exits non-zero when any check is `fail` or `error`, so it doubles as a
+CI gate.
+
+| Option | Description |
+|---|---|
+| `--notify` | Push the snapshot to configured [notification channels](/cli/notifications) |
+| `--org <alias>` | Target org |
+| `--json` | Structured output |
 
 ---
 
@@ -43,22 +60,37 @@ Monitors org operational health. Run a single check or `all`.
 sfdt monitor all
 sfdt monitor limits
 sfdt monitor all --backup    # include a metadata backup in the run
+sfdt monitor all --notify    # push the snapshot to notification channels
 ```
 
 | Check | What it inspects |
 |---|---|
 | `limits` | Governor-limit usage vs `monitoring.limitWarnThreshold` |
-| `errors` | Apex errors in the last `monitoring.errorLookbackDays` days |
+| `errors` | Recent failed async Apex jobs (last `monitoring.errorLookbackDays` days) |
 | `health` | Security Health Check score vs `monitoring.healthMinScore` |
+| `org-info` | Instance, edition, and trial/expiration window (`monitoring.orgInfoTrialWarnDays`) |
+| `deploy-history` | Recent deployment success/failure (latest failed → `fail`) |
+| `deprecated-api` | Traffic on deprecated API versions (ApiTotalUsage logs) |
+| `flow-errors` | Paused (potentially stuck) flow interviews |
 | `backup` | Metadata backup (see below) |
 
 | Option | Description |
 |---|---|
 | `--backup` | Include a metadata backup when running `all` |
+| `--notify` | Push the snapshot to configured [notification channels](/cli/notifications) |
 | `--org <alias>` | Target org |
 | `--json` | Structured output |
 
-Results land in `logs/monitor-latest.json`.
+Results land in `logs/monitor-latest.json`. `monitor all` exits non-zero when any check is `fail`
+or `error`.
+
+### Graceful degradation
+
+Some checks depend on Beta or license-gated objects (`MetadataComponentDependency`,
+`DeployRequest`, `FlowInterview`, `ConnectedApplication`, `ValidationRule`/`WorkflowRule`,
+`EventLogFile`). When an org can't run one of these, the check returns **`warn`** ("unavailable …")
+rather than `error`, so `audit all` / `monitor all` never fail CI just because an org lacks a
+particular API or license.
 
 ### `sfdt monitor backup`
 
@@ -135,27 +167,32 @@ Options: `--alias <name>`, `--days <n>`, `--size <n>`, `--json`.
 
 ## `sfdt notify`
 
-Sends a structured Slack notification for a deployment-lifecycle event via Slack Incoming
-Webhooks.
+Pushes a deployment-lifecycle event or an org-health snapshot to configured notification
+channels (Slack, Microsoft Teams, email, generic webhook, or Grafana Loki).
 
 ```bash
 sfdt notify deploy-success
 sfdt notify deploy-failure --org production --version 1.5.0
 sfdt notify test-failure --message "Coverage dropped below threshold"
 sfdt notify release-created --version 1.5.0
+sfdt notify snapshot --type monitor       # push the latest monitor snapshot
+sfdt notify snapshot --type audit
 ```
 
 | Argument | Values |
 |---|---|
-| `<event>` | `deploy-success`, `deploy-failure`, `test-failure`, `release-created` |
+| `<event>` | `deploy-success`, `deploy-failure`, `test-failure`, `release-created`, `snapshot` |
 
 | Option | Description |
 |---|---|
+| `--type <kind>` | For `snapshot`: `audit` or `monitor` (which snapshot to push) |
 | `--version <ver>` | Version label to include |
 | `--org <alias>` | Org alias to display |
 | `--message <msg>` | Custom message body |
 
-<Callout type="warning">
-  Requires `features.notifications: true` and `notifications.slack.webhookUrl` in config.
-  Otherwise the command exits with setup instructions.
+<Callout type="info">
+  Configure channels, severity routing, and optional AI executive-summary digests on the
+  [Notifications](/cli/notifications) page. `audit all` / `monitor all` accept `--notify` to run
+  and push in one step. The legacy single-Slack config (`notifications.slack.webhookUrl` with
+  `features.notifications: true`) is still honored.
 </Callout>

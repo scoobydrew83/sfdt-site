@@ -1,0 +1,124 @@
+---
+title: Notifications
+description: Push deployment events and org-health snapshots to Slack, Microsoft Teams, email, a generic webhook, or Grafana Loki — with per-channel event filtering, severity routing, and optional AI executive summaries.
+---
+
+import { Callout } from 'nextra/components'
+
+# Notifications
+
+sfdt can push deployment events and org-health snapshots to **Slack**, **Microsoft Teams**,
+**email**, a generic **webhook**, or **Grafana Loki** — with per-channel event filtering and
+severity routing.
+
+<Callout type="info">
+  The multi-channel `channels[]` system is gated by `notifications.enabled`. The older
+  single-Slack shape (`notifications.slack.webhookUrl`) is still honored when
+  `features.notifications: true`. See [Configuration](/cli/configuration#notifications).
+</Callout>
+
+## Configuration
+
+```jsonc
+{
+  "features": { "notifications": true },
+  "notifications": {
+    "enabled": true,
+    "summary": { "enabled": false },
+    "channels": [
+      {
+        "type": "slack",
+        "name": "team-deploys",
+        "webhookUrlEnv": "SLACK_WEBHOOK_URL",
+        "severityThreshold": "warn",
+        "events": ["deploy-failure", "snapshot"]
+      },
+      {
+        "type": "teams",
+        "name": "ops",
+        "webhookUrlEnv": "TEAMS_WEBHOOK_URL",
+        "severityThreshold": "fail",
+        "events": ["snapshot"]
+      },
+      {
+        "type": "email",
+        "name": "admins",
+        "from": "ci@example.com",
+        "to": ["admin@example.com"],
+        "smtp": { "hostEnv": "SFDT_SMTP_HOST", "portEnv": "SFDT_SMTP_PORT", "userEnv": "SFDT_SMTP_USER", "passwordEnv": "SFDT_SMTP_PASS" },
+        "severityThreshold": "fail",
+        "events": ["snapshot"]
+      },
+      {
+        "type": "webhook",
+        "name": "loki",
+        "format": "loki",
+        "url": "https://logs-prod.grafana.net/loki/api/v1/push",
+        "severityThreshold": "warn",
+        "events": ["snapshot"]
+      }
+    ]
+  }
+}
+```
+
+<Callout type="warning">
+  **Secrets are referenced by env-var name, never inline.** Webhook URLs and SMTP credentials are
+  given as the *name* of an environment variable (`webhookUrlEnv`, `urlEnv`, SMTP `*Env`) — the
+  value is read from `process.env` at send time and is never stored in config. Inline
+  `webhookUrl`/`url` are still supported for back-compat but discouraged.
+</Callout>
+
+### Channel fields
+
+| Field | Applies to | Meaning |
+|---|---|---|
+| `type` | all | `slack` \| `teams` \| `email` \| `webhook` |
+| `name` | all | Friendly label (shown in CLI/GUI results) |
+| `webhookUrl` / `webhookUrlEnv` | slack, teams | Incoming-webhook URL (inline or env-var name) |
+| `url` / `urlEnv` | webhook | Endpoint URL (inline or env-var name) |
+| `format` | webhook | `json` (default) or `loki` (Grafana Loki push) |
+| `headers` | webhook | Extra HTTP headers |
+| `from`, `to`, `smtp` | email | Sender, recipients, and SMTP env-var names |
+| `severityThreshold` | all | Minimum snapshot severity to receive (`ok` \| `warn` \| `error` \| `fail`) |
+| `events` | all | Which events this channel receives (omit = all) |
+
+Email uses `nodemailer`, an **optional dependency** that is lazy-loaded only when an email channel
+is configured.
+
+## Events & severity routing
+
+- **Lifecycle events** — `deploy-success`, `deploy-failure`, `test-failure`, `release-created` —
+  are sent to any channel whose `events` filter allows them.
+- The **`snapshot`** event (an audit/monitor run) is routed by severity: a channel receives it
+  only when the snapshot's worst status is at or above the channel's `severityThreshold`.
+
+Severity rank: `ok < warn < error < fail`.
+
+## AI executive-summary digests
+
+Set `notifications.summary.enabled = true` to have snapshot notifications carry a 1–2 paragraph AI
+executive summary (top issue + next steps) instead of the raw findings list. It requires
+`features.ai` and an available AI provider; the summary is computed once and reused across
+channels, and falls back to the normal body when AI is unavailable. The wording is controlled by
+the editable `monitor-summary` prompt (see [AI Providers](/cli/ai-providers)).
+
+## Commands
+
+```bash
+sfdt notify deploy-failure --org prod --message "Release 1.4 failed"
+sfdt notify snapshot --type monitor        # push the latest monitor snapshot
+sfdt notify snapshot --type audit
+sfdt monitor all --notify                  # run + notify in one step
+sfdt audit all --notify
+```
+
+See [Org Health & Operations](/cli/commands/org-health) for the `audit`/`monitor` commands.
+
+## Surfaces
+
+- **GUI** — the Notifications page lists configured channels (secrets redacted), shows whether the
+  AI summary is on, and offers a "send test to all channels" button.
+- **MCP** — [`sfdt_notify`](/cli/mcp) pushes the latest snapshot.
+- **CI** — the generated pipelines run `monitor all --notify` on a schedule (see
+  [CI/CD Integration](/cli/ci-cd)).

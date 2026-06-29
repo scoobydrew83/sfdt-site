@@ -1,0 +1,25 @@
+# MCP server — new & changed tools (Phase 1 + 2)
+
+Merge into the existing MCP tools reference.
+
+## New tools
+
+| Tool | Purpose |
+|---|---|
+| `sfdt_notify` | Push the latest audit/monitor snapshot to configured channels (`type`: audit\|monitor) |
+| `sfdt_retrofit` | Retrieve from a source org, commit, smart-deploy to a target (`source`, `target`, `metadata`, `execute`; real deploys require `confirmExecution`) |
+| `sfdt_pr_comment` | Post the latest audit/monitor snapshot to the current PR (`type`, `pr`) |
+
+## Changed tools
+
+- `sfdt_audit` — `check` enum now includes: `inactive-flows`, `unused-permsets`,
+  `connected-apps`, `field-descriptions`, `apex-unreferenced`, `lint-access`,
+  `inactive-validations`, `inactive-workflows`, `lint-access-fields` (plus the
+  originals, or `all`).
+- `sfdt_monitor` — `check` enum now includes: `org-info`, `deploy-history`,
+  `deprecated-api`, `flow-errors` (plus `limits`, `errors`, `health`, `backup`,
+  or `all`).
+- `sfdt_deploy` — adds `smart`, `deltaBase`, `deltaHead`, and `dryRun`. A
+  validate-only run (`dryRun: true`) no longer requires `confirmExecution`; a real
+  deploy still does.
+</content>

@@ -70,6 +70,19 @@ Authentication and model selection are handled by the Codex CLI. Suitable for CI
   </Tabs.Tab>
 </Tabs>
 
+### HTTP endpoint (text-only)
+
+For any OpenAI-compatible endpoint, set `ai.provider` to `http` — no CLI to install:
+
+```json
+{ "ai": { "provider": "http", "baseURL": "https://…/v1", "model": "…", "apiKeyEnv": "AI_API_KEY" } }
+```
+
+Unlike the three CLI providers, `http` is plain text-completion and **cannot run tools**, so
+commands pre-gather context for it. Prompt content is passed through `redactSensitiveData` before
+it's sent. The bounded auto-fix loop (`deploy --smart --ai-fix` with `ai.agent.allowWrite`) is
+CLI-providers-only for this reason.
+
 ## Which commands use AI
 
 | Command | AI role |
@@ -82,7 +95,27 @@ Authentication and model selection are handled by the Codex CLI. Suitable for CI
 | `sfdt pr-description` | GitHub/Slack content generation |
 | `sfdt release` | Release-note generation |
 | `sfdt changelog generate` | Changelog entries from commits |
+| `sfdt deploy --smart --ai-fix` | Explain a failed deploy, or run the bounded auto-fix loop |
+| `sfdt manifest --ai-cleanup` | Audit a draft `package.xml` for missing dependencies |
+| `sfdt docs generate --roles` | Per-component, per-role documentation guides |
+| `sfdt monitor`/`audit --notify` | Executive-summary digest (with `notifications.summary.enabled`) |
 | `sfdt ai prompt` | Ad-hoc prompts |
+
+### Non-interactive `--agent` mode
+
+`deploy`, `explain`, `review`, and `quality` accept `--agent`, which runs the AI session
+non-interactively (it never blocks on input) — so coding agents and CI can drive these commands.
+Combine with `--json` for machine-readable output where supported.
+
+### Editable prompts
+
+All AI behavior is driven by editable prompt templates (override per project under
+`.sfdt/prompts.json`):
+
+- `deploy-error` — deploy/validation error resolution.
+- `doc-apex`, `doc-flow`, `doc-lwc`, `doc-object` — per-metadata-type documentation guides (fall
+  back to `doc-role-guide`).
+- `monitor-summary` — org-health executive summary for [notification digests](/cli/notifications).
 
 ## Disabling AI
 

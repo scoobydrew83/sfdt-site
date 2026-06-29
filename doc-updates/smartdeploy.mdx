@@ -1,0 +1,85 @@
+# Smart Deploy
+
+`sfdt deploy --smart` deploys only the metadata that changed between two git refs,
+picks the minimal safe Apex test level, honors overwrite protection, and runs a
+self-contained, non-interactive `sf project deploy` (no archive/commit side
+effects).
+
+```bash
+sfdt deploy --smart --dry-run                      # validate the delta (recommended in CI)
+sfdt deploy --smart --delta-base main              # delta vs main
+sfdt deploy --smart --delta-base origin/main --delta-head HEAD --org uat
+sfdt deploy --smart --prod                         # treat target as production
+sfdt deploy --smart --ai-fix                       # AI analysis on failure
+sfdt deploy --smart --pr-comment                   # decorate the PR with the result
+```
+
+## How it works
+
+1. **Delta** — computes changed metadata between `--delta-base` (default `main`,
+   or `deployment.smart.deltaBase`) and `--delta-head` (default `HEAD`) using the
+   same engine as `sfdt manifest`. Additive and destructive changes are
+   separated automatically.
+2. **Overwrite protection** — members listed in `package-no-overwrite.xml`
+   (configurable; `*` wildcard supported) are removed from the deploy so they're
+   never overwritten.
+3. **Smart test selection**:
+   - Production (or `--prod`/`assumeProd`) → `RunLocalTests`, never downgraded.
+   - No impacting metadata changed (Apex/triggers/flows) → `NoTestRun`.
+   - Only Apex **test** classes changed → `RunSpecifiedTests` (those tests).
+   - Any other impacting change → `RunLocalTests`.
+4. **Execute** — `sf project deploy validate` (with `--dry-run`) or
+   `sf project deploy start`, including `--post-destructive-changes` when needed.
+
+## Options
+
+| Flag | Notes |
+|---|---|
+| `--smart` | Enable smart delta deploy |
+| `--delta-base <ref>` / `--delta-head <ref>` | Git refs to diff (defaults: config/`main` … `HEAD`) |
+| `--overwrite-manifest <path>` | Path to `package-no-overwrite.xml` (overrides config) |
+| `--prod` | Treat the target as production (never downgrade tests) |
+| `--dry-run` | Validate only (no changes applied) |
+| `--ai-deps` | Run AI dependency cleanup on the computed delta first |
+| `--ai-fix` | On failure, run AI deploy-error analysis (or the auto-fix loop, below) |
+| `--max-turns <n>` | Auto-fix iteration cap (overrides `ai.agent.maxTurns`) |
+| `--pr-comment` | Post the delta + outcome to the current PR (via `gh`) |
+| `--agent` | Non-interactive mode (AI prompts never block on input) |
+
+## Configuration
+
+```jsonc
+{
+  "deployment": {
+    "smart": {
+      "enabled": false,
+      "deltaBase": "main",
+      "noOverwriteManifest": "manifest/package-no-overwrite.xml",
+      "impactingTypes": ["ApexClass", "ApexTrigger", "Flow"],
+      "downgradeTestsOnNonProd": true,
+      "assumeProd": false
+    }
+  }
+}
+```
+
+## AI deploy-error resolution & auto-fix loop
+
+`--ai-fix` captures the failure output and runs the editable `deploy-error`
+prompt to explain the failure and suggest fixes (read-only).
+
+When `ai.agent.enabled` **and** `ai.agent.allowWrite` are set (CLI providers
+only — the `http` provider can't run tools), `--ai-fix` instead runs a **bounded
+coding-agent auto-fix loop**: the agent edits the repo, re-validates via a dry-run
+each turn, and stops on success or after `maxTurns`. It never deploys, the failure
+text is redacted before prompting, and everything defaults off.
+
+```jsonc
+{ "ai": { "agent": { "enabled": false, "maxTurns": 3, "allowWrite": false } } }
+```
+
+> Delta deployments are git-diff based and don't automatically pull in parent
+> metadata (e.g. a changed field without its object). Use `--ai-deps` for an AI
+> dependency pass, or maintain `package-no-overwrite.xml` and review the computed
+> delta in `--dry-run` first.
+</content>

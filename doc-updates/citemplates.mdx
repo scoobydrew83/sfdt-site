@@ -1,0 +1,52 @@
+# CI/CD Templates
+
+`sfdt ci init` generates a ready-to-run pipeline for your Git provider — either a
+scheduled **org-monitoring** job or a PR **smart-deploy** validation job.
+
+```bash
+sfdt ci init --provider github --type monitor --cron "0 6 * * *"
+sfdt ci init --provider gitlab --type deploy --org uat
+sfdt ci init --provider azure --type monitor --node 22
+sfdt ci init --provider bitbucket --type deploy --print   # print instead of write
+```
+
+`sfdt monitor schedule --provider github` is a thin alias for
+`ci init --type monitor`.
+
+## Options
+
+| Flag | Default | Notes |
+|---|---|---|
+| `--provider` | (required) | `github` \| `gitlab` \| `azure` \| `bitbucket` |
+| `--type` | `monitor` | `monitor` (scheduled health) or `deploy` (PR smart-deploy) |
+| `--cron` | `0 6 * * *` | Schedule for monitor workflows |
+| `--org` | `config.defaultOrg` | Target org alias embedded in the workflow |
+| `--delta-base` | `main` | Base ref for smart-deploy delta |
+| `--node` | `20` | Node.js version for the CI runner |
+| `--out` | provider convention | Output path override |
+| `--print` | — | Print to stdout instead of writing |
+| `--force` | — | Overwrite an existing file |
+| `--json` | — | Machine-readable result |
+
+## Where files land
+
+- **GitHub** → `.github/workflows/sfdt-monitor.yml` / `sfdt-deploy.yml`
+- **GitLab / Azure / Bitbucket** → a standalone fragment under `.sfdt/ci/` for you
+  to merge/include (these providers use a single top-level pipeline file).
+
+## Required secrets
+
+The templates authenticate with an `SFDX_AUTH_URL` secret
+(`sf org display --verbose --json` for the target org) and read notification
+webhook secrets by name (e.g. `SLACK_WEBHOOK_URL`, `TEAMS_WEBHOOK_URL`). Add them
+in your provider's secret store:
+
+- GitHub: Settings → Secrets and variables → Actions
+- GitLab: Settings → CI/CD → Variables (masked)
+- Azure: Pipelines → Library / pipeline variables (secret)
+- Bitbucket: Repository settings → Pipelines → Variables (secured)
+
+Monitor workflows run `sfdt monitor all --notify --json`; deploy workflows run
+`sfdt deploy --smart --dry-run` against the PR's base branch (full git history is
+fetched so the delta can be computed).
+</content>

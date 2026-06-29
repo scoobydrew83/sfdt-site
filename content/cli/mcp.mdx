@@ -57,9 +57,15 @@ Configure it under the `mcp` key in `.sfdt/config.json`:
 
 | Tool | Arguments |
 |---|---|
-| `sfdt_deploy` | `targetOrg` (req), `manifest`, `testLevel`, `testClasses`, `destructiveTiming`, `confirmExecution` (req) |
+| `sfdt_deploy` | `targetOrg` (req), `manifest`, `testLevel`, `testClasses`, `destructiveTiming`, `smart`, `deltaBase`, `deltaHead`, `dryRun`, `confirmExecution` |
 | `sfdt_quick_deploy` | `validationJobId` (req), `targetOrg` (req), `confirmExecution` (req) |
 | `sfdt_rollback` | `confirmExecution` (req) |
+| `sfdt_retrofit` | `source` (req), `target`, `metadata`, `execute`; real deploys require `confirmExecution` |
+
+<Callout type="info">
+  For `sfdt_deploy`, a validate-only run (`dryRun: true`) no longer requires `confirmExecution`; a
+  real deploy still does. See [Smart Deploy](/cli/smart-deploy).
+</Callout>
 
 ### Analysis & observe
 
@@ -69,6 +75,15 @@ Configure it under the `mcp` key in `.sfdt/config.json`:
 | `sfdt_compare` | `source` (req), `target` (req) |
 | `sfdt_quality` | `generateStubs`, `fixPlan` |
 | `sfdt_logs` | `type` — `preflight` \| `drift` \| `deploy` \| `rollback` \| `quality` |
+
+### Org health & notifications
+
+| Tool | Arguments |
+|---|---|
+| `sfdt_audit` | `check` — any [audit check id](/cli/commands/org-health#sfdt-audit) or `all`. Includes `inactive-flows`, `unused-permsets`, `connected-apps`, `field-descriptions`, `apex-unreferenced`, `lint-access`, `inactive-validations`, `inactive-workflows`, `lint-access-fields` |
+| `sfdt_monitor` | `check` — `limits`, `errors`, `health`, `backup`, `org-info`, `deploy-history`, `deprecated-api`, `flow-errors`, or `all` |
+| `sfdt_notify` | Push the latest audit/monitor snapshot to configured channels (`type`: `audit` \| `monitor`) |
+| `sfdt_pr_comment` | Post the latest audit/monitor snapshot to the current PR (`type`, `pr`) |
 
 ### Context budget governance
 

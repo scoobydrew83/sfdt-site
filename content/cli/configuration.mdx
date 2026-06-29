@@ -118,8 +118,10 @@ Feature toggles. All default to `true` except `notifications`.
 
 | Key | Type | Description |
 |---|---|---|
-| `ai.provider` | enum | `claude` (default), `gemini`, or `openai` |
+| `ai.provider` | enum | `claude` (default), `gemini`, `openai`, or `http` (text-only endpoint) |
 | `ai.model` | string | Optional model override (the provider CLI handles selection) |
+| `ai.baseURL` | string | OpenAI-compatible endpoint URL (`http` provider only) |
+| `ai.apiKeyEnv` | string | Name of the env var holding the API key (`http` provider only) |
 
 See [AI Providers](/cli/ai-providers) for full setup.
 
@@ -152,10 +154,15 @@ See the [MCP Server](/cli/mcp) page for details.
 | `audit.licenseWarnThreshold` | `0.75` | License-usage warn threshold (0–1) |
 | `audit.inactiveUserDays` | `90` | Days before a user is "inactive" |
 | `audit.minApiVersion` | `45` | Minimum acceptable API version |
+| `audit.fieldDescriptionMaxMissing` | `0` | Max custom fields allowed without a description before warning |
+| `audit.connectedAppFlagPermissive` | `true` | Flag connected apps that permit all users (admin approval off) |
 | `monitoring.backupDir` | `monitoring-backup` | Metadata-backup output directory |
 | `monitoring.limitWarnThreshold` | `0.75` | Governor-limit warn threshold (0–1) |
 | `monitoring.errorLookbackDays` | `7` | Apex-error lookback window |
 | `monitoring.healthMinScore` | `80` | Minimum acceptable Security Health Check score |
+| `monitoring.orgInfoTrialWarnDays` | `14` | Warn when a trial/expiration window is within this many days |
+| `monitoring.deployHistoryLookback` | `20` | Number of recent deployments inspected by `deploy-history` |
+| `monitoring.deprecatedApiLookbackDays` | `7` | Lookback window for deprecated-API traffic |
 | `docs.outputDir` | `docs` | Generated-docs output directory |
 | `docs.ai` | `true` | Include an AI overview in generated docs |
 | `docs.diagrams` | `true` | Generate Mermaid diagrams |
@@ -172,13 +179,57 @@ See the [MCP Server](/cli/mcp) page for details.
 
 ### `notifications`
 
-```json
+Multi-channel push to Slack, Microsoft Teams, email, a generic webhook, or Grafana Loki. Secrets
+are referenced by env-var **name**, never inline. The older single-Slack shape is still honored
+when `features.notifications: true`.
+
+```jsonc
 {
   "features": { "notifications": true },
   "notifications": {
-    "slack": { "webhookUrl": "https://hooks.slack.com/services/T.../B.../..." }
+    "enabled": false,                 // master switch for the channels[] system
+    "summary": { "enabled": false },  // send AI executive summaries for snapshots
+    "channels": [
+      // type: slack | teams | email | webhook
+      // common: name, severityThreshold (ok|warn|error|fail), events[]
+      // slack/teams: webhookUrl | webhookUrlEnv
+      // webhook: url | urlEnv, format (json|loki), headers{}
+      // email: from, to[], smtp{ hostEnv, portEnv, userEnv, passwordEnv, secure }
+    ],
+    // legacy single-Slack shape (still honored when features.notifications=true):
+    "slack": { "webhookUrl": "", "webhookUrlEnv": "" }
   }
 }
+```
+
+See the [Notifications](/cli/notifications) page for channel fields and severity routing.
+
+### `deployment.smart`
+
+Settings for [Smart Deploy](/cli/smart-deploy) (`sfdt deploy --smart`).
+
+```jsonc
+{
+  "deployment": {
+    "smart": {
+      "enabled": false,
+      "deltaBase": "main",
+      "noOverwriteManifest": "manifest/package-no-overwrite.xml",
+      "impactingTypes": ["ApexClass", "ApexTrigger", "Flow"],
+      "downgradeTestsOnNonProd": true,
+      "assumeProd": false
+    }
+  }
+}
+```
+
+### `ai.agent`
+
+The bounded coding-agent auto-fix loop for `sfdt deploy --smart --ai-fix`. Off by default; requires
+both `enabled` and `allowWrite`. See [Smart Deploy](/cli/smart-deploy#ai-deploy-error-resolution--auto-fix-loop).
+
+```jsonc
+{ "ai": { "agent": { "enabled": false, "maxTurns": 3, "allowWrite": false } } }
 ```
 
 ## Reading & writing config

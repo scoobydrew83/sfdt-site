@@ -17,6 +17,27 @@ repository; this page summarizes recent highlights.
   [Extension `CHANGELOG.md`](https://github.com/scoobydrew83/sfdt/blob/main/extension/CHANGELOG.md)
 </Callout>
 
+## `@sfdt/cli` — Unreleased
+
+Org-monitoring, CI/CD, and AI-agent additions on top of the org-health suite:
+
+- **Expanded org health** — `sfdt audit` / `sfdt monitor` grew to ~25 native checks
+  (inactive validation/workflow rules, field-level access lint, connected apps, unused permission
+  sets, legacy API usage, deployment history, paused flows, and more). License/Beta-gated checks
+  degrade to a `warn` instead of failing CI. See [Org Health & Operations](/cli/commands/org-health).
+- **[Multi-channel notifications](/cli/notifications)** — Slack, Microsoft Teams, email, generic
+  webhook, and Grafana Loki, with per-channel event filters and severity routing, plus optional AI
+  executive-summary digests.
+- **[CI/CD templates](/cli/ci-cd#generating-a-pipeline--sfdt-ci-init)** — `sfdt ci init` generates
+  ready-to-run GitHub/GitLab/Azure/Bitbucket pipelines.
+- **[Smart Deploy](/cli/smart-deploy)** — `sfdt deploy --smart` delta-deploys with smart test
+  selection and overwrite protection; optional AI deploy-error analysis and a bounded coding-agent
+  auto-fix loop (default-off).
+- **[Retrofit & PR comments](/cli/retrofit)** — `sfdt retrofit` (retrieve → commit → smart-deploy)
+  and `sfdt pr comment` PR decoration.
+- **AI** — a new text-only `http` provider, a non-interactive `--agent` convention across AI
+  commands, and per-metadata-type documentation prompts. See [AI Providers](/cli/ai-providers).
+
 ## `@sfdt/cli` — 0.13.1
 
 Adds a native **org health & operations** suite — clean-room reimplementations of org
