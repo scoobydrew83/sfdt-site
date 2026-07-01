@@ -49,6 +49,24 @@ brew install sfdt
   `brew upgrade sfdt` picks up new releases like any other formula.
 </Callout>
 
+## One-line install script
+
+The bootstrap script checks prerequisites (Node, `sf`, `bash`, `jq`) and then installs via npm:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/scoobydrew83/sfdt/main/install.sh | bash
+```
+
+## Run with Docker
+
+For CI/CD or a zero-install run, use the official multi-arch image — no local Node or `sf` needed:
+
+```bash
+docker run --rm -v "$PWD:/project" ghcr.io/scoobydrew83/sfdt:latest --help
+```
+
+See [Docker](/cli/docker) for image tags, volume mounts, and auth passthrough.
+
 ## Install as a Salesforce CLI plugin
 
 If your team standardizes on `sf plugins`, install sfdt as a plugin and run every command as
