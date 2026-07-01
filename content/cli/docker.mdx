@@ -10,7 +10,27 @@ import { Callout } from 'nextra/components'
 An official Docker image is available for CI/CD pipelines. It ships Node, the Salesforce CLI,
 `git`, `bash`, and `jq` — everything sfdt's shell scripts need.
 
+## Pull the official image
+
+The published multi-arch image (linux/amd64 + linux/arm64) lives on GitHub Container Registry.
+Pull it directly — no build step needed:
+
+```bash
+docker pull ghcr.io/scoobydrew83/sfdt:latest
+# or pin a version:
+docker pull ghcr.io/scoobydrew83/sfdt:0.15.1
+```
+
+```bash
+# smoke test
+docker run --rm ghcr.io/scoobydrew83/sfdt:latest --help
+```
+
+A new image is published for every CLI release (tagged with the version, plus `:latest`).
+
 ## Build from source
+
+If you'd rather build locally instead of pulling:
 
 ```bash
 docker build -t sfdt .

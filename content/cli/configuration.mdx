@@ -98,6 +98,20 @@ A representative `config.json`:
 | `deployment.preflight.enforceTests` | boolean | `false` | Promote "no tests" from warning to failure |
 | `deployment.preflight.enforceBranchNaming` | boolean | `false` | Enforce branch-naming convention |
 | `deployment.preflight.enforceChangelog` | boolean | `false` | Require an `[Unreleased]` changelog entry |
+| `deployment.preflight.strict` | boolean | `false` | Promote **every** preflight warning to a failure |
+
+<Callout type="warning">
+  `strict` **overrides the per-check flags.** A check you left as a warning by setting its
+  `enforceX: false` is still promoted to a failure when `strict: true`. For the opt-in flags
+  above, `false` behaves the same as omitting the key — it leaves the check as a non-fatal
+  warning, it does not actively suppress it under strict mode.
+</Callout>
+
+<Callout type="info">
+  These preflight flags are editable from the **dashboard** (Settings → Config) as of v0.15.1 —
+  the dashboard shows an inline safety caution when you change one. (`defaultOrg`, `plugins`, and
+  the MCP command settings remain file-only.)
+</Callout>
 
 ### `features`
 

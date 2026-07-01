@@ -17,7 +17,17 @@ repository; this page summarizes recent highlights.
   [Extension `CHANGELOG.md`](https://github.com/scoobydrew83/sfdt/blob/main/extension/CHANGELOG.md)
 </Callout>
 
-## `@sfdt/cli` — Unreleased
+## `@sfdt/cli` — 0.15.1
+
+- **Deploy picker & Release Hub cleanup** — under `subpath` manifest layout, the deploy menu and
+  dashboard Release Hub no longer list in-flight (`manifest/release/deploy/`) or already-deployed
+  (`deployed/`) artifacts, which previously clogged the picker. A project path containing a space no
+  longer breaks the interactive selection either.
+- **Editable preflight settings** — `deployment.preflight.*` flags can now be changed from the
+  [dashboard](/cli/dashboard) (Settings → Config) with an inline safety caution, instead of being
+  file-only. See [Configuration](/cli/configuration#deployment).
+
+## `@sfdt/cli` — 0.15.0
 
 Org-monitoring, CI/CD, and AI-agent additions on top of the org-health suite:
 
