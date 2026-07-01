@@ -33,6 +33,22 @@ Verify the install:
 sfdt version
 ```
 
+## Install with Homebrew
+
+On macOS/Linux, tap the formula repo once, then install `sfdt` by name:
+
+```bash
+brew tap scoobydrew83/sfdt
+brew install sfdt
+```
+
+<Callout type="info">
+  `sfdt` ships from a **third-party tap**, so it won't appear in Homebrew's website
+  search (`formulae.brew.sh` only indexes the official `homebrew-core`). Tapping
+  `scoobydrew83/sfdt` is what makes the `sfdt` formula resolvable — after that,
+  `brew upgrade sfdt` picks up new releases like any other formula.
+</Callout>
+
 ## Install as a Salesforce CLI plugin
 
 If your team standardizes on `sf plugins`, install sfdt as a plugin and run every command as

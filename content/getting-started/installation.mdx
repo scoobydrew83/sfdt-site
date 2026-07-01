@@ -13,12 +13,22 @@ extensions delegate that work to it over the [bridge](/guides/the-bridge).
 
 ## 1. Install the CLI
 
-<Tabs items={['npm (global)', 'From source']}>
+<Tabs items={['npm (global)', 'Homebrew', 'From source']}>
   <Tabs.Tab>
 ```bash
 npm install -g @sfdt/cli
 sfdt version
 ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```bash
+# Tap once, then install by name:
+brew tap scoobydrew83/sfdt
+brew install sfdt
+sfdt version
+```
+It won't appear in Homebrew's website search — that only indexes `homebrew-core`,
+not third-party taps. Tapping `scoobydrew83/sfdt` is what makes `sfdt` resolvable.
   </Tabs.Tab>
   <Tabs.Tab>
 ```bash
