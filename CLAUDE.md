@@ -31,3 +31,17 @@ config reference, and the `support/changelog` + version highlights.
 
 When unsure whether docs exist for a change, grep `content/` for the command or config key before
 assuming it's undocumented.
+
+### Syncing after a release
+
+The upstream `/sync-docs-site` skill (defined in the `sfdt` repo) drives this sync end to end —
+version references, changelog highlights, install commands, and the doc-staleness pass — and opens a
+PR here. It runs automatically as the final step of the upstream `/release`, and can be invoked on its
+own ("sync the docs site", "update sfdt.dev"). If you're working in this repo after an upstream
+release and the docs look stale, invoke it rather than hand-editing version literals.
+
+- Version literals are bumped by `scripts/sync-doc-versions.mjs` (the single source of truth). Run
+  `node scripts/sync-doc-versions.mjs --check` to see drift; never hand-edit a pinned version — add
+  new hardcoded spots to that script's `TARGETS`.
+- A scheduled workflow (`.github/workflows/docs-version-drift.yml`) opens a version-bump PR
+  automatically if the site drifts from the upstream `@sfdt/cli` / extension versions.
