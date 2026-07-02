@@ -1,0 +1,61 @@
+name: Docs version drift
+
+# Backstop for the /sync-docs-site skill: keeps hardcoded version references in
+# content/ in sync with the upstream @sfdt/cli and Chrome-extension versions.
+# The script fetches upstream versions from raw.githubusercontent.com (public),
+# so no PAT or upstream checkout is needed. Changelog + doc-staleness are NOT
+# handled here — that's the skill's job; this only bumps version literals.
+
+on:
+  # Daily so a release that forgot to run the skill still self-heals within a day.
+  schedule:
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write        # commit the branch
+  pull-requests: write   # open the PR
+
+concurrency:
+  group: docs-version-drift
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      # Applies version bumps in place (no-op if already in sync). Pure stdlib +
+      # fetch, so no `npm ci` needed.
+      - name: Sync version references
+        run: node scripts/sync-doc-versions.mjs
+
+      # Only opens/updates a PR when the previous step actually changed files.
+      # NOTE: requires the repo setting "Allow GitHub Actions to create and
+      # approve pull requests" (Settings → Actions → General).
+      - name: Open PR if drifted
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: docs/version-drift
+          delete-branch: true
+          commit-message: 'docs: sync version references to upstream'
+          title: 'docs: version references drifted from upstream'
+          body: |
+            Automated by `.github/workflows/docs-version-drift.yml`.
+
+            Hardcoded version references in `content/` no longer matched the upstream
+            `@sfdt/cli` / Chrome-extension versions. This PR bumps the version literals
+            (`scripts/sync-doc-versions.mjs`).
+
+            **This is the mechanical bump only.** For changelog highlights and the full
+            doc-staleness pass (new commands, flags, config keys, MCP tools), run the
+            `/sync-docs-site` skill in the upstream `sfdt` repo.
+          labels: docs, automated
