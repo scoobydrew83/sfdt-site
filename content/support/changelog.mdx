@@ -17,6 +17,28 @@ repository; this page summarizes recent highlights.
   [Extension `CHANGELOG.md`](https://github.com/scoobydrew83/sfdt/blob/main/extension/CHANGELOG.md)
 </Callout>
 
+## `@sfdt/cli` — Unreleased
+
+Next release (in `develop`, post-0.15.2) — a Salesforce-release-readiness and Agentforce batch:
+
+- **[`sfdt agent-test`](/cli/commands/testing-quality#sfdt-agent-test)** — run an Agentforce agent
+  test (`sf agent test run`) as an exit-code CI gate, with `--notify` and `--pr-comment`. Smart
+  deploy and `sfdt manifest` now also recognise **Agentforce metadata** (Bot, GenAiPlanner/Plugin,
+  AiEvaluationDefinition, and more) in git deltas — see [Smart Deploy](/cli/smart-deploy).
+- **[`sfdt test --logic`](/cli/commands/testing-quality#sfdt-test)** — run Apex **and** Flow tests
+  together via Salesforce's Spring '26 `sf logic run test`, with AI failure analysis.
+- **[`sfdt quality`](/cli/commands/testing-quality#sfdt-quality) upgrades** — **Code Analyzer v5**
+  (`sf code-analyzer run`) with `--include-fixes`, an API **v67** user-mode readiness scan
+  (`--api67`), and a `--test-hints` check for missing `@IsTest(testFor=…)` annotations.
+- **[`sfdt deploy`](/cli/commands/core#sfdt-deploy) automations as flags** — `--tag`, `--create-pr`,
+  and `--notify` (previously GUI-only), plus any-`.xml` manifest auto-detection.
+- **New [org-health checks](/cli/commands/org-health#sfdt-audit)** — `audit mfa-readiness` and
+  `audit soap-logins`; `monitor limits`/`org-info` gain elastic-async and release-version reporting.
+- **[Google Chat notifications](/cli/notifications)**, four new read-only
+  [MCP tools](/cli/mcp) (`sfdt_coverage`, `sfdt_scan`, `sfdt_dependencies`, `sfdt_flow_scan`), and
+  **[dashboard](/cli/dashboard)** run-now / create-delete-generate actions for Audit, Monitor,
+  Scratch, Data, and Docs.
+
 ## `@sfdt/cli` — 0.15.2
 
 - **Fewer false-positive trigger conflicts** — `@sfdt/flow-core` 0.9.4 now reads a record-triggered

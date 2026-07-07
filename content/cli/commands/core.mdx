@@ -48,6 +48,7 @@ sfdt deploy
 sfdt deploy --managed
 sfdt deploy --skip-preflight
 sfdt deploy --source-dir force-app/feature-a   # deploy a folder directly (no manifest)
+sfdt deploy --tag --create-pr --notify         # tag, open a PR, and notify after a successful deploy
 ```
 
 | Option | Description |
@@ -57,6 +58,24 @@ sfdt deploy --source-dir force-app/feature-a   # deploy a folder directly (no ma
 | `--dry-run` | Show what would run without making changes |
 | `--source-dir <path>` | Deploy a source directory directly instead of a manifest |
 | `--org <alias>` | Target org (defaults to `config.defaultOrg`) |
+| `--tag` | Tag the release in git (`v<version>`) after a successful deploy. Interactive runs pre-select "tag after deployment"; CI runs tag and push automatically. |
+| `--create-pr` | Open a pull request from the current branch to the default branch (`defaultBranch`, default `main`) via the `gh` CLI after a successful deploy |
+| `--notify` | Send the deploy success/failure notification through `sfdt notify` (the non-interactive path now sends the success event too) |
+
+<Callout type="info">
+  `--tag`, `--create-pr`, and `--notify` apply to the **standard manifest deploy only** — combining
+  them with `--smart`, `--managed`, or `--source-dir` prints a warning instead of silently doing
+  nothing.
+</Callout>
+
+<Callout type="info">
+  **Manifest auto-detection.** The interactive picker (and non-interactive auto-select) offers any
+  `.xml` manifest found in your manifest directory (`manifestDir`, default `manifest/release/`) —
+  generated `rl-*-package.xml` releases are listed first (and still preferred by auto-select), but
+  plain `package.xml` files, `sf project generate manifest` output, and `sfdt manifest` previews
+  (`preview-package.xml`) all work too. Companion `*-destructiveChanges.xml` / `*no-overwrite*.xml`
+  files and the `deploy/`/`deployed/` subfolders are excluded.
+</Callout>
 
 <Callout type="info">
   Use `--source-dir` for targeted deploys of a single package directory without generating a

@@ -3,12 +3,19 @@ title: Compare & Promote Between Orgs
 description: Find what's missing between source and an org (or between two orgs) and promote it with an exported package.xml.
 ---
 
-import { Steps } from 'nextra/components'
+import { Steps, Callout } from 'nextra/components'
 
 # Compare & Promote Between Orgs
 
 `sfdt compare` enumerates metadata members on both sides and reports what's `source-only`,
 `target-only`, or in `both`. Export the source-only set as a `package.xml` to promote it.
+
+<Callout type="info">
+  When the two orgs run **different Salesforce releases** (detected best-effort from each org's REST
+  version list), `sfdt compare` prints a heads-up before comparing — metadata valid on one release
+  may not deploy cleanly to another. It's non-fatal and skipped for org↔local comparisons or when a
+  release can't be determined.
+</Callout>
 
 ## Audit what's in production but not in source
 

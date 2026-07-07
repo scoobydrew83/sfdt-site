@@ -31,7 +31,7 @@ Running `sfdt init` creates a `.sfdt/` directory in your project root. Every com
 |---|---|
 | `config.json` | Core settings: org aliases, feature flags, AI provider, coverage threshold (see below) |
 | `environments.json` | Named environments and org aliases |
-| `test-config.json` | Test classes, coverage threshold, test level |
+| `test-config.json` | Test classes, coverage threshold, test level, and `parallelDelay` (seconds between parallel test batches, default `1` → `SFDT_PARALLEL_DELAY`) |
 | `pull-config.json` | Metadata types to pull from the org (see [Incremental Pull](/cli/workflows/incremental-pull)) |
 | `*.local.json` | Optional environment-specific overrides — git-ignore these |
 | `plugins/` | Optional local CLI plugins (`.js`/`.mjs`) — see [Plugins](/cli/plugins) |
@@ -86,6 +86,8 @@ A representative `config.json`:
 | `manifestLayout` | enum | `flat` (default) or `subpath` for per-package subdirectories |
 | `changelogDir` | string | Per-package changelog directory (default `changelogs`) |
 | `logDir` | string | CLI log directory (default `logs`) |
+| `defaultBranch` | string | Default base branch for `deploy --create-pr` / release PRs (default `main`; a user-exported `SFDT_DEFAULT_BRANCH` wins) |
+| `smokeTests.testClasses` | array | Apex test classes run by `sfdt smoke` (reaches the script via `SFDT_SMOKE_TESTS`; a user-exported env value wins) |
 | `plugins` | array | npm package names to load as plugins |
 | `pluginOptions.autoDiscover` | boolean | Auto-load `sfdt-plugin-*` packages and `.sfdt/plugins/*.js` (default `false`) |
 
@@ -95,6 +97,7 @@ A representative `config.json`:
 |---|---|---|---|
 | `deployment.coverageThreshold` | number | `75` | Minimum Apex test coverage percent |
 | `deployment.backupBeforeRollback` | boolean | `true` | Capture an org snapshot before `sfdt rollback` |
+| `deployment.keyClasses` | array | `[]` | Key Apex class names for test-selection heuristics |
 | `deployment.preflight.enforceTests` | boolean | `false` | Promote "no tests" from warning to failure |
 | `deployment.preflight.enforceBranchNaming` | boolean | `false` | Enforce branch-naming convention |
 | `deployment.preflight.enforceChangelog` | boolean | `false` | Require an `[Unreleased]` changelog entry |
@@ -170,6 +173,7 @@ See the [MCP Server](/cli/mcp) page for details.
 | `audit.minApiVersion` | `45` | Minimum acceptable API version |
 | `audit.fieldDescriptionMaxMissing` | `0` | Max custom fields allowed without a description before warning |
 | `audit.connectedAppFlagPermissive` | `true` | Flag connected apps that permit all users (admin approval off) |
+| `audit.soapLoginLookbackDays` | `30` | Lookback window for the `soap-logins` check (retiring SOAP `login()` traffic) |
 | `monitoring.backupDir` | `monitoring-backup` | Metadata-backup output directory |
 | `monitoring.limitWarnThreshold` | `0.75` | Governor-limit warn threshold (0–1) |
 | `monitoring.errorLookbackDays` | `7` | Apex-error lookback window |
@@ -178,8 +182,10 @@ See the [MCP Server](/cli/mcp) page for details.
 | `monitoring.deployHistoryLookback` | `20` | Number of recent deployments inspected by `deploy-history` |
 | `monitoring.deprecatedApiLookbackDays` | `7` | Lookback window for deprecated-API traffic |
 | `docs.outputDir` | `docs` | Generated-docs output directory |
-| `docs.ai` | `true` | Include an AI overview in generated docs |
-| `docs.diagrams` | `true` | Generate Mermaid diagrams |
+| `docs.ai` | `true` | Include an AI overview in generated docs (requires `features.ai`) |
+| `docs.diagrams` | `true` | Emit the standalone ER-diagram page during `docs generate` |
+| `docs.roleGuides` | `false` | Emit per-component role guides during `docs generate` (requires `features.ai`) |
+| `docs.roles` | `[]` | Which role guides to emit (`developer`, `admin`, `user`, `devops`); empty = all four |
 | `data.dir` | `.sfdt/data` | Data-set definition directory |
 | `scratch.definitionFile` | `config/project-scratch-def.json` | Scratch-org definition |
 | `scratch.durationDays` | `7` | Scratch-org lifetime |
@@ -193,9 +199,9 @@ See the [MCP Server](/cli/mcp) page for details.
 
 ### `notifications`
 
-Multi-channel push to Slack, Microsoft Teams, email, a generic webhook, or Grafana Loki. Secrets
-are referenced by env-var **name**, never inline. The older single-Slack shape is still honored
-when `features.notifications: true`.
+Multi-channel push to Slack, Microsoft Teams, Google Chat, email, a generic webhook, or Grafana
+Loki. Secrets are referenced by env-var **name**, never inline. The older single-Slack shape is
+still honored when `features.notifications: true`.
 
 ```jsonc
 {
@@ -204,9 +210,9 @@ when `features.notifications: true`.
     "enabled": false,                 // master switch for the channels[] system
     "summary": { "enabled": false },  // send AI executive summaries for snapshots
     "channels": [
-      // type: slack | teams | email | webhook
+      // type: slack | teams | googlechat | email | webhook
       // common: name, severityThreshold (ok|warn|error|fail), events[]
-      // slack/teams: webhookUrl | webhookUrlEnv
+      // slack/teams/googlechat: webhookUrl | webhookUrlEnv
       // webhook: url | urlEnv, format (json|loki), headers{}
       // email: from, to[], smtp{ hostEnv, portEnv, userEnv, passwordEnv, secure }
     ],
@@ -231,11 +237,16 @@ Settings for [Smart Deploy](/cli/smart-deploy) (`sfdt deploy --smart`).
       "noOverwriteManifest": "manifest/package-no-overwrite.xml",
       "impactingTypes": ["ApexClass", "ApexTrigger", "Flow"],
       "downgradeTestsOnNonProd": true,
+      "useRelevantTests": false,
       "assumeProd": false
     }
   }
 }
 ```
+
+`deployment.smart.useRelevantTests` (default `false`) opts non-production orgs on API ≥ 66 into
+Salesforce's beta `RunRelevantTests` in place of the `RunLocalTests` fallback — see
+[Smart Deploy](/cli/smart-deploy).
 
 ### `ai.agent`
 

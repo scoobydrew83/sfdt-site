@@ -32,8 +32,23 @@ sfdt deploy --smart --pr-comment                   # decorate the PR with the re
    - No impacting metadata changed (Apex/triggers/flows) → `NoTestRun`.
    - Only Apex **test** classes changed → `RunSpecifiedTests` (those tests).
    - Any other impacting change → `RunLocalTests`.
+   - When `RunSpecifiedTests` is chosen, the selection is **widened by Spring '26 `@IsTest`
+     annotations**: test classes whose `@IsTest(testFor='Type:Name')` targets a changed component,
+     plus every `@IsTest(critical=true)` class, are included automatically (sources are
+     comment/string-sanitized first, so commented-out annotations don't count).
+   - On a non-production org with `sourceApiVersion` ≥ 66, `deployment.smart.useRelevantTests`
+     (default `false`) opts into Salesforce's beta `RunRelevantTests` instead of the `RunLocalTests`
+     fallback. Production deploys are never auto-downgraded.
 4. **Execute** — `sf project deploy validate` (with `--dry-run`) or `sf project deploy start`,
    including `--post-destructive-changes` when needed.
+
+<Callout type="info">
+  **Agentforce metadata is delta-aware.** The manifest engine recognises Agentforce / Einstein
+  agent types — `Bot`, `BotVersion` (member `Bot.Version`), `GenAiPlanner`, `GenAiPlannerBundle`,
+  `GenAiPlugin`, `GenAiFunction`, `GenAiPromptTemplate`, `AiEvaluationDefinition`, and
+  `AiAuthoringBundle` (the Agent Script authoring bundle). Previously these changes mapped to
+  UNKNOWN and were silently dropped from `deploy --smart` deltas and `sfdt manifest` output.
+</Callout>
 
 ## Options
 
@@ -61,11 +76,19 @@ sfdt deploy --smart --pr-comment                   # decorate the PR with the re
       "noOverwriteManifest": "manifest/package-no-overwrite.xml",
       "impactingTypes": ["ApexClass", "ApexTrigger", "Flow"],
       "downgradeTestsOnNonProd": true,
+      "useRelevantTests": false,
       "assumeProd": false
     }
   }
 }
 ```
+
+<Callout type="info">
+  `useRelevantTests` opts non-production orgs on API ≥ 66 into Salesforce's beta `RunRelevantTests`
+  (the org analyzes the payload and runs only the relevant tests) in place of the `RunLocalTests`
+  fallback. It's beta — a known [sf CLI issue](https://github.com/forcedotcom/cli/issues/3565) can
+  cause `deploy validate` to run zero tests with this level, so verify with `--json` output.
+</Callout>
 
 ## AI deploy-error resolution & auto-fix loop
 

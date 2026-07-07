@@ -1,6 +1,6 @@
 ---
 title: Notifications
-description: Push deployment events and org-health snapshots to Slack, Microsoft Teams, email, a generic webhook, or Grafana Loki — with per-channel event filtering, severity routing, and optional AI executive summaries.
+description: Push deployment events and org-health snapshots to Slack, Microsoft Teams, Google Chat, email, a generic webhook, or Grafana Loki — with per-channel event filtering, severity routing, and optional AI executive summaries.
 ---
 
 import { Callout } from 'nextra/components'
@@ -8,8 +8,8 @@ import { Callout } from 'nextra/components'
 # Notifications
 
 sfdt can push deployment events and org-health snapshots to **Slack**, **Microsoft Teams**,
-**email**, a generic **webhook**, or **Grafana Loki** — with per-channel event filtering and
-severity routing.
+**Google Chat**, **email**, a generic **webhook**, or **Grafana Loki** — with per-channel event
+filtering and severity routing.
 
 <Callout type="info">
   The multi-channel `channels[]` system is gated by `notifications.enabled`. The older
@@ -39,6 +39,13 @@ severity routing.
         "webhookUrlEnv": "TEAMS_WEBHOOK_URL",
         "severityThreshold": "fail",
         "events": ["snapshot"]
+      },
+      {
+        "type": "googlechat",
+        "name": "gchat-ops",
+        "webhookUrlEnv": "GCHAT_WEBHOOK_URL",
+        "severityThreshold": "warn",
+        "events": ["deploy-failure", "snapshot"]
       },
       {
         "type": "email",
@@ -73,9 +80,9 @@ severity routing.
 
 | Field | Applies to | Meaning |
 |---|---|---|
-| `type` | all | `slack` \| `teams` \| `email` \| `webhook` |
+| `type` | all | `slack` \| `teams` \| `googlechat` \| `email` \| `webhook` |
 | `name` | all | Friendly label (shown in CLI/GUI results) |
-| `webhookUrl` / `webhookUrlEnv` | slack, teams | Incoming-webhook URL (inline or env-var name) |
+| `webhookUrl` / `webhookUrlEnv` | slack, teams, googlechat | Incoming-webhook URL (inline or env-var name) |
 | `url` / `urlEnv` | webhook | Endpoint URL (inline or env-var name) |
 | `format` | webhook | `json` (default) or `loki` (Grafana Loki push) |
 | `headers` | webhook | Extra HTTP headers |

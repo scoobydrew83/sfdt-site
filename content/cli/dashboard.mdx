@@ -38,11 +38,11 @@ sfdt ui --no-open         # start without opening the browser
 | **Pull** | Smart-delta / preview / full retrieve with live streaming | `/api/pull` (SSE) |
 | **Quality** | Code/test quality results; stub generator with dry-run preview | `quality-latest.json` |
 | **Scan** | Full metadata inventory with search & filter | `/api/scan` |
-| **Audit** | Org health: audit trail, licenses, MFA, unused Apex, API versions | `audit-latest.json` |
-| **Monitor** | Limits, errors, health score, backup history | `monitor-latest.json` |
-| **Scratch** | Scratch-org pool fill and active scratch orgs | `/api/scratch` |
-| **Data** | Defined `sf data tree` data sets | `/api/data` |
-| **Docs** | Docs config: output dir, diagrams, AI authoring | `/api/docs` |
+| **Audit** | Org health: audit trail, licenses, MFA, unused Apex, API versions; **Run now** (SSE) | `audit-latest.json` |
+| **Monitor** | Limits, errors, health score, backup history; **Run now** (SSE) | `monitor-latest.json` |
+| **Scratch** | Active scratch orgs, plus create / delete / pool-fill actions | `/api/scratch` |
+| **Data** | Defined `sf data tree` data sets, plus export / import / delete actions | `/api/data` |
+| **Docs** | Docs config, plus a generate action | `/api/docs` |
 | **Flows** | Flow health scores, trigger conflicts, subflow graph | `/api/flow/quality` |
 | **Manifests** | Generated `package.xml` artifacts — preview & download | `manifest/release/*.xml` |
 | **Logs** | Searchable log viewer with pagination and raw output | `logs/*` |
@@ -56,9 +56,13 @@ Data appears automatically after running the corresponding CLI commands (`sfdt t
 
 ## Live command runners
 
-The Test Runs, Preflight, Drift, Compare, and Pull pages have **Run** buttons that trigger the
-underlying command over a Server-Sent Events stream — output appears line-by-line in real time,
-exactly like running the CLI.
+The Test Runs, Preflight, Drift, Compare, Pull, **Audit**, and **Monitor** pages have **Run**
+buttons that trigger the underlying command over a Server-Sent Events stream — output appears
+line-by-line in real time, exactly like running the CLI.
+
+The Scratch (create / delete / pool-fill), Data (export / import / delete), and Docs (generate)
+pages add real mutating actions behind in-app confirmation dialogs — which also work inside the
+VS Code-embedded dashboard (no `window.confirm`).
 
 ## AI chat drawer
 

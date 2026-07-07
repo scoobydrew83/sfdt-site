@@ -75,6 +75,10 @@ Configure it under the `mcp` key in `.sfdt/config.json`:
 | `sfdt_compare` | `source` (req), `target` (req) |
 | `sfdt_quality` | `generateStubs`, `fixPlan` |
 | `sfdt_logs` | `type` — `preflight` \| `drift` \| `deploy` \| `rollback` \| `quality` |
+| `sfdt_coverage` | `org` (optional) — org-wide + per-class Apex coverage. Read-only. |
+| `sfdt_scan` | `org` (optional) — full metadata inventory of the org. Read-only. |
+| `sfdt_dependencies` | `name` (req) — component name; `org` (optional). What it references and what references it. Read-only. |
+| `sfdt_flow_scan` | `org` (optional) — Flow quality analysis via `@sfdt/flow-core` (fetches each active FlowDefinition version). Read-only. |
 
 ### Org health & notifications
 
