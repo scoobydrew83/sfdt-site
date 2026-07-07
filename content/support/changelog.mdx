@@ -38,11 +38,13 @@ Next release (in `develop`, post-0.15.2) — a Salesforce-release-readiness and 
   [MCP tools](/cli/mcp) (`sfdt_coverage`, `sfdt_scan`, `sfdt_dependencies`, `sfdt_flow_scan`), and
   **[dashboard](/cli/dashboard)** run-now / create-delete-generate actions for Audit, Monitor,
   Scratch, Data, and Docs.
-- **[Dependency](/cli/commands/metadata#sfdt-dependencies) coverage expanded** — the CLI and the
-  dashboard graph now share one `METADATA_TYPE_REGISTRY` in `@sfdt/flow-core` (no more drift) and
-  cover **Visualforce components and Aura** alongside Apex, triggers, VF pages, Flows, and LWC, with
-  **Custom Object / Custom Field** as opt-in graph source types. The graph query is capped at 5000
-  edges with a truncation banner.
+- **[Dependency](/cli/commands/metadata#sfdt-dependencies) coverage expanded + graph rebuilt** — the
+  CLI and the dashboard graph share one `METADATA_TYPE_REGISTRY` in `@sfdt/flow-core` (no more drift)
+  and cover **Visualforce components and Aura** alongside Apex, triggers, VF pages, Flows, and LWC,
+  with **Custom Object / Custom Field** reachable too. The [dashboard](/cli/dashboard) graph is now
+  **seed + expand-on-click**: pick a component by name and type, then click nodes to expand their
+  dependencies (both directions, capped per click with a **"+more"** badge on high-degree nodes) — so
+  it scales to any org instead of bulk-loading the whole thing.
 
 ## `@sfdt/cli` — 0.15.2
 

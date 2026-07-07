@@ -46,7 +46,7 @@ sfdt ui --no-open         # start without opening the browser
 | **Flows** | Flow health scores, trigger conflicts, subflow graph | `/api/flow/quality` |
 | **Manifests** | Generated `package.xml` artifacts — preview & download | `manifest/release/*.xml` |
 | **Logs** | Searchable log viewer with pagination and raw output | `logs/*` |
-| **Dependencies** | D3 force-directed component dependency graph across Apex, triggers, Visualforce pages/components, Flows, LWC & Aura (with Custom Object/Field as opt-in source types); capped at 5000 edges with a truncation banner | `/api/dependencies` |
+| **Dependencies** | Seed + expand-on-click D3 dependency graph — pick a component by name+type, then click nodes to expand their references / referenced-by (both directions, capped 50/direction with a **"+more"** hub badge); covers Apex, triggers, Visualforce pages/components, Flows, LWC & Aura, with Custom Object/Field reachable as neighbors | `/api/dependencies/resolve`, `/api/dependencies/neighbors` |
 | **Settings** | View/edit config; initialize a project from the GUI | `.sfdt/config.json` |
 | **Coverage** | Live org-wide Apex coverage (with threshold band) plus the per-run coverage trend | `/api/coverage`, `test-results/` |
 | **Dependency Check** | Preflight dependency validation (missing/broken refs) | `/api/dependencies/preflight` |
