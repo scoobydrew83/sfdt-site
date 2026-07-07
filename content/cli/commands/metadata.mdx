@@ -167,7 +167,7 @@ draws on. Resolution and grouping are shared with the Chrome extension and dashb
 sfdt dependencies AccountTriggerHandler                       # ApexClass (default)
 sfdt dependencies AccountTrigger --type ApexTrigger
 sfdt dependencies My_Flow --type Flow
-sfdt dependencies Account.Industry --type CustomField
+sfdt dependencies My_Custom_Field --type CustomField        # resolve a field by its DeveloperName
 sfdt dependencies myComponent --type LightningComponentBundle --org production --json
 ```
 
@@ -178,8 +178,9 @@ sfdt dependencies myComponent --type LightningComponentBundle --org production -
 | `--org <alias>` | Target org (defaults to `config.defaultOrg`) |
 | `--json` | Structured output |
 
-Supported `--type` values: `ApexClass`, `ApexTrigger`, `ApexPage`, `Flow`, `CustomField`,
-`LightningComponentBundle`.
+Supported `--type` values: `ApexClass`, `ApexTrigger`, `ApexPage`, `ApexComponent`, `Flow`,
+`LightningComponentBundle`, `AuraDefinitionBundle`, `CustomField`. The list is driven by the shared
+`METADATA_TYPE_REGISTRY` in `@sfdt/flow-core`, so the CLI and the dashboard graph never drift.
 
 <Callout type="info">
   Output is two grouped lists — **references** (this component → others) and **referenced-by**
