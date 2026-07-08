@@ -210,3 +210,27 @@ sfdt notify snapshot --type audit
   and push in one step. The legacy single-Slack config (`notifications.slack.webhookUrl` with
   `features.notifications: true`) is still honored.
 </Callout>
+
+---
+
+## `sfdt history`
+
+Shows recent runs from the local run index so org-health, coverage, test, and deploy outcomes can
+be trended over time instead of only reading the latest snapshot. Every audit, monitor, quality,
+test, deploy, rollback, and agent-test run is recorded to a compact SQLite index
+(`logs/history.db`); `audit` and `monitor` also archive full timestamped snapshots under
+`logs/audit-results/` and `logs/monitor-results/`. Recording is best-effort — a history failure
+never fails the command.
+
+```bash
+sfdt history
+sfdt history --type audit
+sfdt history --type deploy --limit 50
+sfdt history --json
+```
+
+| Option | Description |
+|---|---|
+| `--type <type>` | Filter to one run type (e.g. `audit`, `monitor`, `quality`, `test-run`, `deploy`, `agent-test`) |
+| `--limit <n>` | Maximum rows to show (default `30`) |
+| `--json` | Emit the result as JSON |
