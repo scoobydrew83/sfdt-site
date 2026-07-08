@@ -45,6 +45,11 @@ Next release (in `develop`, post-0.15.2) — a Salesforce-release-readiness and 
   **seed + expand-on-click**: pick a component by name and type, then click nodes to expand their
   dependencies (both directions, capped per click with a **"+more"** badge on high-degree nodes) — so
   it scales to any org instead of bulk-loading the whole thing.
+- **[Dependency gap report](/cli/commands/metadata#source-parsed-gaps---gaps)** — `sfdt dependencies
+  <name> --gaps` parses local source to surface references the Tooling API misses (dynamic Apex, LWC
+  `@salesforce/apex`, formula and Flow references). Offline by default; `--org` diffs against the API
+  to mark each **MISSING** vs **confirmed**. Also available as a **Gaps** panel on the dashboard
+  Dependencies page.
 
 ## `@sfdt/cli` — 0.15.2
 

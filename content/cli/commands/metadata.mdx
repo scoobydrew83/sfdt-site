@@ -187,3 +187,28 @@ Supported `--type` values: `ApexClass`, `ApexTrigger`, `ApexPage`, `ApexComponen
   (others → this component) — each bucketed by metadata type. An unsupported `--type` or a name
   that resolves to nothing surfaces a clean error / not-found message.
 </Callout>
+
+### Source-parsed gaps (`--gaps`)
+
+The Tooling API's `MetadataComponentDependency` is statically incomplete — it never records
+references that only exist in source in forms it can't resolve: dynamic Apex (`Type.forName`,
+`Database.query`), LWC `@salesforce/apex` imports, formula-field references, and Flow subflow/action
+references. `--gaps` finds those by **parsing your local source**.
+
+```bash
+sfdt dependencies AccountService --type ApexClass --gaps              # offline: list inferred refs
+sfdt dependencies AccountService --type ApexClass --gaps --org prod   # diff: mark MISSING vs confirmed
+```
+
+- **Offline by default** — parses the local source tree, no org needed. Each row shows the reference
+  `kind` (`apex-dynamic`, `lwc-apex`, `formula`, `flow-subflow`, …), the target, and the source
+  evidence.
+- **`--org <alias>`** additionally queries the Tooling API and tags each inferred reference
+  **`MISSING`** (a real gap the API doesn't record) or **`confirmed`** (already known to the API).
+- `--json` emits the structured `{ from, org?, gaps[] }` report.
+
+<Callout type="warning">
+  `--gaps` is a **heuristic regex report** — it can surface false positives (e.g. a class name in a
+  comment) and doesn't resolve fully-dynamic references (a class name built from a variable). Treat
+  it as a lead for impact analysis, not an exhaustive list.
+</Callout>
