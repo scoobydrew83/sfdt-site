@@ -18,6 +18,8 @@ dashboard.
 ```bash
 sfdt test
 sfdt test --analyze
+sfdt test --class-names MyClassTest,OtherTest   # run a specific set of Apex test classes
+sfdt test --logic                               # run Apex + Flow tests together
 sfdt test --legacy
 sfdt test --dry-run
 ```
@@ -26,6 +28,8 @@ sfdt test --dry-run
 |---|---|
 | `--legacy` | Use the legacy test runner instead of the enhanced one |
 | `--analyze` | Run the test analyzer after tests complete, regardless of pass/fail |
+| `--class-names <list>` | Run only a specific comma-separated set of Apex test classes, overriding the configured `testConfig.testClasses` for that run |
+| `--logic` | Run Apex **and** Flow tests together via Salesforce's `sf logic run test` (Flow tests named `FlowTesting.<name>`; requires the org "View All Data" permission). Supports `--category Apex\|Flow`, `--test-level`, `--tests`, `--code-coverage`, `--wait` |
 | `--dry-run` | Preview without running |
 
 **AI on failure:** when tests fail and AI is available, sfdt prompts to analyze the failures —
@@ -34,25 +38,54 @@ assertion failures, then suggests specific fixes. Set `features.ai: false` to sk
 
 ---
 
+## `sfdt agent-test`
+
+Runs an Agentforce agent test (`sf agent test run`, an `AiEvaluationDefinition`) as a CI gate.
+Pass/fail comes from the CLI exit code.
+
+```bash
+sfdt agent-test --spec MyAgentEval
+sfdt agent-test --spec MyAgentEval --org uat --wait 20
+sfdt agent-test --spec MyAgentEval --notify --pr-comment
+```
+
+| Option | Description |
+|---|---|
+| `--spec <name>` | Agent-test spec API name (required) |
+| `--org <alias>` | Target org |
+| `--wait <min>` | Minutes to wait for results |
+| `--pass-rate <pct>` | Fail the gate when the pass rate falls below this threshold |
+| `--notify` | Dispatch an `agent-test-success`/`agent-test-failure` notification |
+| `--pr-comment` | Decorate the current PR with the result |
+
+---
+
 ## `sfdt quality`
 
 Static code-quality analysis with optional AI fix plan. Can analyze code structure, test
-quality, or both.
+quality, or both. The static scan runs the **Salesforce Code Analyzer v5** (`sf code-analyzer run`
+— PMD 7, ESLint, RetireJS), falling back to v4 only when v5 isn't present and otherwise reporting
+the scan as `SKIPPED` rather than a fabricated clean result.
 
 ```bash
 sfdt quality                    # code analyzer only (default)
 sfdt quality --tests            # test analyzer only
 sfdt quality --all              # both analyzers
+sfdt quality --include-fixes    # request actionable fixes/suggestions from Code Analyzer v5
 sfdt quality --fix-plan         # analyzer + AI fix plan
+sfdt quality --api67            # API v67 (Summer '26 user-mode) readiness scan of local Apex
+sfdt quality --test-hints       # flag @IsTest classes lacking @IsTest(testFor=…) annotations
 sfdt quality --generate-stubs   # generate @IsTest stubs for untested Apex
-sfdt quality --generate-stubs --dry-run  # preview stubs without writing files
 ```
 
 | Option | Description |
 |---|---|
 | `--tests` | Run the test analyzer only |
 | `--all` | Run both the code and test analyzers |
+| `--include-fixes` | Ask Code Analyzer v5 for actionable fixes and suggestions (enriches the `--fix-plan` input) |
 | `--fix-plan` | Send analysis output to AI for a prioritized, file-specific fix plan |
+| `--api67` | API v67 readiness scan: flags `WITH SECURITY_ENFORCED`, no-sharing declarations, and `without sharing` DML/SOQL. Exits non-zero only when blocking errors exist and `sourceApiVersion` ≥ 67 |
+| `--test-hints` | Advisory check for `@IsTest` classes with no `@IsTest(testFor=…)` annotation (invisible to Spring '26 RunRelevantTests selection) |
 | `--generate-stubs` | Generate `@IsTest` stub classes for Apex without a test class |
 | `--dry-run` | Preview `--generate-stubs` output without writing files |
 

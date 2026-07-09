@@ -169,12 +169,15 @@ sfdt dependencies AccountTrigger --type ApexTrigger
 sfdt dependencies My_Flow --type Flow
 sfdt dependencies Account.Industry --type CustomField
 sfdt dependencies myComponent --type LightningComponentBundle --org production --json
+sfdt dependencies AccountTriggerHandler --gaps                # source-parsed inferred edges (offline)
+sfdt dependencies AccountTriggerHandler --gaps --org uat      # diff against the org: MISSING vs confirmed
 ```
 
 | Argument / Option | Description |
 |---|---|
 | `<name>` | Developer name of the component to resolve |
 | `--type <MetadataType>` | Metadata type to resolve (default `ApexClass`) |
+| `--gaps` | Report **source-parsed** references the Tooling API misses — dynamic Apex, LWC `@salesforce/apex`, formula and Flow references — by parsing local source offline. With `--org`, each inferred edge is diffed against the org and marked MISSING vs confirmed |
 | `--org <alias>` | Target org (defaults to `config.defaultOrg`) |
 | `--json` | Structured output |
 

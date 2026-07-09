@@ -27,6 +27,8 @@ sfdt audit all --notify          # also push the snapshot to notification channe
 | `audittrail` | Recent Setup Audit Trail entries (lookback `audit.auditTrailLookbackDays`) |
 | `licenses` | License usage vs `audit.licenseWarnThreshold` |
 | `mfa` | Active standard users with no registered MFA method |
+| `mfa-readiness` | Active users not ready for Salesforce's phishing-resistant MFA enforcement (July 2026) |
+| `soap-logins` | SOAP `login()` traffic on API versions 31–64 (retiring Summer '27) |
 | `unused-apex` | Apex classes with zero test coverage (heuristic) |
 | `apex-unreferenced` | Apex classes with no inbound metadata dependency |
 | `inactive-users` | Active users with no recent login (beyond `audit.inactiveUserDays`) |
@@ -100,6 +102,29 @@ Retrieves a full metadata backup into `monitoring.backupDir`.
 sfdt monitor backup
 sfdt monitor backup --org production --json
 ```
+
+---
+
+## `sfdt history`
+
+A durable, queryable index of past runs, so org-health/coverage/deploy outcomes can be **trended**
+over time instead of only showing the latest snapshot. Every audit/monitor/quality/test/deploy/
+rollback/agent-test run is recorded to a compact SQLite index (`logs/history.db`), and audit/monitor
+also archive full timestamped snapshots. Recording is best-effort — a history failure never fails
+the command.
+
+```bash
+sfdt history                       # recent runs across all types
+sfdt history --type audit          # only audit runs
+sfdt history --type deploy --limit 50
+sfdt history --json
+```
+
+| Option | Description |
+|---|---|
+| `--type <type>` | Filter to one run type (`audit`, `monitor`, `quality`, `test`, `deploy`, `rollback`, `agent-test`, …) |
+| `--limit <n>` | Maximum rows to return |
+| `--json` | Structured output |
 
 ---
 

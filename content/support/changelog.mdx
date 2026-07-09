@@ -17,6 +17,25 @@ repository; this page summarizes recent highlights.
   [Extension `CHANGELOG.md`](https://github.com/scoobydrew83/sfdt/blob/main/extension/CHANGELOG.md)
 </Callout>
 
+## `@sfdt/cli` — 0.16.0
+
+- **[Dependency graph — seed & expand](/cli/commands/metadata)** — the dashboard graph is now a
+  seed-and-expand explorer (pick a component, click nodes to expand neighbours). `sfdt dependencies
+  <name> --gaps` reports source-parsed edges the Tooling API misses (dynamic Apex, LWC
+  `@salesforce/apex`, formula/Flow refs), and a "Show inferred" toggle overlays them as dashed edges.
+- **[Agentforce & unified tests](/cli/commands/testing-quality)** — `sfdt agent-test` runs an
+  Agentforce agent test (`sf agent test run`) as a CI gate; `sfdt test --logic` runs Apex + Flow tests
+  together; `--class-names` targets a specific set of Apex classes.
+- **[Code Analyzer v5 + readiness scans](/cli/commands/testing-quality)** — `sfdt quality` now runs
+  `sf code-analyzer run` (PMD 7 / ESLint / RetireJS) with `--include-fixes`, plus new `--api67`
+  (Summer '26 user-mode) and `--test-hints` readiness scans.
+- **[Run history](/cli/commands/org-health) & new org-health checks** — `sfdt history` trends past
+  runs; `sfdt audit` adds MFA-readiness and SOAP-login-retirement checks (both degrade to `warn` on
+  orgs that can't run them). `sfdt deploy` gains `--tag`/`--create-pr`/`--notify`, and
+  [notifications](/cli/notifications) add a Google Chat channel.
+- **[MCP tool-use examples](/cli/mcp)** — every multi-parameter MCP tool now ships realistic example
+  invocations for better agent tool selection. Bundles `@sfdt/flow-core` 0.9.5.
+
 ## `@sfdt/cli` — 0.15.2
 
 - **Fewer false-positive trigger conflicts** — `@sfdt/flow-core` 0.9.4 now reads a record-triggered
@@ -79,6 +98,15 @@ pooling — surfaced across four consumers: the CLI, the web dashboard, the buil
   (`--json` returns `status: "partial"` with `skippedCount`/`errorCount`); `audit`, `monitor`,
   and `data` now surface Salesforce CLI's real error text instead of the opaque execa message.
 
+## `@sfdt/extension` — 0.6.0
+
+- **Flow Scanner** — the flow-quality feature now renders the full `@sfdt/flow-core` report (issue
+  families by score impact, affected elements, recommended fixes, dependencies) on real Salesforce
+  pages, with **Explore** cross-links into the org-wide Dependency Explorer.
+- **Org release badge & Field Access quick link** — the Workspace and Setup tab strip show the org's
+  Salesforce release (and flag preview instances); Object Manager pages gain a Field Access tab.
+- **Org Health (bridge)** is now registered on real Salesforce pages and works via the native host.
+
 ## `@sfdt/extension` — 0.5.0
 
 - **`show-api-names`** — annotate Lightning record detail pages with each field's API name next to
@@ -112,6 +140,15 @@ A WXT/Chrome MV3 extension with a growing set of opt-in features.
 - **0.3.0 — Workspace & Apex** — added the standalone **Workspace** tab plus `apex-anonymous`,
   `debug-log-viewer`, `org-switcher`, and `saved-soql`; the Salesforce API client now works from
   the `chrome-extension://` origin.
+
+## `sfdt.sfdt-devtools` (VS Code) — 0.4.0
+
+- **Run-test-class & agent-test CodeLenses** — a ▶ Run test class lens on Apex test classes and a
+  ▶ Run agent test lens on `*.aiEvaluationDefinition-meta.xml` specs, plus palette commands.
+- **Test Runs in the Status view, coverage highlights, Problems-pane diagnostics** — recent runs,
+  gutter coverage bands, and quality violations surfaced as native VS Code diagnostics.
+- **Smart Deploy — Validate & Review / Quick Deploy** and a "Get started with SFDT" walkthrough; the
+  two CLI spawn paths were consolidated into one.
 
 ## `sfdt.sfdt-devtools` (VS Code) — 0.3.1
 
