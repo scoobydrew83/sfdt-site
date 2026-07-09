@@ -167,7 +167,7 @@ draws on. Resolution and grouping are shared with the Chrome extension and dashb
 sfdt dependencies AccountTriggerHandler                       # ApexClass (default)
 sfdt dependencies AccountTrigger --type ApexTrigger
 sfdt dependencies My_Flow --type Flow
-sfdt dependencies Account.Industry --type CustomField
+sfdt dependencies My_Custom_Field --type CustomField        # resolve a field by its DeveloperName
 sfdt dependencies myComponent --type LightningComponentBundle --org production --json
 ```
 
@@ -178,11 +178,37 @@ sfdt dependencies myComponent --type LightningComponentBundle --org production -
 | `--org <alias>` | Target org (defaults to `config.defaultOrg`) |
 | `--json` | Structured output |
 
-Supported `--type` values: `ApexClass`, `ApexTrigger`, `ApexPage`, `Flow`, `CustomField`,
-`LightningComponentBundle`.
+Supported `--type` values: `ApexClass`, `ApexTrigger`, `ApexPage`, `ApexComponent`, `Flow`,
+`LightningComponentBundle`, `AuraDefinitionBundle`, `CustomField`. The list is driven by the shared
+`METADATA_TYPE_REGISTRY` in `@sfdt/flow-core`, so the CLI and the dashboard graph never drift.
 
 <Callout type="info">
   Output is two grouped lists — **references** (this component → others) and **referenced-by**
   (others → this component) — each bucketed by metadata type. An unsupported `--type` or a name
   that resolves to nothing surfaces a clean error / not-found message.
+</Callout>
+
+### Source-parsed gaps (`--gaps`)
+
+The Tooling API's `MetadataComponentDependency` is statically incomplete — it never records
+references that only exist in source in forms it can't resolve: dynamic Apex (`Type.forName`,
+`Database.query`), LWC `@salesforce/apex` imports, formula-field references, and Flow subflow/action
+references. `--gaps` finds those by **parsing your local source**.
+
+```bash
+sfdt dependencies AccountService --type ApexClass --gaps              # offline: list inferred refs
+sfdt dependencies AccountService --type ApexClass --gaps --org prod   # diff: mark MISSING vs confirmed
+```
+
+- **Offline by default** — parses the local source tree, no org needed. Each row shows the reference
+  `kind` (`apex-dynamic`, `lwc-apex`, `formula`, `flow-subflow`, …), the target, and the source
+  evidence.
+- **`--org <alias>`** additionally queries the Tooling API and tags each inferred reference
+  **`MISSING`** (a real gap the API doesn't record) or **`confirmed`** (already known to the API).
+- `--json` emits the structured `{ from, org?, gaps[] }` report.
+
+<Callout type="warning">
+  `--gaps` is a **heuristic regex report** — it can surface false positives (e.g. a class name in a
+  comment) and doesn't resolve fully-dynamic references (a class name built from a variable). Treat
+  it as a lead for impact analysis, not an exhaustive list.
 </Callout>

@@ -20,6 +20,8 @@ sfdt test
 sfdt test --analyze
 sfdt test --legacy
 sfdt test --dry-run
+sfdt test --logic                                    # Apex + Flow tests in one pass
+sfdt test --logic --tests FooTest,FlowTesting.MyFlow --code-coverage
 ```
 
 | Option | Description |
@@ -27,10 +29,23 @@ sfdt test --dry-run
 | `--legacy` | Use the legacy test runner instead of the enhanced one |
 | `--analyze` | Run the test analyzer after tests complete, regardless of pass/fail |
 | `--dry-run` | Preview without running |
+| `--logic` | Run Apex **and** Flow tests together via `sf logic run test` (Salesforce Spring '26 beta). Requires the org **"View All Data"** permission. Waits for async results. |
+| `--org <alias>` | For `--logic`: target org (default `config.defaultOrg`) |
+| `--test-level <level>` | For `--logic`: `RunLocalTests` \| `RunAllTestsInOrg` \| `RunSpecifiedTests` |
+| `--tests <list>` | For `--logic`: comma-separated names — Apex classes and Flow tests as `FlowTesting.<name>` |
+| `--category <cat>` | For `--logic`: restrict to `Apex` or `Flow` |
+| `--code-coverage` | For `--logic`: retrieve code-coverage results |
+| `--wait <minutes>` | For `--logic`: streaming wait timeout (default `30`) |
 
 **AI on failure:** when tests fail and AI is available, sfdt prompts to analyze the failures —
 it checks for missing test data, SOQL governor-limit violations, null-pointer exceptions, and
 assertion failures, then suggests specific fixes. Set `features.ai: false` to skip the prompt.
+
+<Callout type="info">
+  `--logic` is a thin pass-through to Salesforce's Spring '26 `sf logic run test`, which runs Apex
+  and Flow tests in a single async run. On failure (with `features.ai` enabled) sfdt offers the same
+  AI failure analysis as the Apex runner, feeding it the captured logic-test output.
+</Callout>
 
 ---
 
@@ -41,6 +56,8 @@ quality, or both.
 
 ```bash
 sfdt quality                    # code analyzer only (default)
+sfdt quality --api67            # API v67 (Summer '26) user-mode readiness scan only
+sfdt quality --test-hints       # flag @IsTest classes lacking @IsTest(testFor=...) hints
 sfdt quality --tests            # test analyzer only
 sfdt quality --all              # both analyzers
 sfdt quality --fix-plan         # analyzer + AI fix plan
@@ -50,6 +67,9 @@ sfdt quality --generate-stubs --dry-run  # preview stubs without writing files
 
 | Option | Description |
 |---|---|
+| `--api67` | API v67 (Summer '26 user-mode-by-default) readiness scan of local Apex — flags `WITH SECURITY_ENFORCED` (no longer compiles at v67), classes with no sharing declaration, and `without sharing` classes doing DML/SOQL. Exits `1` only when blocking errors exist and `sourceApiVersion` ≥ 67. |
+| `--test-hints` | Advisory check — flags `@IsTest` classes with no `@IsTest(testFor=...)` annotation (invisible to Spring '26 `RunRelevantTests` and smart-deploy's annotation-aware widening) |
+| `--include-fixes` | Ask **Code Analyzer v5** for actionable fixes/suggestions in the scan output (`--include-fixes --include-suggestions`); the richer output feeds `--fix-plan` |
 | `--tests` | Run the test analyzer only |
 | `--all` | Run both the code and test analyzers |
 | `--fix-plan` | Send analysis output to AI for a prioritized, file-specific fix plan |
@@ -57,9 +77,45 @@ sfdt quality --generate-stubs --dry-run  # preview stubs without writing files
 | `--dry-run` | Preview `--generate-stubs` output without writing files |
 
 <Callout type="info">
+  **Code Analyzer v5.** The code scan runs Salesforce **Code Analyzer v5** (`sf code-analyzer run`
+  — a just-in-time plugin, PMD 7 / ESLint / RetireJS, that auto-installs on a modern `sf` CLI). It
+  falls back to the retired v4 (`sf scanner run`) only if that's the sole plugin present, and
+  otherwise reports the scan as **SKIPPED** (never a fabricated clean result). Install manually with
+  `sf plugins install code-analyzer` if needed.
+</Callout>
+
+<Callout type="info">
   The AI fix plan groups issues by severity (critical / high / medium / low) with file locations
   and concrete suggestions, focused on Salesforce concerns: governor limits, CRUD/FLS, bulk-safe
   patterns, and coverage gaps.
+</Callout>
+
+---
+
+## `sfdt agent-test`
+
+Runs an Agentforce agent test (`sf agent test run` — an `AiEvaluationDefinition`) as a CI gate.
+Pass/fail is taken from the CLI's exit code (the reliable signal, like `sf apex run test`), so it
+slots into any pipeline. Optionally notifies configured channels and decorates the current PR.
+
+```bash
+sfdt agent-test --spec MyAgentEval
+sfdt agent-test --spec MyAgentEval --org uat --wait 45
+sfdt agent-test --spec MyAgentEval --notify --pr-comment
+```
+
+| Option | Description |
+|---|---|
+| `--spec <apiName>` | **Required.** Agent test API name (an `AiEvaluationDefinition`) to run |
+| `--org <alias>` | Target org (default: `config.defaultOrg`) |
+| `--wait <minutes>` | Wait timeout (default `30`; the underlying command is async and sfdt waits for the result) |
+| `--notify` | Dispatch an `agent-test-success` / `agent-test-failure` notification through configured channels |
+| `--pr-comment` | Post the pass/fail result to the current PR (via the `gh` CLI) |
+
+<Callout type="info">
+  A numeric pass-rate threshold (e.g. fail below 90%) is a planned follow-up — it depends on the
+  `sf agent test` JSON result schema. For now the gate is exit-code based: any failed test case
+  fails the run.
 </Callout>
 
 ---

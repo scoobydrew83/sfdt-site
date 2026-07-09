@@ -46,6 +46,13 @@ Default metadata set: `CustomField`, `ValidationRule`, `Layout`, `CustomLabel`, 
 The deploy step uses the [Smart Deploy](/cli/smart-deploy) engine, so overwrite protection and
 smart test selection apply.
 
+<Callout type="info">
+  **Cross-org release check.** When `--source` and `--target` run different Salesforce releases
+  (detected best-effort from each org's REST version list), `sfdt retrofit` prints a heads-up before
+  deploying — metadata valid on one release may not deploy cleanly to another. It's non-fatal, and
+  skipped when a release can't be determined; `retrofit --json` reports it as `releaseMismatch`.
+</Callout>
+
 ## PR comments
 
 `sfdt pr comment` posts results to the current pull request via the GitHub CLI (`gh`). It renders

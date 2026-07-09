@@ -1,6 +1,6 @@
 ---
 title: Org Health & Operations Commands
-description: audit, monitor, docs, data, scratch, and notify — diagnose org health, back up metadata, generate docs, seed data, manage scratch orgs, and push notifications to Slack, Teams, email, webhook, or Loki.
+description: audit, monitor, docs, data, scratch, and notify — diagnose org health, back up metadata, generate docs, seed data, manage scratch orgs, and push notifications to Slack, Teams, Google Chat, email, webhook, or Loki.
 ---
 
 import { Callout } from 'nextra/components'
@@ -27,6 +27,8 @@ sfdt audit all --notify          # also push the snapshot to notification channe
 | `audittrail` | Recent Setup Audit Trail entries (lookback `audit.auditTrailLookbackDays`) |
 | `licenses` | License usage vs `audit.licenseWarnThreshold` |
 | `mfa` | Active standard users with no registered MFA method |
+| `mfa-readiness` | Users without **phishing-resistant** MFA (security key, WebAuthn, or built-in authenticator) ahead of the July 2026 enforcement |
+| `soap-logins` | SOAP `login()` traffic on API versions 31–64 (retiring Summer '27; lookback `audit.soapLoginLookbackDays`) |
 | `unused-apex` | Apex classes with zero test coverage (heuristic) |
 | `apex-unreferenced` | Apex classes with no inbound metadata dependency |
 | `inactive-users` | Active users with no recent login (beyond `audit.inactiveUserDays`) |
@@ -35,7 +37,7 @@ sfdt audit all --notify          # also push the snapshot to notification channe
 | `inactive-validations` | Validation rules that are not active |
 | `inactive-workflows` | Workflow rules that are not active (legacy automation) |
 | `unused-permsets` | Permission sets with no user or group assignment |
-| `connected-apps` | Connected apps that permit all users (admin approval off) |
+| `connected-apps` | Connected apps that permit all users (admin approval off); also notes the External Client Apps migration |
 | `field-descriptions` | Custom fields missing a description |
 | `lint-access` | Custom objects with no Read access granted |
 | `lint-access-fields` | Custom fields with no Read access granted (field-level) |
@@ -65,10 +67,10 @@ sfdt monitor all --notify    # push the snapshot to notification channels
 
 | Check | What it inspects |
 |---|---|
-| `limits` | Governor-limit usage vs `monitoring.limitWarnThreshold` |
+| `limits` | Governor-limit usage vs `monitoring.limitWarnThreshold`; reports the Summer '26 elastic async Apex entries when present and warns in the overflow band |
 | `errors` | Recent failed async Apex jobs (last `monitoring.errorLookbackDays` days) |
 | `health` | Security Health Check score vs `monitoring.healthMinScore` |
-| `org-info` | Instance, edition, and trial/expiration window (`monitoring.orgInfoTrialWarnDays`) |
+| `org-info` | Instance, edition, trial/expiration window (`monitoring.orgInfoTrialWarnDays`), and the org's Salesforce **release version** and preview status |
 | `deploy-history` | Recent deployment success/failure (latest failed → `fail`) |
 | `deprecated-api` | Traffic on deprecated API versions (ApiTotalUsage logs) |
 | `flow-errors` | Paused (potentially stuck) flow interviews |
@@ -108,16 +110,28 @@ sfdt monitor backup --org production --json
 Generates documentation and diagrams from your org/source.
 
 ```bash
-sfdt docs generate            # objects, Apex, flows (MkDocs-compatible)
-sfdt docs generate --ai       # include an AI overview
-sfdt docs diagram             # print a Mermaid ER diagram
+sfdt docs generate                       # objects, Apex, flows (MkDocs-compatible)
+sfdt docs generate --ai                  # force the AI overview on
+sfdt docs generate --no-ai               # force the AI overview off
+sfdt docs generate --roles developer,admin   # per-component role guides (AI)
+sfdt docs generate --no-diagrams         # skip the standalone ER-diagram page
+sfdt docs diagram                        # print a Mermaid ER diagram
 sfdt docs diagram --output erd.mmd
 ```
 
 | Subcommand | Options |
 |---|---|
-| `docs generate` | `--ai`, `--json` |
+| `docs generate` | `--ai` / `--no-ai`, `--roles [list]`, `--no-diagrams`, `--json` |
 | `docs diagram` | `--output <file>`, `--json` |
+
+<Callout type="info">
+  **Config-driven docs.** With no flags, `docs generate` follows config: the AI overview is on when
+  `features.ai && docs.ai !== false` (`--no-ai`/`--ai` override either way); per-component
+  Developer/Admin/User/DevOps guides are emitted when `docs.roleGuides` is enabled (scoped by
+  `docs.roles`, or `--roles [list]`); and the standalone ER-diagram page (`diagrams/erd.md`, linked
+  in the MkDocs nav) is emitted when `docs.diagrams` is enabled (`--no-diagrams` to opt out). Role
+  guides and AI overviews both require `features.ai`.
+</Callout>
 
 ---
 
@@ -168,7 +182,7 @@ Options: `--alias <name>`, `--days <n>`, `--size <n>`, `--json`.
 ## `sfdt notify`
 
 Pushes a deployment-lifecycle event or an org-health snapshot to configured notification
-channels (Slack, Microsoft Teams, email, generic webhook, or Grafana Loki).
+channels (Slack, Microsoft Teams, Google Chat, email, generic webhook, or Grafana Loki).
 
 ```bash
 sfdt notify deploy-success

@@ -131,9 +131,25 @@ sfdt plugin create my-plugin --description "My custom command" --author "you@exa
 
 ## `sfdt skills`
 
-Exports local agent skills to IDE/agent-specific configurations.
+Exports SFDT's bundled agent skills to IDE/agent-specific configurations, or to an
+[`npx skills`](https://github.com/vercel-labs/skills)-compatible pack.
 
 ```bash
-sfdt skills export
+sfdt skills export                              # IDE rules (claude, default)
+sfdt skills export --target cursor
+sfdt skills export --target pack --out ./sfdt-skills-pack
 sfdt skills export --json
 ```
+
+| Option | Description |
+|---|---|
+| `--target <t>` | `claude` (default) \| `cursor` \| `codex` \| `windsurf` — IDE/agent rules; or `pack` for an `npx skills add`-compatible pack |
+| `--out <dir>` | Output directory for `--target pack` (default `./sfdt-skills-pack`) |
+| `--json` | Structured output |
+
+<Callout type="info">
+  `--target pack` emits a root `manifest.json` plus a copy of every skill folder, mirroring the
+  [vercel-labs/skills](https://github.com/vercel-labs/skills) schema — so coding agents can install
+  SFDT's Salesforce workflows the same way as `forcedotcom/sf-skills`. The published npm package
+  ships the `skills/` folder, so the export works from a global install.
+</Callout>
