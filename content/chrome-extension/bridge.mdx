@@ -63,6 +63,12 @@ The host (`com.sfdt.host`) ships with the CLI and supports Chrome, Edge, Brave, 
 Vivaldi on macOS, Linux, and Windows. Set the preferred transport in the options page
 (`auto`, `localhost`, or `native`).
 
+The host answers the **read-only** bridge kinds directly — `quality` (in-process via
+`@sfdt/flow-core`), plus `scan`, `compare`, `drift`, and `org-health`. Mutating kinds (`deploy`,
+`rollback`, `ai`) stay bridge-only and need `sfdt ui` running. Because Chrome launches the host
+outside any project, `install-host` records the project root in `~/.config/sfdt-host.json`; pass
+`--project-root <path>` to override the auto-detected project, or set `SFDT_PROJECT_ROOT`.
+
 <Callout type="warning">
   The extension's built manifest requests `storage`, `clipboardWrite`, and `cookies` plus
   localhost host permissions. The native-messaging transport is provided by the CLI-installed
@@ -79,7 +85,7 @@ The bridge speaks a versioned contract (currently **v1.2**, defined in
 - **Major mismatch** (e.g. `1.x` vs `2.0`) — the extension **refuses** to send requests.
 
 Request kinds include `ping`, `version`, `deploy`, `rollback`, `quality`, `ai`, `scan`,
-`compare`, `org-health`, and `telemetry.snapshot`.
+`compare`, `drift`, `org-health`, and `telemetry.snapshot`.
 
 ## Verifying the connection
 

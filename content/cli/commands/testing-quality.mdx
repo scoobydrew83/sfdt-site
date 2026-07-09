@@ -20,6 +20,7 @@ sfdt test
 sfdt test --analyze
 sfdt test --legacy
 sfdt test --dry-run
+sfdt test --class-names AccountServiceTest,ContactTriggerTest   # run only these classes
 sfdt test --logic                                    # Apex + Flow tests in one pass
 sfdt test --logic --tests FooTest,FlowTesting.MyFlow --code-coverage
 ```
@@ -29,6 +30,7 @@ sfdt test --logic --tests FooTest,FlowTesting.MyFlow --code-coverage
 | `--legacy` | Use the legacy test runner instead of the enhanced one |
 | `--analyze` | Run the test analyzer after tests complete, regardless of pass/fail |
 | `--dry-run` | Preview without running |
+| `--class-names <list>` | Run only these Apex test classes (comma-separated), overriding the configured `testConfig.testClasses` for this run. Powers the VS Code "Run test class" CodeLens. |
 | `--logic` | Run Apex **and** Flow tests together via `sf logic run test` (Salesforce Spring '26 beta). Requires the org **"View All Data"** permission. Waits for async results. |
 | `--org <alias>` | For `--logic`: target org (default `config.defaultOrg`) |
 | `--test-level <level>` | For `--logic`: `RunLocalTests` \| `RunAllTestsInOrg` \| `RunSpecifiedTests` |

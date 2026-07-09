@@ -47,6 +47,7 @@ Configure it under the `mcp` key in `.sfdt/config.json`:
 |---|---|
 | `sfdt_preflight` | `strict` (boolean, optional) |
 | `sfdt_validate` | `targetOrg` (required), `manifest`, `testLevel`, `testClasses` |
+| `sfdt_manifest_from_git` | `base` (default `main`), `head` (default `HEAD`), `package`, `name` — build `package.xml` + `destructiveChanges.xml` from a git diff. Read-only. |
 
 ### Deployment & rollback (safety-gated)
 
@@ -61,6 +62,7 @@ Configure it under the `mcp` key in `.sfdt/config.json`:
 | `sfdt_quick_deploy` | `validationJobId` (req), `targetOrg` (req), `confirmExecution` (req) |
 | `sfdt_rollback` | `confirmExecution` (req) |
 | `sfdt_retrofit` | `source` (req), `target`, `metadata`, `execute`; real deploys require `confirmExecution` |
+| `sfdt_release` | `version`, `package` (default `all`), `name`, `confirmExecution` (req) — builds the release manifest + notes and writes artifacts to the repo |
 
 <Callout type="info">
   For `sfdt_deploy`, a validate-only run (`dryRun: true`) no longer requires `confirmExecution`; a
@@ -79,6 +81,23 @@ Configure it under the `mcp` key in `.sfdt/config.json`:
 | `sfdt_scan` | `org` (optional) — full metadata inventory of the org. Read-only. |
 | `sfdt_dependencies` | `name` (req) — component name; `org` (optional). What it references and what references it. Read-only. |
 | `sfdt_flow_scan` | `org` (optional) — Flow quality analysis via `@sfdt/flow-core` (fetches each active FlowDefinition version). Read-only. |
+| `sfdt_docs` | `ai` (boolean) — generate MkDocs project docs (objects/fields, Apex, Flows) with an optional AI overview and a Mermaid ER diagram. Read-only. |
+| `sfdt_test` | `classNames` (array, optional) — run Apex tests via the enhanced runner; limit to specific classes or use the configured set. Consumes org test resources; not metadata-mutating. |
+| `sfdt_history` | `type` (optional filter — `audit` \| `monitor` \| `quality` \| `test-run` \| `deploy` \| `agent-test` …), `limit` (default 30) — recent runs from the local run index. Read-only. |
+
+### Scratch orgs & data (safety-gated)
+
+The mutating tools here take the same `confirmExecution: true` gate as deployment. `sfdt_data_export`
+and `sfdt_scratch_pool` with `action: "status"` are read-only and need no gate.
+
+| Tool | Arguments |
+|---|---|
+| `sfdt_scratch_create` | `alias`, `days` (1–30), `confirmExecution` (req) |
+| `sfdt_scratch_delete` | `target` (req — alias or username), `confirmExecution` (req) |
+| `sfdt_scratch_pool` | `action` (req — `status` read-only \| `fill` mutating), `size`, `confirmExecution` (req for `fill`) |
+| `sfdt_data_export` | `set` (req), `org` — export a configured data set to local files. Read-only against the org. |
+| `sfdt_data_import` | `set` (req), `org`, `confirmExecution` (req) — write records to the org |
+| `sfdt_data_delete` | `set` (req), `org`, `confirmExecution` (req) — bulk-delete records in the org |
 
 ### Org health & notifications
 

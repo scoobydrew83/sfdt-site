@@ -34,10 +34,21 @@ Next release (in `develop`, post-0.15.2) — a Salesforce-release-readiness and 
   and `--notify` (previously GUI-only), plus any-`.xml` manifest auto-detection.
 - **New [org-health checks](/cli/commands/org-health#sfdt-audit)** — `audit mfa-readiness` and
   `audit soap-logins`; `monitor limits`/`org-info` gain elastic-async and release-version reporting.
-- **[Google Chat notifications](/cli/notifications)**, four new read-only
-  [MCP tools](/cli/mcp) (`sfdt_coverage`, `sfdt_scan`, `sfdt_dependencies`, `sfdt_flow_scan`), and
-  **[dashboard](/cli/dashboard)** run-now / create-delete-generate actions for Audit, Monitor,
-  Scratch, Data, and Docs.
+- **[Google Chat notifications](/cli/notifications)** and **[dashboard](/cli/dashboard)** run-now /
+  create-delete-generate actions for Audit, Monitor, Scratch, Data, and Docs (plus new **Agent Test**
+  and **Retrofit** pages).
+- **[MCP surface now covers the full CLI lifecycle](/cli/mcp)** — on top of the read-only
+  `sfdt_coverage` / `sfdt_scan` / `sfdt_dependencies` / `sfdt_flow_scan`, the server gained the
+  mutating (`confirmExecution`-gated) `sfdt_release`, `sfdt_scratch_*`, and `sfdt_data_*` tools plus
+  `sfdt_test` and read-only `sfdt_history` — 30 tools in total.
+- **[Run history](/cli/commands/org-health#sfdt-history)** — `sfdt history` (with `--type` / `--limit`
+  / `--json`) surfaces a durable local index of every audit/monitor/quality/test/deploy/agent-test run,
+  so outcomes can be trended over time; `audit`/`monitor` also archive full timestamped snapshots.
+- **[`sfdt test --class-names`](/cli/commands/testing-quality#sfdt-test)** runs a specific subset of
+  Apex test classes (powers the VS Code "Run test class" CodeLens), and **[`sfdt skills export
+  --target pack`](/cli/commands/platform-bridge)** emits an `npx skills add`-compatible pack. The
+  Chrome extension's native-messaging host now also answers the read-only bridge kinds
+  (`quality`/`scan`/`compare`/`drift`/`org-health`) when the HTTP bridge isn't running.
 - **[Dependency](/cli/commands/metadata#sfdt-dependencies) coverage expanded + graph rebuilt** — the
   CLI and the dashboard graph share one `METADATA_TYPE_REGISTRY` in `@sfdt/flow-core` (no more drift)
   and cover **Visualforce components and Aura** alongside Apex, triggers, VF pages, Flows, and LWC,
