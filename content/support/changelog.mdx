@@ -17,9 +17,9 @@ repository; this page summarizes recent highlights.
   [Extension `CHANGELOG.md`](https://github.com/scoobydrew83/sfdt/blob/main/extension/CHANGELOG.md)
 </Callout>
 
-## `@sfdt/cli` — Unreleased
+## `@sfdt/cli` — 0.16.0
 
-Next release (in `develop`, post-0.15.2) — a Salesforce-release-readiness and Agentforce batch:
+A Salesforce-release-readiness and Agentforce batch:
 
 - **[`sfdt agent-test`](/cli/commands/testing-quality#sfdt-agent-test)** — run an Agentforce agent
   test (`sf agent test run`) as an exit-code CI gate, with `--notify` and `--pr-comment`. Smart
@@ -125,6 +125,15 @@ pooling — surfaced across four consumers: the CLI, the web dashboard, the buil
   (`--json` returns `status: "partial"` with `skippedCount`/`errorCount`); `audit`, `monitor`,
   and `data` now surface Salesforce CLI's real error text instead of the opaque execa message.
 
+## `@sfdt/extension` — 0.6.0
+
+- **Flow Scanner** — the flow-quality feature now renders the full `@sfdt/flow-core` report (issue
+  families by score impact, affected elements, recommended fixes, dependencies) on real Salesforce
+  pages, with **Explore** cross-links into the org-wide Dependency Explorer.
+- **Org release badge & Field Access quick link** — the Workspace and Setup tab strip show the org's
+  Salesforce release (and flag preview instances); Object Manager pages gain a Field Access tab.
+- **Org Health (bridge)** is now registered on real Salesforce pages and works via the native host.
+
 ## `@sfdt/extension` — 0.5.0
 
 - **`show-api-names`** — annotate Lightning record detail pages with each field's API name next to
@@ -158,6 +167,15 @@ A WXT/Chrome MV3 extension with a growing set of opt-in features.
 - **0.3.0 — Workspace & Apex** — added the standalone **Workspace** tab plus `apex-anonymous`,
   `debug-log-viewer`, `org-switcher`, and `saved-soql`; the Salesforce API client now works from
   the `chrome-extension://` origin.
+
+## `sfdt.sfdt-devtools` (VS Code) — 0.4.0
+
+- **Run-test-class & agent-test CodeLenses** — a ▶ Run test class lens on Apex test classes and a
+  ▶ Run agent test lens on `*.aiEvaluationDefinition-meta.xml` specs, plus palette commands.
+- **Test Runs in the Status view, coverage highlights, Problems-pane diagnostics** — recent runs,
+  gutter coverage bands, and quality violations surfaced as native VS Code diagnostics.
+- **Smart Deploy — Validate & Review / Quick Deploy** and a "Get started with SFDT" walkthrough; the
+  two CLI spawn paths were consolidated into one.
 
 ## `sfdt.sfdt-devtools` (VS Code) — 0.3.1
 
