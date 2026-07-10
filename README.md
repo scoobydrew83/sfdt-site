@@ -77,4 +77,4 @@ wrangler.jsonc           Cloudflare Pages project config
 ```
 
 Content is documentation for the upstream project at
-[scoobydrew83/sfdt](https://github.com/scoobydrew83/sfdt). MIT licensed.
+[scoobydrew83/sfdt](https://github.com/scoobydrew83/sfdt). Apache-2.0 licensed.

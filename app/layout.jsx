@@ -52,7 +52,7 @@ const footer = (
   <Footer>
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
       <span>
-        MIT {new Date().getFullYear()} © SFDT — Salesforce DevTools. Not affiliated with
+        Apache-2.0 {new Date().getFullYear()} © SFDT — Salesforce DevTools. Not affiliated with
         Salesforce, Inc.
       </span>
       <span style={{ opacity: 0.6, fontSize: '0.85em' }}>
