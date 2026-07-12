@@ -17,9 +17,9 @@ repository; this page summarizes recent highlights.
   [Extension `CHANGELOG.md`](https://github.com/scoobydrew83/sfdt/blob/main/extension/CHANGELOG.md)
 </Callout>
 
-## `@sfdt/cli` — Unreleased
+## `@sfdt/cli` — 0.17.0
 
-A CI/CD expansion batch:
+A CI/CD and diagnostics batch:
 
 - **[GitHub Action](/cli/github-action)** — run any sfdt command as a single step
   (`uses: scoobydrew83/sfdt@v0`) with built-in sfdx-url/JWT auth and version pinning
@@ -35,6 +35,10 @@ A CI/CD expansion batch:
   CLI, locally and in scratch-org CI.
 - **[`deploy --smart --notify`](/cli/smart-deploy#notifications)** — smart deploys now push
   success/failure notifications through your configured channels.
+- **[`sfdt doctor`](/cli/commands/platform-bridge#sfdt-doctor) core group** — new environment
+  diagnostics (`sf`, Node, `git`, `.sfdt` config validity, AI provider, and a warn-only,
+  timeout-bounded org-connectivity probe) alongside the extension-stack checks. Flags `--core`,
+  `--extension`, `--org`, `--json`; CI-safe (the org check never fails the run).
 - **Node 22 floor** — @sfdt/cli requires Node ≥ 22.15; all generated pipelines and the action
   default to Node 22.
 
@@ -188,6 +192,12 @@ A WXT/Chrome MV3 extension with a growing set of opt-in features.
 - **0.3.0 — Workspace & Apex** — added the standalone **Workspace** tab plus `apex-anonymous`,
   `debug-log-viewer`, `org-switcher`, and `saved-soql`; the Salesforce API client now works from
   the `chrome-extension://` origin.
+
+## `sfdt.sfdt-devtools` (VS Code) — 0.4.1
+
+- **Commands-tree catalog** now surfaces the new CLI actions — [`test --lwc`](/cli/commands/testing-quality#sfdt-test),
+  `deploy --smart --notify`, and [`quality --output-file`](/cli/commands/testing-quality#sfdt-quality) —
+  keeping the extension in step with CLI 0.17.0.
 
 ## `sfdt.sfdt-devtools` (VS Code) — 0.4.0
 
