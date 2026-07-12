@@ -1,6 +1,7 @@
 export default {
   index: 'Overview',
   installation: 'Installation',
+  'github-action': 'GitHub Action',
   configuration: 'Configuration',
   commands: 'Command Reference',
   workflows: 'Workflows',

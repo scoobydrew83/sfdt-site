@@ -26,7 +26,16 @@ docker pull ghcr.io/scoobydrew83/sfdt:0.16.0
 docker run --rm ghcr.io/scoobydrew83/sfdt:latest --help
 ```
 
-A new image is published for every CLI release (tagged with the version, plus `:latest`).
+A new image is published for every CLI release (tagged with the version, plus `:latest`). The
+image ships Node 22.
+
+## Use as a CI job image
+
+The image is a first-class CI job image:
+`sfdt ci init --provider gitlab|bitbucket --runner docker` generates pipelines whose jobs run
+directly on `ghcr.io/scoobydrew83/sfdt:latest` — no per-run `npm install`s. See
+[CI/CD Integration](/cli/ci-cd#generating-a-pipeline--sfdt-ci-init). (On GitHub, use the
+[GitHub Action](/cli/github-action) instead.)
 
 ## Build from source
 

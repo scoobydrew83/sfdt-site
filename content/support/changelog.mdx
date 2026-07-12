@@ -17,6 +17,27 @@ repository; this page summarizes recent highlights.
   [Extension `CHANGELOG.md`](https://github.com/scoobydrew83/sfdt/blob/main/extension/CHANGELOG.md)
 </Callout>
 
+## `@sfdt/cli` — Unreleased
+
+A CI/CD expansion batch:
+
+- **[GitHub Action](/cli/github-action)** — run any sfdt command as a single step
+  (`uses: scoobydrew83/sfdt@v0`) with built-in sfdx-url/JWT auth and version pinning
+  (`cli-version: auto`).
+- **[`ci init` expansion](/cli/ci-cd#generating-a-pipeline--sfdt-ci-init)** — new `release`
+  (approval-gated real deploys) and `scratch` (create → deploy → test → always-delete) pipeline
+  types; JWT auth (`--auth jwt`); Docker (`--runner docker`, GitLab/Bitbucket) and Action
+  (`--runner action`, GitHub) runners.
+- **Quality gate in PR pipelines** — generated deploy workflows run an advisory `sfdt quality`
+  scan; GitHub uploads SARIF to code scanning
+  ([`quality --output-file`](/cli/commands/testing-quality#sfdt-quality)).
+- **[`test --lwc`](/cli/commands/testing-quality#sfdt-test)** — run LWC (Jest) unit tests via the
+  CLI, locally and in scratch-org CI.
+- **[`deploy --smart --notify`](/cli/smart-deploy#notifications)** — smart deploys now push
+  success/failure notifications through your configured channels.
+- **Node 22 floor** — @sfdt/cli requires Node ≥ 22.15; all generated pipelines and the action
+  default to Node 22.
+
 ## `@sfdt/cli` — 0.16.0
 
 A Salesforce-release-readiness and Agentforce batch:
