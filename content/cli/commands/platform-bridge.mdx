@@ -80,18 +80,30 @@ sfdt feature-flags clear --remove
 
 ## `sfdt doctor`
 
-End-to-end diagnostic for the extension stack: bridge reachable, native host registered,
-kill-switch readable, telemetry snapshot present. Exits non-zero on failure — wire it into CI.
+End-to-end local diagnostic. Two check groups run by default:
+
+- **Environment** — `sf`, `node`, and `git` are present; `.sfdt/` config is valid; the
+  configured AI provider is reachable (when enabled); and the default org is reachable
+  (always run, but warn-only — it never fails the command and is bounded by a timeout).
+- **Extension stack** — bridge reachable, native host registered, kill-switch readable,
+  telemetry snapshot present.
+
+With no flag, both groups run. Exits non-zero if any check fails (org connectivity never
+fails) — wire it into CI.
 
 ```bash
-sfdt doctor --extension
-sfdt doctor --extension --json
-sfdt doctor --extension --port 8080
+sfdt doctor                 # environment + extension groups
+sfdt doctor --core          # environment checks only
+sfdt doctor --extension     # extension checks only
+sfdt doctor --org myAlias   # check a specific org's connectivity
+sfdt doctor --json          # CI-friendly structured output
 ```
 
 | Option | Description |
 |---|---|
-| `--extension` | Run the extension-stack diagnostic |
+| `--core` | Run only the environment checks (sf, node, git, config, AI, org) |
+| `--extension` | Run only the extension-stack checks |
+| `--org <alias>` | Org alias for the connectivity check (default: config `defaultOrg`) |
 | `--json` | CI-friendly structured output |
 | `--port <n>` | Bridge port if not the default |
 
