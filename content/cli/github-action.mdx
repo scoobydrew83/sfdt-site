@@ -1,0 +1,81 @@
+---
+title: GitHub Action
+description: Run any sfdt command as a single GitHub Actions step — uses scoobydrew83/sfdt@v0 — with built-in Node setup, pinned CLI install, and sfdx-url or JWT org authentication.
+---
+
+import { Callout } from 'nextra/components'
+
+# GitHub Action
+
+The sfdt repo ships a composite GitHub Action: run any sfdt command as a single `uses:` step.
+The action sets up Node, installs the Salesforce CLI and a **pinned** `@sfdt/cli`, and
+optionally authenticates the org.
+
+```yaml
+- uses: scoobydrew83/sfdt@v0
+  with:
+    command: deploy --smart --org ci --dry-run
+```
+
+## Inputs
+
+| Input | Default | Description |
+|---|---|---|
+| `command` | *(required)* | The sfdt command line to run (everything after `sfdt`), e.g. `deploy --smart --org ci --dry-run` |
+| `cli-version` | `auto` | `auto` installs the CLI version shipped at the pinned action ref — **pinning the action tag pins the CLI**. `latest` or an exact semver also accepted |
+| `auth-method` | `none` | `none` (job already authenticated) \| `sfdx-url` \| `jwt` |
+| `sfdx-auth-url` | — | Sfdx auth URL for `sfdx-url` (pass a secret) |
+| `consumer-key` | — | Connected-app consumer key (client id) for `jwt` (pass a secret) |
+| `jwt-secret-key` | — | **Contents** of the JWT signing private key for `jwt` (pass a secret), not a file path |
+| `username` | — | Username to authenticate as for `jwt` |
+| `instance-url` | `https://login.salesforce.com` | Login URL for `jwt` |
+| `org-alias` | `ci-org` | Alias assigned to the authenticated org (also set as default org) |
+| `node-version` | `22` | Node to set up — **@sfdt/cli requires Node ≥ 22.15**; the action fails fast with a clear `::error::` on older versions |
+
+## Example — PR validation (sfdx auth URL)
+
+```yaml
+- uses: actions/checkout@v4
+  with:
+    fetch-depth: 0
+- name: Smart delta validation
+  uses: scoobydrew83/sfdt@v0
+  with:
+    command: deploy --smart --org ci --delta-base "origin/${{ github.event.pull_request.base.ref }}" --dry-run
+    auth-method: sfdx-url
+    sfdx-auth-url: ${{ secrets.SFDX_AUTH_URL }}
+    org-alias: ci
+```
+
+## Example — JWT release deploy
+
+```yaml
+- name: Smart delta deploy
+  uses: scoobydrew83/sfdt@v0
+  with:
+    command: deploy --smart --org prod --delta-base "v1.4.0" --notify
+    auth-method: jwt
+    consumer-key: ${{ secrets.SFDX_CONSUMER_KEY }}
+    jwt-secret-key: ${{ secrets.SFDX_JWT_SECRET_KEY }}
+    username: ${{ secrets.SFDX_USERNAME }}
+    org-alias: prod
+```
+
+## Version pinning
+
+The floating `v0` tag tracks the newest stable release automatically (the release pipeline
+force-moves it; beta releases never move it). Pin an exact tag (`@v0.16.2`) or a commit SHA for
+immutable references — with `cli-version: auto` that also pins the CLI version.
+
+## Security
+
+<Callout type="warning">
+  - Pass secrets only as `${{ secrets.X }}` expressions — never as literals in the workflow file.
+  - Do **not** feed untrusted input to `command` — it is executed as a shell command line.
+  - The JWT key is written to a temp file and always deleted (trap on exit).
+</Callout>
+
+<Callout type="info">
+  `sfdt ci init --provider github --runner action` generates complete workflows built on this
+  action — see [CI/CD Integration](/cli/ci-cd#generating-a-pipeline--sfdt-ci-init).
+</Callout>

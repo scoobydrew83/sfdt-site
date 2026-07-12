@@ -63,9 +63,10 @@ sfdt deploy --tag --create-pr --notify         # tag, open a PR, and notify afte
 | `--notify` | Send the deploy success/failure notification through `sfdt notify` (the non-interactive path now sends the success event too) |
 
 <Callout type="info">
-  `--tag`, `--create-pr`, and `--notify` apply to the **standard manifest deploy only** — combining
-  them with `--smart`, `--managed`, or `--source-dir` prints a warning instead of silently doing
-  nothing.
+  `--tag` and `--create-pr` apply to the **standard manifest deploy only** — combining them with
+  `--smart`, `--managed`, or `--source-dir` prints a warning instead of silently doing nothing.
+  `--notify` now also works with `--smart` (see [Smart Deploy](/cli/smart-deploy#notifications));
+  with `--managed` or `--source-dir` it still prints a warning.
 </Callout>
 
 <Callout type="info">

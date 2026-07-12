@@ -23,13 +23,15 @@ sfdt test --dry-run
 sfdt test --class-names AccountServiceTest,ContactTriggerTest   # run only these classes
 sfdt test --logic                                    # Apex + Flow tests in one pass
 sfdt test --logic --tests FooTest,FlowTesting.MyFlow --code-coverage
+sfdt test --lwc                                      # run the project's LWC (Jest) unit tests
 ```
 
 | Option | Description |
 |---|---|
 | `--legacy` | Use the legacy test runner instead of the enhanced one |
 | `--analyze` | Run the test analyzer after tests complete, regardless of pass/fail |
-| `--dry-run` | Preview without running |
+| `--dry-run` | Preview without running (also works with `--lwc`) |
+| `--lwc` | Run the project's LWC (Jest) unit tests locally. Prefers `npm run test:unit`, falls back to the `sfdx-lwc-jest` binary |
 | `--class-names <list>` | Run only these Apex test classes (comma-separated), overriding the configured `testConfig.testClasses` for this run. Powers the VS Code "Run test class" CodeLens. |
 | `--logic` | Run Apex **and** Flow tests together via `sf logic run test` (Salesforce Spring '26 beta). Requires the org **"View All Data"** permission. Waits for async results. |
 | `--org <alias>` | For `--logic`: target org (default `config.defaultOrg`) |
@@ -49,6 +51,15 @@ assertion failures, then suggests specific fixes. Set `features.ai: false` to sk
   AI failure analysis as the Apex runner, feeding it the captured logic-test output.
 </Callout>
 
+<Callout type="info">
+  **`--lwc` detection.** The project's `package.json` must wire a runner (an
+  `@salesforce/sfdx-lwc-jest` — or legacy `sfdx-lwc-jest` — dependency, or a `test:unit` script)
+  **and** at least one `lwc/*/__tests__/` directory must exist under the package directories.
+  When not detected, the command exits with a clear, actionable error. The
+  [scratch-org CI templates](/cli/ci-cd#workflow-types) run these same tests when a Jest setup is
+  detected.
+</Callout>
+
 ---
 
 ## `sfdt quality`
@@ -65,6 +76,7 @@ sfdt quality --all              # both analyzers
 sfdt quality --fix-plan         # analyzer + AI fix plan
 sfdt quality --generate-stubs   # generate @IsTest stubs for untested Apex
 sfdt quality --generate-stubs --dry-run  # preview stubs without writing files
+sfdt quality --output-file sfdt-quality.sarif   # extra Code Analyzer v5 output file (SARIF, HTML, CSV, …)
 ```
 
 | Option | Description |
@@ -72,6 +84,7 @@ sfdt quality --generate-stubs --dry-run  # preview stubs without writing files
 | `--api67` | API v67 (Summer '26 user-mode-by-default) readiness scan of local Apex — flags `WITH SECURITY_ENFORCED` (no longer compiles at v67), classes with no sharing declaration, and `without sharing` classes doing DML/SOQL. Exits `1` only when blocking errors exist and `sourceApiVersion` ≥ 67. |
 | `--test-hints` | Advisory check — flags `@IsTest` classes with no `@IsTest(testFor=...)` annotation (invisible to Spring '26 `RunRelevantTests` and smart-deploy's annotation-aware widening) |
 | `--include-fixes` | Ask **Code Analyzer v5** for actionable fixes/suggestions in the scan output (`--include-fixes --include-suggestions`); the richer output feeds `--fix-plan` |
+| `--output-file <path>` | Ask **Code Analyzer v5** for a second output file whose format follows the extension — `.sarif` for GitHub code scanning, `.html`, `.csv`, etc. (as supported by v5). The stdout/JSON contract is unchanged (the flag adds a second `--output-file` to the same scan). Code Analyzer **v4** logs a warning and skips the extra file |
 | `--tests` | Run the test analyzer only |
 | `--all` | Run both the code and test analyzers |
 | `--fix-plan` | Send analysis output to AI for a prioritized, file-specific fix plan |
@@ -90,6 +103,13 @@ sfdt quality --generate-stubs --dry-run  # preview stubs without writing files
   The AI fix plan groups issues by severity (critical / high / medium / low) with file locations
   and concrete suggestions, focused on Salesforce concerns: governor limits, CRUD/FLS, bulk-safe
   patterns, and coverage gaps.
+</Callout>
+
+<Callout type="info">
+  The [generated GitHub PR-validation workflow](/cli/ci-cd#workflow-types) uses `--output-file`
+  automatically — `quality --output-file sfdt-quality.sarif` plus
+  `github/codeql-action/upload-sarif@v3` puts scan results in the repo's Security → Code scanning
+  tab.
 </Callout>
 
 ---

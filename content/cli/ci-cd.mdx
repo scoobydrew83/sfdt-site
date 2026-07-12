@@ -65,53 +65,102 @@ sfdt audit --json | jq '.status'          # 0 when healthy
 
 ## Generating a pipeline — `sfdt ci init`
 
-`sfdt ci init` generates a ready-to-run pipeline for your Git provider — either a scheduled
-**org-monitoring** job or a PR **smart-deploy** validation job.
+`sfdt ci init` generates a ready-to-run pipeline for your Git provider — four workflow types:
+scheduled **org monitoring**, PR **smart-deploy validation**, approval-gated **release
+deploys**, and **scratch-org CI**.
 
 ```bash
 sfdt ci init --provider github --type monitor --cron "0 6 * * *"
-sfdt ci init --provider gitlab --type deploy --org uat
-sfdt ci init --provider azure --type monitor --node 22
-sfdt ci init --provider bitbucket --type deploy --print   # print instead of write
+sfdt ci init --provider gitlab --type deploy --org uat --auth jwt
+sfdt ci init --provider github --type release --branch main --environment production
+sfdt ci init --provider azure --type scratch --org my-devhub
+sfdt ci init --provider github --type deploy --runner action   # one-step workflows via the GitHub Action
+sfdt ci init --provider bitbucket --type deploy --print        # print instead of write
 ```
 
-`sfdt monitor schedule --provider github` is a thin alias for `ci init --type monitor`.
+`sfdt monitor schedule --provider github` is a thin alias for `ci init --type monitor` (it also
+accepts `--auth` and `--runner`).
 
 | Flag | Default | Notes |
 |---|---|---|
-| `--provider` | (required) | `github` \| `gitlab` \| `azure` \| `bitbucket` |
-| `--type` | `monitor` | `monitor` (scheduled health) or `deploy` (PR smart-deploy) |
-| `--cron` | `0 6 * * *` | Schedule for monitor workflows |
-| `--org` | `config.defaultOrg` | Target org alias embedded in the workflow |
-| `--delta-base` | `main` | Base ref for smart-deploy delta |
-| `--node` | `20` | Node.js version for the CI runner |
+| `--provider <name>` | (required) | `github` \| `gitlab` \| `azure` \| `bitbucket` |
+| `--type <type>` | `monitor` | `monitor` (scheduled health) \| `deploy` (PR validation) \| `release` (real deploy) \| `scratch` (scratch-org CI) |
+| `--auth <method>` | config `ci.authMethod` or `sfdx-url` | `sfdx-url` \| `jwt` — swaps the generated auth steps and the documented secrets |
+| `--runner <name>` | config `ci.runner` or `npx` | `npx` \| `docker` \| `action`. `docker` (GitLab/Bitbucket only): job runs on `ghcr.io/scoobydrew83/sfdt:latest` — no per-run CLI installs. `action` (GitHub only; monitor/deploy/release): one `uses: scoobydrew83/sfdt@v0` step replaces setup/auth — see [GitHub Action](/cli/github-action). Scratch is excluded from `action` because it drives raw `sf` commands with their own always-run cleanup |
+| `--cron <expr>` | `0 6 * * *` | Schedule for monitor workflows |
+| `--org <alias>` | `config.defaultOrg` | Target org alias embedded in the workflow. For `--type scratch` this is the **Dev Hub** alias |
+| `--branch <name>` | config `defaultBranch` or `main` | Protected branch that triggers a release workflow |
+| `--environment <name>` | config `ci.environment` or `production` | Approval environment for release workflows |
+| `--delta-base <ref>` | deploy: `main`; release: `HEAD~1` | Base ref for the smart-deploy delta. Release templates resolve the **last git tag at runtime** (`git describe`); this flag is only the no-tags fallback |
+| `--definition-file <path>` | config `scratch.definitionFile` or `config/project-scratch-def.json` | Scratch-org definition (scratch type) |
+| `--node <version>` | `22` | Node.js version for the CI runner — **@sfdt/cli requires Node ≥ 22.15** |
 | `--out` | provider convention | Output path override |
 | `--print` | — | Print to stdout instead of writing |
 | `--force` | — | Overwrite an existing file |
 | `--json` | — | Machine-readable result |
 
+### Workflow types
+
+- **`monitor`** — scheduled org health: runs `sfdt monitor all --notify --json` on the `--cron`
+  schedule. See [Notifications](/cli/notifications).
+- **`deploy`** — PR validation: runs an advisory `sfdt quality` scan, then
+  `sfdt deploy --smart --dry-run` against the PR's base branch (full git history is fetched so
+  the delta can be computed). On GitHub the quality scan emits SARIF and uploads it to the
+  **Security → Code scanning** tab (the generated workflow includes
+  `permissions: security-events: write`). The scan is non-blocking by design. See
+  [Smart Deploy](/cli/smart-deploy) and [`sfdt quality`](/cli/commands/testing-quality#sfdt-quality).
+- **`release`** — approval-gated real deploy from the protected `--branch`: deploys the delta
+  since the **last git tag** with `deploy --smart --notify`. Tag each release (e.g.
+  `sfdt release <version>` or `sfdt deploy --tag`) so the delta stays small.
+- **`scratch`** — scratch-org CI: creates a 1-day scratch org from the Dev Hub, deploys source,
+  runs `RunLocalTests` with coverage, optionally runs LWC Jest tests (the step is emitted
+  commented-out unless a Jest setup is detected in the project), and **always deletes the org**
+  (`if: always()` / `after_script` / `condition: always()` / after-script, per provider).
+
+### Release approval gating, per provider
+
+- **GitHub** — the job runs in a GitHub Environment: add required reviewers under
+  Settings → Environments, and scope the auth secret to the environment.
+- **GitLab** — the job is `when: manual` and bound to an environment: protect it via
+  Settings → CI/CD → Protected environments.
+- **Azure** — uses a `deployment:` job bound to an Environment: create it first
+  (Pipelines → Environments) and add "Approvals and checks"; plain script jobs do not honor
+  approvals.
+- **Bitbucket** — the step is bound to a deployment environment; restricting deployers requires
+  **Premium**. The template header shows a manual-trigger `custom:` pipeline alternative for
+  other plans.
+
 ### Where files land
 
-- **GitHub** → `.github/workflows/sfdt-monitor.yml` / `sfdt-deploy.yml`
+- **GitHub** → `.github/workflows/` (e.g. `sfdt-monitor.yml`, `sfdt-deploy.yml`)
 - **GitLab / Azure / Bitbucket** → a standalone fragment under `.sfdt/ci/` for you to
   merge/include (these providers use a single top-level pipeline file).
 
 ### Required secrets
 
-The templates authenticate with an `SFDX_AUTH_URL` secret (`sf org display --verbose --json` for
-the target org) and read notification webhook secrets by name (e.g. `SLACK_WEBHOOK_URL`,
-`TEAMS_WEBHOOK_URL`). Add them in your provider's secret store:
+Secrets depend on `--auth` (they're listed in the generated file's header and the post-generate
+hint):
+
+- **`sfdx-url`** — `SFDX_AUTH_URL` (from `sf org auth show-sfdx-auth-url`)
+- **`jwt`** — `SFDX_CONSUMER_KEY`, `SFDX_JWT_SECRET_KEY` (the key **contents**, not a path),
+  `SFDX_USERNAME`, optional `SFDX_INSTANCE_URL`
+- optional for monitor/release: `SLACK_WEBHOOK_URL`, `TEAMS_WEBHOOK_URL`
+
+Add them in your provider's secret store:
 
 - **GitHub** → Settings → Secrets and variables → Actions
 - **GitLab** → Settings → CI/CD → Variables (masked)
 - **Azure** → Pipelines → Library / pipeline variables (secret)
 - **Bitbucket** → Repository settings → Pipelines → Variables (secured)
 
-Monitor workflows run `sfdt monitor all --notify --json`; deploy workflows run
-`sfdt deploy --smart --dry-run` against the PR's base branch (full git history is fetched so the
-delta can be computed). See [Smart Deploy](/cli/smart-deploy) and [Notifications](/cli/notifications).
+Defaults for `--auth`, `--runner`, and `--environment` can be set once in the
+[`ci` config block](/cli/configuration#ci) — flags override config; config overrides built-in
+defaults.
 
 ## GitHub Actions
+
+For a single-step setup, use the official [GitHub Action](/cli/github-action) —
+`uses: scoobydrew83/sfdt@v0` handles Node, the CLI install, and org auth. Or script it yourself:
 
 ```yaml
 - name: Preflight and deploy

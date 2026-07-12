@@ -63,6 +63,7 @@ sfdt deploy --smart --pr-comment                   # decorate the PR with the re
 | `--ai-fix` | On failure, run AI deploy-error analysis (or the auto-fix loop, below) |
 | `--max-turns <n>` | Auto-fix iteration cap (overrides `ai.agent.maxTurns`) |
 | `--pr-comment` | Post the delta + outcome to the current PR (via `gh`) |
+| `--notify` | Dispatch `deploy-success` / `deploy-failure` through configured notification channels after the run (see below) |
 | `--agent` | Non-interactive mode (AI prompts never block on input) |
 
 ## Configuration
@@ -89,6 +90,14 @@ sfdt deploy --smart --pr-comment                   # decorate the PR with the re
   fallback. It's beta — a known [sf CLI issue](https://github.com/forcedotcom/cli/issues/3565) can
   cause `deploy validate` to run zero tests with this level, so verify with `--json` output.
 </Callout>
+
+## Notifications
+
+`sfdt deploy --smart --notify` dispatches `deploy-success` / `deploy-failure` through the
+configured [notification channels](/cli/notifications) after the run (previously `--notify` was
+ignored with a warning in smart mode — it only worked on the standard manifest deploy). The
+notification includes the delta refs, additive/destructive counts, and test level; validate-only
+runs say "Validation (check-only)". When no channels are configured it warns instead of failing.
 
 ## AI deploy-error resolution & auto-fix loop
 

@@ -18,10 +18,14 @@ nest under their parent.
 | --- | --- |
 | **Deploy & Release** | deploy, preflight, rollback, release, manifest, pr-description, changelog (generate / release / check), smoke |
 | **Org Health** | audit (all + audittrail / licenses / mfa / unused-apex / inactive-users / api-versions), monitor (all + limits / errors / health), backup, scan, drift, doctor |
-| **Quality & Analysis** | quality, test, review, flow (scan / conflicts) |
+| **Quality & Analysis** | quality, test, Run LWC Tests (`test --lwc`), review, flow (scan / conflicts) |
 | **Documentation** | docs (generate / diagram), explain, compare |
 | **Data & Scratch Orgs** | data (list / export / import / delete), scratch (create / list / delete / pool status / pool fill) |
 | **Project & Tools** | init, config, pull, Open Dashboard, mcp start, extension (status / stats), update |
+
+The command palette and Commands tree also include [CI pipeline generators](/cli/ci-cd#generating-a-pipeline--sfdt-ci-init)
+for all four providers (GitHub, GitLab, Azure, Bitbucket) — monitor, deploy, **release**, and
+**scratch** workflow types.
 
 ## Running, copying, and docs
 

@@ -197,6 +197,22 @@ See the [MCP Server](/cli/mcp) page for details.
   org-health usage identically (shared via `@sfdt/flow-core`).
 </Callout>
 
+### `ci`
+
+Defaults for [`sfdt ci init`](/cli/ci-cd#generating-a-pipeline--sfdt-ci-init). Flags override
+config; config overrides built-in defaults. (`--type scratch` also reads the existing
+`scratch.definitionFile` key.)
+
+```jsonc
+{
+  "ci": {
+    "authMethod": "sfdx-url",    // sfdx-url | jwt
+    "environment": "production", // release approval environment
+    "runner": "npx"              // npx | docker | action
+  }
+}
+```
+
 ### `notifications`
 
 Multi-channel push to Slack, Microsoft Teams, Google Chat, email, a generic webhook, or Grafana
