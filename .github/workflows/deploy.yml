@@ -2,7 +2,7 @@ name: Deploy docs to Cloudflare Pages
 
 on:
   push:
-    branches: [main]
+    branches: [master]
   workflow_dispatch:
 
 permissions:
