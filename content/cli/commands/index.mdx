@@ -7,7 +7,7 @@ import { Cards } from 'nextra/components'
 
 # Command Reference
 
-sfdt ships **38 commands**. They are grouped here by area. Every command accepts `--help`, and
+sfdt ships **43 commands**. They are grouped here by area. Every command accepts `--help`, and
 most operational commands accept `--json` for scripting and `--dry-run` to preview.
 
 <Cards>
@@ -42,6 +42,8 @@ most operational commands accept `--json` for scripting and `--dry-run` to previ
 | [`sfdt compare`](/cli/commands/metadata#sfdt-compare) | Compare metadata between two orgs or local vs org |
 | [`sfdt scan`](/cli/commands/metadata#sfdt-scan) | Fetch a full metadata inventory from an org |
 | [`sfdt dependencies`](/cli/commands/metadata#sfdt-dependencies) | Trace what a component references and what references it |
+| `sfdt retrofit` | Retrofit metadata from a source org: retrieve → commit → smart-deploy to a target org |
+| `sfdt flow` | Flow-specific analyses (uses `@sfdt/flow-core`, matching the Chrome extension) |
 
 ## Testing & Quality
 
@@ -72,6 +74,9 @@ most operational commands accept `--json` for scripting and `--dry-run` to previ
 | [`sfdt data`](/cli/commands/org-health#sfdt-data) | Manage data sets via `sf data tree` |
 | [`sfdt scratch`](/cli/commands/org-health#sfdt-scratch) | Create/delete/list scratch orgs and pools |
 | [`sfdt notify`](/cli/commands/org-health#sfdt-notify) | Send Slack deployment notifications |
+| [`sfdt history`](/cli/commands/org-health#sfdt-history) | Show recent sfdt run history (audit, monitor, quality, test, deploy, …) from the local run index |
+| `sfdt ci` | Generate CI/CD pipeline templates (monitoring, smart deploy, release, scratch-org CI) |
+| `sfdt pr` | Pull-request helpers (post deploy/monitor/audit results as comments) |
 
 ## Config & Utilities
 
