@@ -1,20 +1,26 @@
-name: Deploy docs to Cloudflare Pages
+name: Build check
+
+# Deploys are handled by Cloudflare Workers Builds (dashboard git integration,
+# README "Deploy" option A): Cloudflare builds and deploys the `sfdt-site`
+# Worker on every push to master. This workflow only verifies the site builds
+# (next export + pagefind), so a broken commit is caught on the PR before
+# Cloudflare deploys it. It needs no secrets.
 
 on:
   push:
     branches: [master]
+  pull_request:
   workflow_dispatch:
 
 permissions:
   contents: read
-  deployments: write
 
 concurrency:
-  group: pages-deploy
+  group: build-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -31,10 +37,3 @@ jobs:
 
       - name: Build (next export + pagefind index)
         run: npm run build
-
-      - name: Deploy to Cloudflare (Workers Static Assets)
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: deploy

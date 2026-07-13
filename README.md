@@ -12,7 +12,7 @@ the SFDT Chrome extension, and the SFDT VS Code extension.
 </div>
 
 Built with [Nextra 4](https://nextra.site) (Next.js App Router), statically exported, and
-deployed to **Cloudflare Pages**.
+deployed to **Cloudflare Workers Static Assets**.
 
 ## Local development
 
@@ -49,16 +49,14 @@ In **Workers & Pages → Create → Import a repository**, point it at this repo
 
 No output-directory setting is needed — `wrangler.jsonc` declares `assets.directory: "./out"`.
 
-### B. GitHub Actions (included)
+### B. Manual deploy
 
-`.github/workflows/deploy.yml` builds and runs `wrangler deploy` on push to `main`. It needs two
-repository secrets:
+`npx wrangler deploy` from a local checkout (after `npm run build`) uploads `out/` directly.
+Only needed if the dashboard integration (A) is disconnected.
 
-- `CLOUDFLARE_API_TOKEN` — a token with the **Workers Scripts: Edit** permission
-- `CLOUDFLARE_ACCOUNT_ID`
-
-> Note: use **either** A **or** B, not both, to avoid double deploys. The Worker is named
-> `sfdt-docs` (see `wrangler.jsonc`).
+**Option A is what's live** — Cloudflare Workers Builds watches `master` and deploys the
+`sfdt-site` Worker on every push. `.github/workflows/build.yml` is a secret-free build check
+(next export + pagefind) that gates PRs; it does not deploy.
 
 ## Structure
 
@@ -73,7 +71,7 @@ content/                 All docs (.mdx) + _meta.js
   support/               Get help, FAQ, troubleshooting, report-an-issue, changelog
 mdx-components.js        Nextra MDX component wiring
 next.config.mjs          Nextra + static export config
-wrangler.jsonc           Cloudflare Pages project config
+wrangler.jsonc           Cloudflare Workers Static Assets config
 ```
 
 Content is documentation for the upstream project at
