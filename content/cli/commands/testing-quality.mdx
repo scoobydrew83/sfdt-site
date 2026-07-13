@@ -39,7 +39,8 @@ sfdt test --lwc                                      # run the project's LWC (Je
 | `--tests <list>` | For `--logic`: comma-separated names — Apex classes and Flow tests as `FlowTesting.<name>` |
 | `--category <cat>` | For `--logic`: restrict to `Apex` or `Flow` |
 | `--code-coverage` | For `--logic`: retrieve code-coverage results |
-| `--wait <minutes>` | For `--logic`: streaming wait timeout (default `30`) |
+| `--wait <minutes>` | For `--logic`: streaming wait timeout in whole minutes, ≥ 1 (default `30`; invalid values are rejected) |
+| `--allow-zero-tests` | For `--logic`: exit `0` even when Salesforce runs **zero** tests. By default a zero-test "pass" exits `1` — it verified nothing (typo'd names, missing `FlowTesting.` prefix, or a permissions gap) |
 
 **AI on failure:** when tests fail and AI is available, sfdt prompts to analyze the failures —
 it checks for missing test data, SOQL governor-limit violations, null-pointer exceptions, and
@@ -89,13 +90,16 @@ sfdt quality --output-file sfdt-quality.sarif   # extra Code Analyzer v5 output 
 | `--all` | Run both the code and test analyzers |
 | `--fix-plan` | Send analysis output to AI for a prioritized, file-specific fix plan |
 | `--generate-stubs` | Generate `@IsTest` stub classes for Apex without a test class |
+| `--allow-legacy-analyzer` | Permit the retired **Code Analyzer v4** (`sf scanner run`) when v5 is unavailable — results are labeled **non-authoritative**. Also enabled via config `quality.analyzer.allowLegacyV4`. Without it, a v4-only environment reports the scan as SKIPPED. v4 support is removed at 1.0 |
 | `--dry-run` | Preview `--generate-stubs` output without writing files |
 
 <Callout type="info">
-  **Code Analyzer v5.** The code scan runs Salesforce **Code Analyzer v5** (`sf code-analyzer run`
-  — a just-in-time plugin, PMD 7 / ESLint / RetireJS, that auto-installs on a modern `sf` CLI). It
-  falls back to the retired v4 (`sf scanner run`) only if that's the sole plugin present, and
-  otherwise reports the scan as **SKIPPED** (never a fabricated clean result). Install manually with
+  **Code Analyzer v5 is required for authoritative scans.** The code scan runs Salesforce
+  **Code Analyzer v5** (`sf code-analyzer run` — a just-in-time plugin, PMD 7 / ESLint / RetireJS,
+  that auto-installs on a modern `sf` CLI). The retired v4 (`sf scanner run`) never runs as a
+  silent fallback: it requires the explicit `--allow-legacy-analyzer` opt-in (or config
+  `quality.analyzer.allowLegacyV4`) and its results are labeled non-authoritative. Without v5 the
+  scan reports **SKIPPED** (never a fabricated clean result). Install v5 manually with
   `sf plugins install code-analyzer` if needed.
 </Callout>
 

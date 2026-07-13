@@ -14,14 +14,16 @@ optionally authenticates the org.
 ```yaml
 - uses: scoobydrew83/sfdt@v0
   with:
-    command: deploy --smart --org ci --dry-run
+    args-json: '["deploy","--smart","--org","ci","--dry-run"]'
 ```
 
 ## Inputs
 
 | Input | Default | Description |
 |---|---|---|
-| `command` | *(required)* | The sfdt command line to run (everything after `sfdt`), e.g. `deploy --smart --org ci --dry-run` |
+| `args-json` | — | **Preferred.** The sfdt arguments as a JSON array of strings, executed with **no shell** — values can never be interpreted as shell syntax. Exactly one of `args-json` / `command` is required |
+| `command` | — | **Deprecated** — prefer `args-json`. The sfdt command line as one string. Without `allow-shell-command` it accepts only shell-neutral characters (letters, digits, space, `_@%+=:,./-`) and runs without a shell; quotes and metacharacters are rejected |
+| `allow-shell-command` | `false` | Set `'true'` to run `command` through a shell (legacy eval) when it needs quoting or expansion. Only for fully trusted static strings — never workflow-interpolated user input. Removed in v1 |
 | `cli-version` | `auto` | `auto` installs the CLI version shipped at the pinned action ref — **pinning the action tag pins the CLI**. `latest` or an exact semver also accepted |
 | `auth-method` | `none` | `none` (job already authenticated) \| `sfdx-url` \| `jwt` |
 | `sfdx-auth-url` | — | Sfdx auth URL for `sfdx-url` (pass a secret) |
@@ -41,7 +43,7 @@ optionally authenticates the org.
 - name: Smart delta validation
   uses: scoobydrew83/sfdt@v0
   with:
-    command: deploy --smart --org ci --delta-base "origin/${{ github.event.pull_request.base.ref }}" --dry-run
+    args-json: '["deploy","--smart","--org","ci","--delta-base","origin/${{ github.event.pull_request.base.ref }}","--dry-run"]'
     auth-method: sfdx-url
     sfdx-auth-url: ${{ secrets.SFDX_AUTH_URL }}
     org-alias: ci
@@ -53,12 +55,26 @@ optionally authenticates the org.
 - name: Smart delta deploy
   uses: scoobydrew83/sfdt@v0
   with:
-    command: deploy --smart --org prod --delta-base "v1.4.0" --notify
+    args-json: '["deploy","--smart","--org","prod","--delta-base","v1.4.0","--notify"]'
     auth-method: jwt
     consumer-key: ${{ secrets.SFDX_CONSUMER_KEY }}
     jwt-secret-key: ${{ secrets.SFDX_JWT_SECRET_KEY }}
     username: ${{ secrets.SFDX_USERNAME }}
     org-alias: prod
+```
+
+## Migrating from `command`
+
+`command` still works for shell-neutral strings (it is now word-split without a shell), but
+anything needing quotes or expansion must either move to `args-json` (recommended — each
+argument becomes one array element, no quoting needed) or explicitly opt in with
+`allow-shell-command: 'true'`:
+
+```yaml
+# before (ran through a shell — quoting-sensitive, injection-prone):
+#   command: deploy --smart --delta-base "origin/main" --dry-run
+# after (no shell involved):
+    args-json: '["deploy","--smart","--delta-base","origin/main","--dry-run"]'
 ```
 
 ## Version pinning
@@ -71,7 +87,9 @@ immutable references — with `cli-version: auto` that also pins the CLI version
 
 <Callout type="warning">
   - Pass secrets only as `${{ secrets.X }}` expressions — never as literals in the workflow file.
-  - Do **not** feed untrusted input to `command` — it is executed as a shell command line.
+  - Prefer `args-json`: its values are never interpreted by a shell. Never feed untrusted input
+    (branch names, PR titles, issue text) to `command` with `allow-shell-command: 'true'` — that
+    mode runs the string through a shell.
   - The JWT key is written to a temp file and always deleted (trap on exit).
 </Callout>
 
