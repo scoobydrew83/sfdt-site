@@ -17,6 +17,34 @@ repository; this page summarizes recent highlights.
   [Extension `CHANGELOG.md`](https://github.com/scoobydrew83/sfdt/blob/main/extension/CHANGELOG.md)
 </Callout>
 
+## `@sfdt/cli` — 0.18.0
+
+A platform-integrity release plus a new API-version audit across every surface:
+
+- **[`sfdt versions`](/cli/commands/org-health#sfdt-versions)** — audit the Salesforce API
+  versions of local source (Apex, Flow, LWC, Aura) and the org against the org's max API version;
+  `--local-only` works offline, `--json` for scripting.
+- **[`sfdt versions --advise`](/cli/commands/org-health#sfdt-versions)** — an AI upgrade advisor
+  (value / risks / breaking changes / effort per component), grounded by a curated per-version
+  registry so it never invents version facts; read-only.
+- **[Surface catalog framework](/cli/commands)** — the command reference, feature counts, and
+  dashboard page list are now generated from the code's own catalogs, with CI that fails on drift.
+- **[GitHub Action `args-json`](/cli/github-action)** — a shell-injection-proof way to pass
+  arguments; the legacy `command` string is deprecated and hardened.
+- **Hardening** — `test --logic` zero-test guard + `--wait` validation, and
+  [`quality --allow-legacy-analyzer`](/cli/commands/testing-quality#sfdt-quality) (Code Analyzer
+  v4 is opt-in legacy only; v5 required for authoritative scans).
+
+## `@sfdt/extension` — 0.7.0
+
+- **`api-version-audit`** (the 40th feature) — an org-side Setup pill showing the org's max API
+  version and how many components lag, expanding to per-type API-version histograms.
+
+## `sfdt.sfdt-devtools` (VS Code) — 0.5.0
+
+- **API Versions Report** and **Run History** command-tree entries (running `sfdt versions` /
+  `sfdt history`), plus a surface-parity fix exposing twelve more commands in the tree.
+
 ## `@sfdt/cli` — 0.17.0
 
 A CI/CD and diagnostics batch:

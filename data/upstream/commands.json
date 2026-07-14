@@ -839,7 +839,7 @@
         "cli": true,
         "sfPlugin": true,
         "gui": true,
-        "vscode": false,
+        "vscode": true,
         "chrome": false
       },
       "mcpTools": [
@@ -1376,7 +1376,7 @@
         "cli": true,
         "sfPlugin": true,
         "gui": false,
-        "vscode": false,
+        "vscode": true,
         "chrome": false
       },
       "mcpTools": [],
@@ -1449,7 +1449,7 @@
         "cli": true,
         "sfPlugin": true,
         "gui": true,
-        "vscode": false,
+        "vscode": true,
         "chrome": false
       },
       "mcpTools": [],
@@ -1496,7 +1496,7 @@
         "cli": true,
         "sfPlugin": true,
         "gui": true,
-        "vscode": false,
+        "vscode": true,
         "chrome": false
       },
       "mcpTools": [],
@@ -2870,7 +2870,7 @@
         "cli": true,
         "sfPlugin": true,
         "gui": true,
-        "vscode": false,
+        "vscode": true,
         "chrome": false
       },
       "mcpTools": [
@@ -3066,7 +3066,7 @@
         "cli": true,
         "sfPlugin": true,
         "gui": true,
-        "vscode": false,
+        "vscode": true,
         "chrome": false
       },
       "mcpTools": [
@@ -3327,7 +3327,7 @@
         "cli": true,
         "sfPlugin": true,
         "gui": false,
-        "vscode": false,
+        "vscode": true,
         "chrome": true
       },
       "mcpTools": [],
@@ -3459,7 +3459,7 @@
         "cli": true,
         "sfPlugin": true,
         "gui": false,
-        "vscode": false,
+        "vscode": true,
         "chrome": true
       },
       "mcpTools": [],
@@ -3574,7 +3574,7 @@
         "cli": true,
         "sfPlugin": true,
         "gui": false,
-        "vscode": false,
+        "vscode": true,
         "chrome": false
       },
       "mcpTools": [],
@@ -3636,7 +3636,7 @@
         "cli": true,
         "sfPlugin": true,
         "gui": false,
-        "vscode": false,
+        "vscode": true,
         "chrome": false
       },
       "mcpTools": [],
@@ -3698,7 +3698,7 @@
         "cli": true,
         "sfPlugin": true,
         "gui": false,
-        "vscode": false,
+        "vscode": true,
         "chrome": false
       },
       "mcpTools": [],
@@ -4016,7 +4016,7 @@
         "cli": true,
         "sfPlugin": true,
         "gui": true,
-        "vscode": false,
+        "vscode": true,
         "chrome": false
       },
       "mcpTools": [
@@ -4079,6 +4079,80 @@
         }
       ],
       "source": "src/commands/history.js"
+    },
+    {
+      "id": "versions",
+      "path": [
+        "versions"
+      ],
+      "description": "Audit Salesforce API versions across local source and the org (Apex, Flow, LWC, Aura vs the org max)",
+      "aliases": [],
+      "hidden": false,
+      "arguments": [],
+      "options": [
+        {
+          "flags": "--org <alias>",
+          "name": "org",
+          "required": false,
+          "default": null,
+          "description": "Target org (default: config.defaultOrg)"
+        },
+        {
+          "flags": "--local-only",
+          "name": "localOnly",
+          "required": false,
+          "default": null,
+          "description": "Skip the org side even when an org is configured"
+        },
+        {
+          "flags": "--advise",
+          "name": "advise",
+          "required": false,
+          "default": null,
+          "description": "AI upgrade advice for local components below the target version (requires features.ai; grounded by the curated per-version registry)"
+        },
+        {
+          "flags": "--target <version>",
+          "name": "target",
+          "required": false,
+          "default": null,
+          "description": "For --advise: target API version (default: the org max, or the registry max offline)"
+        },
+        {
+          "flags": "--type <family>",
+          "name": "type",
+          "required": false,
+          "default": null,
+          "description": "For --advise: restrict to one family — apex | flow | lwc"
+        },
+        {
+          "flags": "--json",
+          "name": "json",
+          "required": false,
+          "default": null,
+          "description": "Emit the full report as JSON"
+        }
+      ],
+      "subcommands": [],
+      "mutating": false,
+      "requiresProject": true,
+      "requiresOrg": false,
+      "supportsJson": true,
+      "docsCategory": "org-health",
+      "surfaces": {
+        "cli": true,
+        "sfPlugin": true,
+        "gui": false,
+        "vscode": true,
+        "chrome": true
+      },
+      "mcpTools": [
+        {
+          "name": "sfdt_api_versions",
+          "mutating": false
+        }
+      ],
+      "source": "src/commands/versions.js"
     },
     {
       "id": "version",
