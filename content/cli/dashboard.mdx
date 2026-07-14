@@ -4,6 +4,7 @@ description: The local Lightning Design System dashboard — every page, live SS
 ---
 
 import { Callout } from 'nextra/components'
+import { GuiPageTable, SurfaceCount } from '../../components/catalogs'
 
 # Web Dashboard
 
@@ -25,31 +26,36 @@ sfdt ui --no-open         # start without opening the browser
 
 ## Pages
 
-| Page | What it shows | Data source |
-|---|---|---|
-| **Dashboard** | Summary stat cards: last test run, preflight, drift | `preflight-latest.json`, `drift-latest.json`, `test-results/` |
-| **Test Runs** | Apex test history with coverage bands; run tests inline | `test-results/*.json` |
-| **Preflight** | Per-check pass/warn/fail; run preflight inline | `preflight-latest.json` |
-| **Drift Detection** | Filterable component table (All / Clean / Drift); run inline | `drift-latest.json` |
-| **Compare** | Source-only / target-only / both; side-by-side XML diff; export `package.xml` | `compare-latest.json` |
-| **Review** | AI code-review results across five categories | `review-latest.json` |
-| **Explain** | AI deployment-log analysis | `explain-latest.json` |
-| **Release Hub** | Manifest picker, changelog & release-note editing, deploy | `manifest/release/`, `release-notes/`, `CHANGELOG.md` |
-| **Pull** | Smart-delta / preview / full retrieve with live streaming | `/api/pull` (SSE) |
-| **Quality** | Code/test quality results; stub generator with dry-run preview | `quality-latest.json` |
-| **Scan** | Full metadata inventory with search & filter | `/api/scan` |
-| **Audit** | Org health: audit trail, licenses, MFA, unused Apex, API versions; **Run now** (SSE) | `audit-latest.json` |
-| **Monitor** | Limits, errors, health score, backup history; **Run now** (SSE) | `monitor-latest.json` |
-| **Scratch** | Active scratch orgs, plus create / delete / pool-fill actions | `/api/scratch` |
-| **Data** | Defined `sf data tree` data sets, plus export / import / delete actions | `/api/data` |
-| **Docs** | Docs config, plus a generate action | `/api/docs` |
-| **Flows** | Flow health scores, trigger conflicts, subflow graph | `/api/flow/quality` |
-| **Manifests** | Generated `package.xml` artifacts — preview & download | `manifest/release/*.xml` |
-| **Logs** | Searchable log viewer with pagination and raw output | `logs/*` |
-| **Dependencies** | Seed + expand-on-click D3 dependency graph — pick a component by name+type, then click nodes to expand their references / referenced-by (both directions, capped 50/direction with a **"+more"** hub badge); covers Apex, triggers, Visualforce pages/components, Flows, LWC & Aura, with Custom Object/Field reachable as neighbors. A **Gaps** toggle swaps in a source-parsed report of references the Tooling API misses (`--gaps`), marked MISSING / confirmed / inferred; a **Show inferred** toggle overlays those source-parsed *missing* edges onto the graph itself as dashed lines (reconciled onto existing nodes, or shown as synthetic inferred nodes) | `/api/dependencies/resolve`, `/api/dependencies/neighbors`, `/api/dependencies/gaps` |
-| **Settings** | View/edit config; initialize a project from the GUI | `.sfdt/config.json` |
-| **Coverage** | Live org-wide Apex coverage (with threshold band) plus the per-run coverage trend | `/api/coverage`, `test-results/` |
-| **Dependency Check** | Preflight dependency validation (missing/broken refs) | `/api/dependencies/preflight` |
+All <SurfaceCount surface="gui" metric="pages" /> pages, in nav order — the page list is
+generated from the dashboard's own route registry, so it cannot drift from the app:
+
+<GuiPageTable details={{
+  dashboard: { shows: 'Summary stat cards: last test run, preflight, drift', source: 'preflight-latest.json, drift-latest.json, test-results/' },
+  drift: { shows: 'Filterable component table (All / Clean / Drift); run inline', source: 'drift-latest.json' },
+  audit: { shows: 'Org health: audit trail, licenses, MFA, unused Apex, API versions; Run now (SSE)', source: 'audit-latest.json' },
+  monitor: { shows: 'Limits, errors, health score, backup history; Run now (SSE)', source: 'monitor-latest.json' },
+  tests: { shows: 'Apex test history with coverage bands; run tests inline', source: 'test-results/*.json' },
+  coverage: { shows: 'Live org-wide Apex coverage (with threshold band) plus the per-run coverage trend', source: '/api/coverage, test-results/' },
+  logs: { shows: 'Searchable log viewer with pagination and raw output', source: 'logs/*' },
+  release: { shows: 'Manifest picker, changelog & release-note editing, deploy', source: 'manifest/release/, release-notes/, CHANGELOG.md' },
+  retrofit: { shows: 'Cross-org retrofit: retrieve from a source org, commit, smart-deploy to a target (validate-only or execute)', source: '/api/retrofit' },
+  compare: { shows: 'Source-only / target-only / both; side-by-side XML diff; export package.xml', source: 'compare-latest.json' },
+  scan: { shows: 'Full metadata inventory with search & filter', source: '/api/scan' },
+  preflight: { shows: 'Per-check pass/warn/fail; run preflight inline', source: 'preflight-latest.json' },
+  manifests: { shows: 'Generated package.xml artifacts — preview & download', source: 'manifest/release/*.xml' },
+  quality: { shows: 'Code/test quality results; stub generator with dry-run preview', source: 'quality-latest.json' },
+  'agent-test': { shows: 'Agentforce agent-test runs (AiEvaluationDefinition) with pass/fail history', source: '/api/agent-test' },
+  pull: { shows: 'Smart-delta / preview / full retrieve with live streaming', source: '/api/pull (SSE)' },
+  review: { shows: 'AI code-review results across five categories', source: 'review-latest.json' },
+  explain: { shows: 'AI deployment-log analysis', source: 'explain-latest.json' },
+  flows: { shows: 'Flow health scores, trigger conflicts, subflow graph', source: '/api/flow/quality' },
+  dependency: { shows: 'Seed + expand-on-click D3 dependency graph (references / referenced-by, capped 50/direction); Gaps toggle for source-parsed references the Tooling API misses; Show-inferred overlay renders missing edges as dashed lines', source: '/api/dependencies/resolve, /api/dependencies/neighbors, /api/dependencies/gaps' },
+  scratch: { shows: 'Active scratch orgs, plus create / delete / pool-fill actions', source: '/api/scratch' },
+  data: { shows: 'Defined sf data tree data sets, plus export / import / delete actions', source: '/api/data' },
+  docs: { shows: 'Docs config, plus a generate action', source: '/api/docs' },
+  notifications: { shows: 'Notification channels (redacted), per-channel event filters, and a send-test action', source: '/api/notifications' },
+  settings: { shows: 'View/edit config; initialize a project from the GUI', source: '.sfdt/config.json' },
+}} />
 
 Data appears automatically after running the corresponding CLI commands (`sfdt test`,
 `sfdt preflight`, `sfdt drift`, …) that write JSON result files.

@@ -1,0 +1,242 @@
+---
+title: CI Authentication
+description: Authenticate Salesforce orgs in CI pipelines — the SFDX auth URL flow, the JWT bearer flow, secret storage per provider, key rotation, and troubleshooting.
+---
+
+import { Callout } from 'nextra/components'
+
+# CI Authentication
+
+Every pipeline `sfdt ci init` generates needs to authenticate to a Salesforce org before it can
+monitor, validate, or deploy. sfdt supports two methods, selected with `--auth` (or the
+[`ci.authMethod`](/cli/configuration#ci) config key):
+
+| Method | Secret(s) | Best for |
+|---|---|---|
+| `sfdx-url` (default) | one auth URL containing a refresh token | fast setup, sandboxes, low-ceremony teams |
+| `jwt` | connected app + private key | production, long-lived automation, instant revocation |
+
+Both methods end in the same place: an authenticated `sf` CLI session aliased to your org, which
+every subsequent `sfdt` command uses. The generated workflow files document their required
+secrets in a header comment.
+
+<Callout type="info">
+  Whichever method you choose, authenticate as a **dedicated integration user** with the minimum
+  permissions the pipeline needs — not a personal admin account. Deactivating a person should
+  never break your CI.
+</Callout>
+
+## SFDX auth URL flow (`--auth sfdx-url`)
+
+An SFDX auth URL is a single string (`force://<clientId>::<refreshToken>@<instance>`) that
+encodes everything the `sf` CLI needs to log in — including a **refresh token**, so treat it
+exactly like a password.
+
+**1. Authenticate locally** to the org you want CI to use (skip if already done):
+
+```bash
+sf org login web --alias prod
+```
+
+**2. Retrieve the auth URL** for that org:
+
+```bash
+sf org auth show-sfdx-auth-url --target-org prod
+```
+
+Copy the `force://...` line — that whole string is the secret.
+
+**3. Store it** as `SFDX_AUTH_URL` in your CI provider's secret store (see
+[Secret storage per provider](#secret-storage-per-provider)).
+
+The generated pipelines then log in with:
+
+```bash
+echo "$SFDX_AUTH_URL" | sf org login sfdx-url --sfdx-url-stdin --alias <org> --set-default
+```
+
+`--sfdx-url-stdin` keeps the URL out of the process argument list, and CI log masking keeps it
+out of the job output.
+
+<Callout type="warning">
+  **Legacy note:** `sf org auth show-sfdx-auth-url` requires `sf` CLI ≥ 2.136. On older CLIs the
+  auth URL is only exposed as the `sfdxAuthUrl` field of `sf org display --verbose --json` —
+  upgrade instead if you can; the dedicated command exists so the URL never lands in a scrollback
+  full of other org details.
+</Callout>
+
+**Trade-offs:** setup is one command, but the URL bundles a refresh token whose lifetime follows
+the connected app's token policies — it can be expired by admin revocation, policy changes, or
+user deactivation, and "rotation" means re-generating and re-pasting the URL. For production
+pipelines, prefer JWT.
+
+## JWT bearer flow (`--auth jwt`)
+
+The JWT flow authenticates with a certificate instead of a stored token: CI signs a short-lived
+assertion with a private key, and Salesforce verifies it against a certificate uploaded to a
+connected app. Nothing long-lived leaves Salesforce, and revocation is instant.
+
+### 1. Create the certificate and key
+
+```bash
+openssl genrsa -out server.key 2048
+openssl req -new -x509 -key server.key -out server.crt -days 365 -subj "/CN=sfdt-ci"
+```
+
+`server.key` is the secret you'll store in CI. `server.crt` is public and gets uploaded to
+Salesforce. Set `-days` to match your rotation policy (see
+[Rotation and revocation](#rotation-and-revocation)).
+
+### 2. Create the connected app
+
+In Setup → App Manager → **New Connected App**:
+
+1. Enable **OAuth Settings**. The callback URL is unused by the JWT flow — a placeholder like
+   `http://localhost:1717/OauthRedirect` is fine.
+2. Check **Use digital signatures** and upload `server.crt`.
+3. Add the OAuth scopes:
+   - **Manage user data via APIs (`api`)**
+   - **Perform requests at any time (`refresh_token`, `offline_access`)**
+4. Save, then copy the **Consumer Key** (client id).
+
+### 3. Pre-authorize the CI user
+
+The JWT flow never shows an approval screen, so the user must be pre-approved:
+
+1. On the connected app, click **Manage** → **Edit Policies** and set OAuth Policies →
+   Permitted Users to **Admin approved users are pre-authorized**.
+2. Under **Profiles** or **Permission Sets** on the same Manage page, add the integration
+   user's profile or a permission set they hold.
+
+### 4. Test locally, then store the secrets
+
+```bash
+sf org login jwt \
+  --client-id <consumer-key> \
+  --jwt-key-file server.key \
+  --username ci-user@example.com \
+  --instance-url https://login.salesforce.com
+```
+
+Once that succeeds, store in your CI provider:
+
+| Secret | Value |
+|---|---|
+| `SFDX_CONSUMER_KEY` | the connected app's consumer key |
+| `SFDX_JWT_SECRET_KEY` | the **contents** of `server.key` (the whole file, including the `BEGIN`/`END` lines) — not a file path |
+| `SFDX_USERNAME` | the integration user's username |
+| `SFDX_INSTANCE_URL` | optional; defaults to `https://login.salesforce.com`. Use `https://test.salesforce.com` for sandboxes |
+
+The generated auth step writes the key to a temp file, logs in, and removes the file again
+(with a `trap`/`always` cleanup where the provider supports it):
+
+```bash
+printf '%s\n' "$SFDX_JWT_SECRET_KEY" > server.key
+sf org login jwt --client-id "$SFDX_CONSUMER_KEY" --jwt-key-file server.key \
+  --username "$SFDX_USERNAME" \
+  --instance-url "${SFDX_INSTANCE_URL:-https://login.salesforce.com}" \
+  --alias <org> --set-default
+rm -f server.key
+```
+
+## Already-authenticated runners
+
+On self-hosted or long-lived runners where the `sf` CLI is already authenticated (the auth
+persists in the runner's home directory), you don't need either flow:
+
+- Verify with `sf org list` — the org alias your pipeline targets must appear.
+- Delete the generated auth step from the workflow (`sfdt ci init` always emits one), or keep
+  it for reproducibility.
+- With the [GitHub Action](/cli/github-action), set `auth-method: none` — the action then skips
+  auth entirely and sfdt uses the runner's existing default org (or whatever `--org` you pass).
+
+sfdt itself resolves the target org from `--org`, falling back to `defaultOrg` in
+`.sfdt/config.json`, so an already-authed runner needs no extra wiring.
+
+## Scratch-org CI and the Dev Hub
+
+`sfdt ci init --type scratch` pipelines are a special case: the org you authenticate is the
+**Dev Hub**, not the org under test. The pipeline itself creates a fresh 1-day scratch org
+(`sf org create scratch --set-default`), runs the deploy and tests against it, and always
+deletes it — pass or fail.
+
+- The `--org` flag (and the `{{org}}` placeholder in the template) is the **Dev Hub alias**.
+- The `SFDX_AUTH_URL` or JWT secrets must belong to a Dev Hub user with scratch-org creation
+  permissions (the *Salesforce DX* scratch-org permissions on their profile/permission set).
+- Both auth methods work — retrieve the auth URL from, or point the connected app at, the Dev
+  Hub org.
+
+No secrets are needed for the scratch org itself; its auth is created and destroyed within the
+job.
+
+## Secret storage per provider
+
+The generated templates read these exact names — don't rename them without editing the
+workflow:
+
+- **`sfdx-url`**: `SFDX_AUTH_URL`
+- **`jwt`**: `SFDX_CONSUMER_KEY`, `SFDX_JWT_SECRET_KEY`, `SFDX_USERNAME`, optional `SFDX_INSTANCE_URL`
+
+Where to add them, and what to watch for:
+
+| Provider | Location | Notes |
+|---|---|---|
+| GitHub | Settings → Secrets and variables → **Actions** | Secrets are masked in logs and support multiline values — paste the private key as-is. For release workflows, scope the secret to the GitHub **Environment** the job runs in so only approved runs can read it. |
+| GitLab | Settings → CI/CD → **Variables** | Mark variables **Masked** and **Protected**. Masking requires a single-line value — the auth URL qualifies, a multiline private key does not (see below). Azure-style env mapping isn't needed; variables are exported automatically. |
+| Azure DevOps | Pipelines → **Library** (variable group) or pipeline **Variables**, marked secret | Secret variables are *not* exported to scripts automatically — the generated template includes the required `env:` mapping; keep it if you edit the file. |
+| Bitbucket | Repository settings → Pipelines → **Repository variables**, marked **Secured** | Secured variables are masked in logs. For release steps bound to a deployment environment, use **Deployment variables** so they're only available to that environment. |
+
+### Multiline private keys
+
+`SFDX_JWT_SECRET_KEY` holds a multiline PEM key, which some providers handle poorly (GitLab
+can't mask multiline values; single-line variable UIs can mangle newlines). Two options:
+
+1. **Store it unmasked but protected/secured** — the generated steps never echo the value.
+2. **Base64-encode it** and decode in the workflow — adapt the generated auth step:
+
+```bash
+# store:  base64 < server.key   → SFDX_JWT_SECRET_KEY
+# then change the generated write-out line to:
+printf '%s' "$SFDX_JWT_SECRET_KEY" | base64 -d > server.key
+```
+
+Either way, verify the key round-trips intact: the login fails with `invalid_grant` if the
+`BEGIN`/`END` lines or newlines were lost.
+
+## Rotation and revocation
+
+**SFDX auth URL**
+
+- *Rotate:* re-authenticate locally (`sf org login web`), run
+  `sf org auth show-sfdx-auth-url` again, replace the secret. There is no in-place rotation —
+  the old URL keeps working until its refresh token is revoked.
+- *Revoke:* in Salesforce Setup, open the integration user's detail page → **OAuth Connected
+  Apps** and revoke the token, or block the connected app / tighten its refresh-token policy
+  (Manage → Edit Policies). Deactivating the user revokes everything.
+
+**JWT**
+
+- *Rotate:* generate a new `server.key`/`server.crt` pair, upload the new certificate to the
+  connected app, update `SFDX_JWT_SECRET_KEY`. Do it before the certificate's `-days` expiry.
+- *Revoke:* remove the user's profile/permission set from the connected app's pre-authorized
+  list, or block the app — either takes effect on the next login attempt. No stored token
+  exists to leak.
+
+For both: rotate immediately if a secret may have been exposed (e.g. it was ever printed to a
+log), and audit usage under Setup → Connected Apps OAuth Usage.
+
+## Troubleshooting
+
+| Symptom | Likely cause / fix |
+|---|---|
+| `invalid_grant: user hasn't approved this consumer` | JWT user isn't pre-authorized — set Permitted Users to *Admin approved users are pre-authorized* and add the user's profile/permission set to the connected app. |
+| `invalid_grant: invalid assertion` | Key/certificate mismatch (rotated one but not the other), wrong `SFDX_CONSUMER_KEY`, a mangled multiline key (check `BEGIN`/`END` lines survived), or the wrong login host — sandboxes need `SFDX_INSTANCE_URL=https://test.salesforce.com`. |
+| `invalid_grant: authentication failure` (sfdx-url) | The refresh token inside the auth URL was revoked or expired — admin revocation, connected-app policy change, sandbox refresh, or user deactivation. Regenerate the auth URL. |
+| Auth works locally but fails in CI | IP restrictions: the CI runner's IP isn't in the profile's login IP ranges, or the connected app enforces IP restrictions. Relax IP restrictions on the connected app (Manage → Edit Policies → *Relax IP restrictions*) or allow the runner ranges. |
+| Worked for months, suddenly `expired access/refresh token` | Refresh-token expiry policy on the connected app, or a sandbox refresh invalidated the org's tokens. Re-generate the auth URL / re-verify the JWT user exists in the refreshed sandbox. |
+| GitLab rejects the variable as unmaskable | Masking requires a single-line value — leave the JWT key unmasked (protected) or base64-encode it as shown above. |
+| Scratch job fails at `org create scratch` | The authenticated user isn't a Dev Hub user, or lacks scratch-org permissions — the auth secret must belong to the **Dev Hub**, not a sandbox. |
+
+Still stuck? Run the failing login command manually with the same env values and add
+`--loglevel debug` to the `sf` command, or run `sfdt doctor` on a runner to check the
+environment end-to-end.

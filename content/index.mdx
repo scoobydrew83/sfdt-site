@@ -4,6 +4,7 @@ description: Deploy, test, and ship Salesforce changes with confidence — a CLI
 ---
 
 import { Cards } from 'nextra/components'
+import { SurfaceCount } from '../components/catalogs'
 
 <div style={{ textAlign: 'center', padding: '3rem 0 1rem' }}>
   <span className="sfdt-hero-tag">Salesforce DevTools</span>
@@ -29,12 +30,12 @@ import { Cards } from 'nextra/components'
   <a className="sfdt-card" href="/cli">
     <span className="sfdt-card-emoji">⌨️</span>
     <h3>@sfdt/cli</h3>
-    <p>43 commands for deploy, test, quality, release, and org health — plus a local web dashboard, an MCP server, and a plugin system. Works with any Salesforce DX project.</p>
+    <p><SurfaceCount surface="cli" metric="topLevelCommands" /> commands for deploy, test, quality, release, and org health — plus a local web dashboard, an MCP server, and a plugin system. Works with any Salesforce DX project.</p>
   </a>
   <a className="sfdt-card" href="/chrome-extension">
     <span className="sfdt-card-emoji">🧩</span>
     <h3>Chrome Extension</h3>
-    <p>39 opt-in productivity features for Flow Builder, Setup, Object Manager, and record pages — SOQL/REST/SOAP runners, org tools, and AI, with an optional bridge to the CLI.</p>
+    <p><SurfaceCount surface="chrome" metric="registeredFeatures" /> opt-in productivity features for Flow Builder, Setup, Object Manager, and record pages — SOQL/REST/SOAP runners, org tools, and AI, with an optional bridge to the CLI.</p>
   </a>
   <a className="sfdt-card" href="/vscode-extension">
     <span className="sfdt-card-emoji">🆚</span>

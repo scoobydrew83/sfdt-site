@@ -153,6 +153,10 @@ Add them in your provider's secret store:
 - **Azure** → Pipelines → Library / pipeline variables (secret)
 - **Bitbucket** → Repository settings → Pipelines → Variables (secured)
 
+For the full auth setup — retrieving the auth URL, creating the JWT connected app and
+certificate, multiline-key handling, rotation, and troubleshooting — see
+[CI Authentication](/cli/ci-authentication).
+
 Defaults for `--auth`, `--runner`, and `--environment` can be set once in the
 [`ci` config block](/cli/configuration#ci) — flags override config; config overrides built-in
 defaults.
