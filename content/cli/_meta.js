@@ -14,5 +14,6 @@ export default {
   'sf-plugin': 'Salesforce CLI Plugin',
   mcp: 'MCP Server',
   docker: 'Docker',
-  'ci-cd': 'CI/CD'
+  'ci-cd': 'CI/CD',
+  'ci-authentication': 'CI Authentication'
 }

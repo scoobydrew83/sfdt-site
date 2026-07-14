@@ -4,10 +4,14 @@ description: Every sfdt command grouped by area — core deployment, metadata, t
 ---
 
 import { Cards } from 'nextra/components'
+import { SurfaceCount, CommandTable } from '../../../components/catalogs'
 
 # Command Reference
 
-sfdt ships **43 commands**. They are grouped here by area. Every command accepts `--help`, and
+sfdt ships **<SurfaceCount surface="cli" metric="topLevelCommands" /> commands**. They are grouped
+here by area — every table below is generated from the CLI's own command registry (the
+[catalog](https://github.com/scoobydrew83/sfdt/tree/main/generated), regenerated on every
+command change), so this index cannot drift from the code. Every command accepts `--help`, and
 most operational commands accept `--json` for scripting and `--dry-run` to preview.
 
 <Cards>
@@ -22,79 +26,28 @@ most operational commands accept `--json` for scripting and `--dry-run` to previ
 
 ## Core & Deployment
 
-| Command | Description |
-|---|---|
-| [`sfdt init`](/cli/commands/core#sfdt-init) | Initialize `.sfdt/` config (interactive) |
-| [`sfdt deploy`](/cli/commands/core#sfdt-deploy) | Deploy metadata to a Salesforce org |
-| [`sfdt preflight`](/cli/commands/core#sfdt-preflight) | Run pre-deployment validation checks |
-| [`sfdt rollback`](/cli/commands/core#sfdt-rollback) | Roll back a deployment (with pre-rollback backup) |
-| [`sfdt smoke`](/cli/commands/core#sfdt-smoke) | Post-deploy smoke tests |
-| [`sfdt release`](/cli/commands/core#sfdt-release) | Generate a release manifest + optional AI release notes |
-| [`sfdt test`](/cli/commands/testing-quality#sfdt-test) | Run Apex tests with the enhanced runner |
-| [`sfdt pull`](/cli/commands/metadata#sfdt-pull) | Pull metadata from the configured org (incremental) |
+<CommandTable category="core" />
 
 ## Metadata & Source Control
 
-| Command | Description |
-|---|---|
-| [`sfdt manifest`](/cli/commands/metadata#sfdt-manifest) | Build `package.xml` from git diffs |
-| [`sfdt drift`](/cli/commands/metadata#sfdt-drift) | Detect metadata drift between local source and an org |
-| [`sfdt compare`](/cli/commands/metadata#sfdt-compare) | Compare metadata between two orgs or local vs org |
-| [`sfdt scan`](/cli/commands/metadata#sfdt-scan) | Fetch a full metadata inventory from an org |
-| [`sfdt dependencies`](/cli/commands/metadata#sfdt-dependencies) | Trace what a component references and what references it |
-| `sfdt retrofit` | Retrofit metadata from a source org: retrieve → commit → smart-deploy to a target org |
-| `sfdt flow` | Flow-specific analyses (uses `@sfdt/flow-core`, matching the Chrome extension) |
+<CommandTable category="metadata" />
 
 ## Testing & Quality
 
-| Command | Description |
-|---|---|
-| [`sfdt test`](/cli/commands/testing-quality#sfdt-test) | Run Apex tests (and Flow tests via `--logic`); optional AI failure analysis |
-| [`sfdt agent-test`](/cli/commands/testing-quality#sfdt-agent-test) | Run an Agentforce agent test (`sf agent test run`) as a CI gate |
-| [`sfdt quality`](/cli/commands/testing-quality#sfdt-quality) | Code & test quality analysis (Code Analyzer v5); API v67 & test-hint scans |
-| [`sfdt coverage`](/cli/commands/testing-quality#sfdt-coverage) | Report Apex coverage (org-wide + per-class); CI gate |
-| [`sfdt changelog`](/cli/commands/testing-quality#sfdt-changelog) | Manage changelog files (`generate`, `release`, `check`) |
+<CommandTable category="testing-quality" />
 
 ## AI & Intelligence
 
-| Command | Description |
-|---|---|
-| [`sfdt explain`](/cli/commands/ai#sfdt-explain) | Analyze a deployment error log (AI + heuristics) |
-| [`sfdt review`](/cli/commands/ai#sfdt-review) | AI code review of current branch changes |
-| [`sfdt pr-description`](/cli/commands/ai#sfdt-pr-description) | Generate a PR description or Slack message |
-| [`sfdt ai prompt`](/cli/commands/ai#sfdt-ai-prompt) | Run an ad-hoc prompt through the configured provider |
+<CommandTable category="ai" />
 
 ## Org Health & Operations
 
-| Command | Description |
-|---|---|
-| [`sfdt audit`](/cli/commands/org-health#sfdt-audit) | Diagnose org health |
-| [`sfdt monitor`](/cli/commands/org-health#sfdt-monitor) | Monitor limits, errors, health; metadata backup |
-| [`sfdt docs`](/cli/commands/org-health#sfdt-docs) | Generate docs and ER diagrams |
-| [`sfdt data`](/cli/commands/org-health#sfdt-data) | Manage data sets via `sf data tree` |
-| [`sfdt scratch`](/cli/commands/org-health#sfdt-scratch) | Create/delete/list scratch orgs and pools |
-| [`sfdt notify`](/cli/commands/org-health#sfdt-notify) | Send Slack deployment notifications |
-| [`sfdt history`](/cli/commands/org-health#sfdt-history) | Show recent sfdt run history (audit, monitor, quality, test, deploy, …) from the local run index |
-| `sfdt ci` | Generate CI/CD pipeline templates (monitoring, smart deploy, release, scratch-org CI) |
-| `sfdt pr` | Pull-request helpers (post deploy/monitor/audit results as comments) |
+<CommandTable category="org-health" />
 
 ## Config & Utilities
 
-| Command | Description |
-|---|---|
-| [`sfdt config`](/cli/commands/config-utils#sfdt-config) | Read/write config values (dot notation) |
-| [`sfdt completion`](/cli/commands/config-utils#sfdt-completion) | Print a shell completion script |
-| [`sfdt version`](/cli/commands/config-utils#sfdt-version) | Print the current version |
-| [`sfdt update`](/cli/commands/config-utils#sfdt-update) | Update sfdt from npm |
+<CommandTable category="config-utils" />
 
 ## Platform & Bridge
 
-| Command | Description |
-|---|---|
-| [`sfdt ui`](/cli/commands/platform-bridge#sfdt-ui) | Launch the local web dashboard |
-| [`sfdt extension`](/cli/commands/platform-bridge#sfdt-extension) | Manage the Chrome native messaging host |
-| [`sfdt feature-flags`](/cli/commands/platform-bridge#sfdt-feature-flags) | Manage the extension kill-switch |
-| [`sfdt doctor`](/cli/commands/platform-bridge#sfdt-doctor) | Diagnose the local environment (sf, node, git, config, AI, org) and the extension stack |
-| [`sfdt mcp`](/cli/commands/platform-bridge#sfdt-mcp) | Start / clean up the MCP server |
-| [`sfdt plugin`](/cli/commands/platform-bridge#sfdt-plugin) | Scaffold a new CLI plugin |
-| [`sfdt skills`](/cli/commands/platform-bridge#sfdt-skills) | Export agent skills to IDE configs |
+<CommandTable category="platform-bridge" />

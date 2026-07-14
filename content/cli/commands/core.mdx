@@ -172,3 +172,64 @@ sfdt release          # version resolved from config or prompted
 7. Prompts to push the tag.
 
 See the [Production Release workflow](/cli/workflows/production-release) for the full sequence.
+
+---
+
+## `sfdt ci`
+
+Generates ready-to-use CI/CD pipeline templates for GitHub, GitLab, Azure DevOps, or Bitbucket —
+four workflow types: scheduled org **monitoring**, PR **smart-deploy validation**, approval-gated
+**release** deploys, and **scratch-org CI**. One subcommand: `init`.
+
+```bash
+sfdt ci init --provider github --type monitor --cron "0 6 * * *"
+sfdt ci init --provider gitlab --type deploy --org uat --auth jwt
+sfdt ci init --provider github --type release --branch main --environment production
+sfdt ci init --provider bitbucket --type deploy --print
+```
+
+Key options: `--provider github|gitlab|azure|bitbucket` (required), `--type
+monitor|deploy|release|scratch`, `--auth sfdx-url|jwt`, `--runner npx|docker|action`, plus
+per-type flags (`--cron`, `--org`, `--branch`, `--environment`, `--delta-base`,
+`--definition-file`, `--node`) and output control (`--out`, `--print`, `--force`, `--json`).
+
+The full flag reference, workflow-type breakdown, approval gating per provider, and required
+secrets live on the [CI/CD Integration](/cli/ci-cd#generating-a-pipeline--sfdt-ci-init) page; org
+authentication for the generated pipelines is covered in
+[CI Authentication](/cli/ci-authentication).
+
+<Callout type="info">
+  `sfdt monitor schedule --provider <name>` is a thin alias for `sfdt ci init --type monitor`.
+</Callout>
+
+---
+
+## `sfdt pr`
+
+Pull-request helpers. One subcommand: `comment` — posts a comment to the current PR via the
+GitHub CLI (`gh`), rendering the latest audit/monitor snapshot to markdown, or posting inline
+text / a file.
+
+```bash
+sfdt pr comment --type monitor          # post the latest monitor snapshot
+sfdt pr comment --type audit
+sfdt pr comment --body "Deployed to UAT"
+sfdt pr comment --file notes.md --pr 42
+```
+
+| Option | Description |
+|---|---|
+| `--type <type>` | Render the latest snapshot: `audit` \| `monitor` (default `monitor`) |
+| `--body <text>` | Post this inline text instead of a snapshot |
+| `--file <path>` | Post the contents of this file (relative to project root) |
+| `--pr <id>` | Target PR number or URL (defaults to the current branch PR) |
+| `--json` | Structured output |
+
+Snapshot mode reads `logs/audit-latest.json` / `logs/monitor-latest.json` — run
+`sfdt audit all` / `sfdt monitor all` first. `sfdt deploy --smart --pr-comment` decorates the PR
+with the delta summary and deploy outcome automatically.
+
+<Callout type="warning">
+  Requires the GitHub CLI (`gh`) installed and authenticated (`gh auth login`; `GITHUB_TOKEN` in
+  CI). See [Retrofit & PR Comments](/cli/retrofit#pr-comments) for the workflow context.
+</Callout>

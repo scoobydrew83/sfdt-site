@@ -212,3 +212,98 @@ sfdt dependencies AccountService --type ApexClass --gaps --org prod   # diff: ma
   comment) and doesn't resolve fully-dynamic references (a class name built from a variable). Treat
   it as a lead for impact analysis, not an exhaustive list.
 </Callout>
+
+---
+
+## `sfdt retrofit`
+
+Retrofits metadata that was changed directly in a source org (e.g. an admin editing production)
+back into source control and forward to another org: **retrieve → commit → smart-deploy**. The
+deploy step is validate-only unless you pass `--execute`.
+
+```bash
+sfdt retrofit --source prod --target uat                 # validate-only by default
+sfdt retrofit --source prod --target uat --execute       # real deploy
+sfdt retrofit --source prod --no-deploy                  # retrieve + commit only
+sfdt retrofit --source prod --no-commit                  # retrieve only (review yourself)
+sfdt retrofit --source prod --target uat --metadata "CustomField,ValidationRule,Layout"
+```
+
+| Option | Description |
+|---|---|
+| `--source <alias>` | Org to retrieve changes FROM (required) |
+| `--target <alias>` | Org to deploy changes TO (omit with `--no-deploy`) |
+| `--metadata <types>` | Comma-separated metadata types to retrieve (defaults to a common admin-changed set) |
+| `--commit-msg <msg>` | Commit message for the retrofit commit (default `chore: retrofit metadata from <source>`) |
+| `--no-commit` | Retrieve only; leave changes uncommitted for review |
+| `--no-deploy` | Retrieve and commit, but do not deploy to a target |
+| `--execute` | Perform a real deploy to the target (default is validate-only) |
+| `--skip-preflight` | Skip preflight checks before deploying |
+| `--json` | Structured output |
+
+The default metadata set covers what admins typically change in an org directly: `CustomField`,
+`ValidationRule`, `Layout`, `CustomLabel`, `RecordType`, `QuickAction`, `FlexiPage`,
+`CustomApplication`, `CompactLayout`. Override it with `--metadata`.
+
+<Callout type="warning">
+  When it will auto-commit, `retrofit` **refuses to start on a dirty source tree** — the retrieve
+  overwrites files in place, so pre-existing uncommitted work would be silently bundled into the
+  retrofit commit. Commit or stash first, or pass `--no-commit` to review and commit the result
+  yourself. Only the configured package directories are ever staged (never `git add -A`).
+</Callout>
+
+The deploy step reuses the [Smart Deploy](/cli/smart-deploy) engine, so overwrite protection and
+smart test selection apply. See [Retrofit & PR Comments](/cli/retrofit) for the full workflow,
+including the cross-org release-mismatch check.
+
+---
+
+## `sfdt flow`
+
+Flow-specific analyses, powered by the same `@sfdt/flow-core` engine as the Chrome extension —
+so a Flow scores identically in the CLI, the dashboard, and the extension. Two subcommands:
+`scan` and `conflicts`.
+
+### `sfdt flow scan`
+
+Runs the flow-core health analysis on every Flow with an active version and writes a scored
+report to `logs/flow-scan-latest.json`.
+
+```bash
+sfdt flow scan
+sfdt flow scan --org staging
+sfdt flow scan --output reports/flows.json
+sfdt flow scan --json
+```
+
+| Option | Description |
+|---|---|
+| `--org <alias>` | Org alias (defaults to `config.defaultOrg`) |
+| `--output <file>` | Write the report to this path (default `logs/flow-scan-latest.json`) |
+| `--json` | Emit the report to stdout instead of writing a file |
+
+The terminal summary shows the flow count, average health score, total errors, and the five
+worst-scoring flows.
+
+### `sfdt flow conflicts`
+
+Lists record-triggered Flow groups that fire on the **same object + timing + event** — the
+classic "two before-save flows on Account update" situation where execution order is
+non-deterministic. Report written to `logs/flow-conflicts-latest.json`.
+
+```bash
+sfdt flow conflicts
+sfdt flow conflicts --org production --json
+```
+
+| Option | Description |
+|---|---|
+| `--org <alias>` | Org alias (defaults to `config.defaultOrg`) |
+| `--output <file>` | Write the report to this path (default `logs/flow-conflicts-latest.json`) |
+| `--json` | Emit the report to stdout instead of writing a file |
+
+<Callout type="info">
+  Each conflict group lists the flows involved with their entry-criteria summary — flows with
+  **no entry criteria** are highlighted, since they run on every record change in the group. See
+  [flow-core](/guides/flow-core) for how the scoring and conflict detection work.
+</Callout>

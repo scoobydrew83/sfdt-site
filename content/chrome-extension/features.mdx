@@ -4,10 +4,12 @@ description: All 39 opt-in features of the SFDT SF Helper Chrome extension, grou
 ---
 
 import { Callout } from 'nextra/components'
+import { SurfaceCount } from '../../components/catalogs'
 
 # Features
 
-The extension ships **39 features**. Every feature is **opt-in** — toggle it on or off in the
+The extension ships **<SurfaceCount surface="chrome" metric="registeredFeatures" /> features**
+(count generated from the extension's own registrations). Every feature is **opt-in** — toggle it on or off in the
 [options page](/chrome-extension/settings) — and any feature can be
 [remotely disabled](/chrome-extension/kill-switch) without a Web Store re-review.
 
