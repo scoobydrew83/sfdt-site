@@ -170,7 +170,8 @@ See the [MCP Server](/cli/mcp) page for details.
 | `audit.auditTrailLookbackDays` | `30` | Setup-audit-trail lookback window |
 | `audit.licenseWarnThreshold` | `0.75` | License-usage warn threshold (0–1) |
 | `audit.inactiveUserDays` | `90` | Days before a user is "inactive" |
-| `audit.minApiVersion` | `45` | Minimum acceptable API version |
+| `audit.minApiVersion` | `45` | Minimum acceptable API version (the hard floor for `audit api-versions` and `sfdt versions`) |
+| `audit.apiVersionWarnBehind` | `0` | When > 0, also warn on components more than N versions behind the org's max API version (`0` = off); findings are tagged `below-floor` vs `behind-ceiling` |
 | `audit.fieldDescriptionMaxMissing` | `0` | Max custom fields allowed without a description before warning |
 | `audit.connectedAppFlagPermissive` | `true` | Flag connected apps that permit all users (admin approval off) |
 | `audit.soapLoginLookbackDays` | `30` | Lookback window for the `soap-logins` check (retiring SOAP `login()` traffic) |
