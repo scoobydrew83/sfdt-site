@@ -234,3 +234,36 @@ sfdt history --json
 | `--type <type>` | Filter to one run type (e.g. `audit`, `monitor`, `quality`, `test-run`, `deploy`, `agent-test`) |
 | `--limit <n>` | Maximum rows to show (default `30`) |
 | `--json` | Emit the result as JSON |
+
+---
+
+## `sfdt versions`
+
+Audit Salesforce API versions across **local source and the org**: which versions your Apex
+classes/triggers, Flows, LWC, and Aura components are on, compared against the org's max API
+version. The local scan reads only the `-meta.xml` sidecars, so it works fully offline;
+components whose meta omits `<apiVersion>` are reported as *unspecified* (they inherit
+`sourceApiVersion` at deploy time) and never counted as outdated.
+
+```bash
+sfdt versions                    # local scan + org comparison (default org)
+sfdt versions --org uat          # against a specific org
+sfdt versions --local-only       # fully offline — no org calls
+sfdt versions --json             # full report for scripting / MCP
+```
+
+| Option | Description |
+|---|---|
+| `--org <alias>` | Target org (default `config.defaultOrg`); unreachable orgs degrade to a local-only report |
+| `--local-only` | Skip the org side even when an org is configured |
+| `--json` | Emit the full report (histograms, outliers, thresholds) as JSON |
+
+Output shows per-type version histograms (red = below `audit.minApiVersion`, yellow = behind
+the org ceiling when `audit.apiVersionWarnBehind` is set), the org's max API version and
+release (e.g. `Org max: v67 — Summer '26`), and the outlier components with a
+`below-floor` / `behind-ceiling` reason each.
+
+The report is informational (exit `0`) — the CI-gating surface is
+[`sfdt audit api-versions`](#sfdt-audit), which shares the same thresholds. The MCP server
+exposes the same report as the read-only `sfdt_api_versions` tool, and the Chrome extension's
+`api-version-audit` feature shows the org-side histograms as a Setup pill.
