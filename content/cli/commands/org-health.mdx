@@ -256,6 +256,9 @@ sfdt versions --json             # full report for scripting / MCP
 |---|---|
 | `--org <alias>` | Target org (default `config.defaultOrg`); unreachable orgs degrade to a local-only report |
 | `--local-only` | Skip the org side even when an org is configured |
+| `--advise` | AI upgrade advice for local components below the target version (requires `features.ai`) |
+| `--target <version>` | For `--advise`: target API version (default: the org max, or the registry max offline) |
+| `--type <family>` | For `--advise`: restrict to one family — `apex` \| `flow` \| `lwc` |
 | `--json` | Emit the full report (histograms, outliers, thresholds) as JSON |
 
 Output shows per-type version histograms (red = below `audit.minApiVersion`, yellow = behind
@@ -267,3 +270,23 @@ The report is informational (exit `0`) — the CI-gating surface is
 [`sfdt audit api-versions`](#sfdt-audit), which shares the same thresholds. The MCP server
 exposes the same report as the read-only `sfdt_api_versions` tool, and the Chrome extension's
 `api-version-audit` feature shows the org-side histograms as a Setup pill.
+
+### `--advise` — registry-grounded AI upgrade advice
+
+With `features.ai` enabled, `sfdt versions --advise` explains **what upgrading unlocks and what
+breaks**: value, risks, breaking changes in the upgrade path, effort (S/M/L), minimal code
+changes, an upgrade order across component types, and verification steps (including
+`sfdt quality --api67` when the path crosses v67).
+
+```bash
+sfdt versions --advise                       # advise toward the org max (or registry max offline)
+sfdt versions --advise --target 67           # explicit target version
+sfdt versions --advise --type apex           # only Apex classes/triggers
+```
+
+The advice is **grounded by a curated per-version registry** shipped with the CLI: the AI may
+cite version facts only from the registry, and answers *"unknown — not in registry"* for
+anything it lacks — it never states version facts from model memory. The advisory is strictly
+read-only: CLI providers may read component source to ground their analysis (which is how the
+advice can cite your actual files and lines), but nothing is ever written or auto-fixed. The
+prompt is user-editable as `api-upgrade-advisor` in the prompt editor.
