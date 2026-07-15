@@ -10,6 +10,7 @@ export default {
   notifications: 'Notifications',
   dashboard: 'Web Dashboard',
   'ai-providers': 'AI Providers',
+  skills: 'Agent Skills',
   plugins: 'Plugins',
   'sf-plugin': 'Salesforce CLI Plugin',
   mcp: 'MCP Server',
