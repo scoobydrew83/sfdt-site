@@ -39,12 +39,27 @@ These are the permissions the **built manifest** (`v0.7.0`) actually requests:
 | `https://*.salesforce-setup.com/*` | Setup pages |
 | `https://*.my.salesforce.com/*` | My Domain orgs |
 | `https://*.lightning.force.com/*` | Lightning Experience |
+| `https://*.my.salesforce.mil/*`, `https://*.lightning.force.mil/*` | Gov-cloud (US government) orgs |
+| `https://*.sfcrmapps.cn/*` | Salesforce orgs in China |
+| `https://*.mcas.ms/*` | Orgs fronted by a Microsoft Defender for Cloud Apps proxy |
 | `http://localhost/*`, `http://127.0.0.1/*` | Talk to the local sfdt CLI bridge on your own machine |
 
 <Callout type="info">
   Chrome blocks fetches from an `https://` content script to `http://127.0.0.1` unless the host
   is explicitly permitted at install time — that's why the localhost hosts are listed.
 </Callout>
+
+The gov-cloud, China, and Defender-proxied hosts are listed so the extension can detect your
+Salesforce session on those org families the same way it does on a standard `*.salesforce.com`
+org. The manifest also enables **split incognito**, so an incognito window runs its own isolated
+copy of the extension rather than sharing your normal profile's session state.
+
+### How session data is handled
+
+The extension resolves and caches your Salesforce session **only inside the service worker**,
+in memory-backed `chrome.storage.session`. That store is cleared automatically when the browser
+closes, is never synced, and **never includes the raw session id** — only what's needed to know
+which org a tab belongs to. Content scripts on the page never see or store it.
 
 ## Data stored locally
 
