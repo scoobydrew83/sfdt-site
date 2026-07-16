@@ -49,7 +49,7 @@ Features are surfaced through the ⚡ **side button** menu, which adapts to the 
 
 | Id | What it does |
 | --- | --- |
-| `setup-tabs` | Adds an Automation Home plus reorderable tabs to the Setup tab bar (classic + Lightning) |
+| `setup-tabs` | Adds an Automation Home plus reorderable tabs to the Setup tab bar (classic + Lightning), including a **Login as user…** deep link to Setup's user list |
 | `org-release-badge` | Shows the org's Salesforce release (e.g. Summer '26) and max API version as a badge in the Setup tab strip; flags preview releases |
 | `api-version-audit` | Setup pill (`API v67 · 2 behind`) that expands to per-type API-version histograms (Apex classes/triggers, active Flows) with below-floor rows highlighted and an org-max footer; amber when anything is below the shared health floor |
 
@@ -57,7 +57,7 @@ Features are surfaced through the ⚡ **side button** menu, which adapts to the 
 
 | Id | What it does |
 | --- | --- |
-| `soql-runner` | Run SOQL (REST or Tooling) with field/object autocomplete, history, CSV export, and a LangGraph node generator |
+| `soql-runner` | Run SOQL (REST or Tooling) with field/object autocomplete, history, a **🔎 Explain** query-plan view (cost/cardinality/leading operation, no execution), **Copy JSON / Copy for Excel (TSV)**, CSV export of the current page **or all rows** (follows `queryMore` pagination with a progress indicator + cancel), and a LangGraph node generator |
 | `org-limits` | Live governor-limit usage, sorted by pressure and colour-banded |
 | `rest-explore` | Fire arbitrary `GET`/`POST`/`PATCH`/`PUT`/`DELETE` against `/services/data/...` with a response viewer and history |
 | `soap-explore` | Build and send SOAP API requests with a payload editor and response viewer |
@@ -67,7 +67,7 @@ Features are surfaced through the ⚡ **side button** menu, which adapts to the 
 
 | Id | What it does |
 | --- | --- |
-| `inspect-record` | View a record's complete field set — including empty and system fields — via the REST API |
+| `inspect-record` | View a record's complete field set — including empty and system fields — via the REST API, with a **Fields / JSON** toggle to see the raw REST payload (copyable); also reachable from a right-click **"Inspect this record"** context menu |
 | `show-api-names` | Toggle inline field API names on record pages (object API name + 18-char id in the header), with copy helpers: Id, Apex `insert`, SOQL `SELECT` |
 | `data-import` | Guided CSV data import into the org |
 | `field-creator` | Bulk-create multiple custom fields at once |
@@ -80,9 +80,9 @@ These run inside the standalone [Workspace tab](/chrome-extension/workspace):
 
 | Id | What it does |
 | --- | --- |
-| `apex-anonymous` | Execute anonymous Apex with compile/runtime results and saved snippets |
-| `debug-log-viewer` | List recent `ApexLog` records and view full log bodies |
-| `saved-soql` | Browse bookmarked and recent SOQL and load any query straight into the runner |
+| `apex-anonymous` | Execute anonymous Apex with compile/runtime results, saved snippets, and a **DebugLevel picker** for the captured log |
+| `debug-log-viewer` | List recent `ApexLog` records and view full log bodies, with a 15s **auto-refresh** toggle and **Delete all logs** (bulk-clears the org's logs behind a count-confirm) |
+| `saved-soql` | Browse bookmarked and recent SOQL and load any query straight into the runner, plus a built-in read-only **Templates** group of ready-to-run admin/dev queries |
 | `apex-test-runner` | Run Apex tests (`runTestsAsynchronous`) and view pass/fail results inline (Tooling API) |
 | `apex-coverage` | Org-wide and per-class Apex code coverage with deploy-threshold colour bands (Tooling API) |
 | `org-health-live` | Runs org-health checks **live** against the org — coverage, inactive users, license use, API-version spread, limits near cap (no bridge needed) |

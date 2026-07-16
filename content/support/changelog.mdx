@@ -35,6 +35,32 @@ A platform-integrity release plus a new API-version audit across every surface:
   [`quality --allow-legacy-analyzer`](/cli/commands/testing-quality#sfdt-quality) (Code Analyzer
   v4 is opt-in legacy only; v5 required for authoritative scans).
 
+## `@sfdt/extension` — 0.7.1
+
+Quick-win tooling upgrades across the SOQL Runner, log tools, and record inspector — Phase 1 of
+the extension build-out. See [Features](/chrome-extension/features).
+
+- **SOQL Runner power-ups** — a **🔎 Explain** action shows Salesforce's query plan
+  (cost, cardinality, leading operation, notes) without executing; **Copy JSON** and
+  **Copy for Excel (TSV)** on the result toolbar; and **Export all as CSV** that follows
+  `queryMore` pagination to download every row, with a live progress indicator and Cancel
+  (memory-safe by construction).
+- **Query template pack** — the Saved SOQL panel gains a read-only **Templates** group of 8
+  built-in admin/dev queries (Apex test coverage, validation rules, login history, setup audit
+  trail, limits snapshot, deploy requests, active TraceFlags, record types) that load straight
+  into the runner.
+- **Execute Anonymous — DebugLevel picker** — choose which org DebugLevel a captured log uses from
+  a native **Log level** select (persists per user), no trip to Setup.
+- **Debug Logs — auto-refresh + bulk delete** — a 15-second **Auto-refresh** toggle (off by
+  default, no orphan timers) and a **Delete all logs** action that clears every org `ApexLog`
+  behind a count-confirm dialog.
+- **Inspect Record — raw-JSON toggle + right-click open** — a **Fields / JSON** view toggle renders
+  the raw REST payload (copyable), and a right-click **"Inspect this record"** context menu opens
+  the inspector for a record Id on the page or link (new `contextMenus` permission — see
+  [Privacy &amp; Permissions](/chrome-extension/privacy)).
+- **Login as user** — the Setup tabs feature adds a **Login as user…** deep link to Setup's user
+  list (deep link only; Salesforce enforces the Login-As permission server-side).
+
 ## `@sfdt/extension` — 0.7.0
 
 - **`api-version-audit`** (the 40th feature) — an org-side Setup pill showing the org's max API
