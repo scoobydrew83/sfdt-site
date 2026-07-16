@@ -8,10 +8,43 @@ import { Callout } from 'nextra/components'
 # Keyboard Shortcuts & Triggers
 
 Most features are launched from the ⚡ **side button** menu rather than global hotkeys, so they
-never collide with Salesforce's own shortcuts. One feature has a dedicated, configurable
-keyboard shortcut.
+never collide with Salesforce's own shortcuts. On top of that, the extension exposes a **toolbar
+popup** and a small set of **browser-level keyboard commands** you can remap yourself.
 
-## Keyboard shortcut
+## Toolbar popup
+
+Clicking the extension's toolbar icon opens a thin popup scoped to the **active tab**. On a
+Salesforce tab it shows:
+
+- Whether the tab is a Salesforce page, and **which org** it belongs to.
+- A live **session-status** indicator (is your Salesforce session resolved?).
+- A **bridge status** indicator (is the [sfdt CLI bridge](/chrome-extension/bridge) reachable?).
+- Quick buttons — **Open Workspace**, the **quick menu**, and **Settings**.
+- The installed extension **version**.
+
+On any non-Salesforce tab the popup shows a simple *"not a Salesforce tab"* state instead.
+
+## Browser keyboard commands
+
+Three commands are declared at the browser level, so they work on a Salesforce tab **even before
+the in-page script has loaded**. They're remappable at
+`chrome://extensions/shortcuts` (Chrome may leave some unassigned if the default collides with
+another extension).
+
+| Command | Default | What it does |
+| --- | --- | --- |
+| **Open Workspace** | `Cmd`/`Ctrl`+`Shift`+`E` | Opens the [Workspace tab](/chrome-extension/workspace) |
+| **Open quick menu** | `Cmd`/`Ctrl`+`Shift`+`K` | Opens the ⚡ side menu (will open the command palette in a later release) |
+| **Toggle inspector** | *(unset)* | Reserved for the LWC inspector — shows a *"not available yet"* notice until that feature ships |
+
+<Callout type="info">
+  Remap or clear any of these from `chrome://extensions/shortcuts`. Because they're Chrome
+  commands rather than page shortcuts, they don't collide with Salesforce's own keys.
+</Callout>
+
+## In-page keyboard shortcut
+
+One feature has a dedicated, configurable in-page shortcut:
 
 | Action | Shortcut | Configurable? |
 | --- | --- | --- |

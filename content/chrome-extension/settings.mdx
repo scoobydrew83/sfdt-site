@@ -43,6 +43,22 @@ Features that declare a settings schema render their own controls. A few example
 | `api-name-generator` | `namingPattern` (`Snake_Case` \| `PascalCase` \| `camelCase`) | `Snake_Case` |
 | `scheduled-flow-explorer` | `defaultView` (`list` \| `calendar`) | `list` |
 
+## Appearance (theme)
+
+The **Appearance › Theme** control sets the extension UI's colour theme:
+
+| Value | Behaviour |
+| --- | --- |
+| `auto` (default) | Follows your operating system's light/dark setting, live — flip your OS theme and the extension follows without a reload. |
+| `light` | Always light, regardless of the OS. |
+| `dark` | Always dark, regardless of the OS. |
+
+The theme applies to every extension surface — the ⚡ side menu and tools injected on Salesforce
+pages, the Workspace app, and the options page — and only to the extension's own UI; the
+Salesforce page itself is never restyled. Your choice is stored in `chrome.storage.local`
+(`settings.theme`), read on boot on every surface, and persists across browser restarts. Both
+themes meet WCAG AA text contrast.
+
 ## Telemetry (opt-in, local-only)
 
 Telemetry is **off by default**. When you check **Enable local telemetry**, the extension keeps
