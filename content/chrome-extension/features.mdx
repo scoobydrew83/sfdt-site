@@ -1,6 +1,6 @@
 ---
 title: Features
-description: All 39 opt-in features of the SFDT SF Helper Chrome extension, grouped by the Salesforce context where they run.
+description: The opt-in features of the SFDT SF Helper Chrome extension, grouped by the Salesforce context where they run.
 ---
 
 import { Callout } from 'nextra/components'
@@ -21,6 +21,50 @@ Features are surfaced through the ⚡ **side button** menu, which adapts to the 
   Features marked **🔌 Bridge** require a running [sfdt CLI bridge](/chrome-extension/bridge).
   Everything else runs standalone against your existing Salesforce session.
 </Callout>
+
+## Highlights
+
+A few features aren't tied to one Salesforce context — they open from anywhere, or add a whole
+sub-view to an existing tool.
+
+### Command palette (`command-palette`)
+
+A global, keyboard-first ⚡ overlay on **any** Salesforce page — press `Ctrl`/`Cmd`+`Shift`+`K`
+(or pick **View all features** from the ⚡ menu). Fuzzy-search across your enabled features, Setup
+deep-links (including *Login as user…*), objects, a pasted record Id (opens the inspector), and
+your own **custom shortcuts**. Recent choices resurface first. Opening it makes **zero** Salesforce
+API calls — the Objects list fills in after first paint. Manage custom name→URL shortcuts on the
+[options page](/chrome-extension/settings); they open in a new tab and reappear under **Recent**.
+
+### Docked side panel
+
+The tools can also run in a docked Chrome **side panel** (Firefox: native `sidebar_action`)
+instead of the centered modal — open it from the toolbar popup's **Open side panel** button. It
+hosts the full Workspace next to the page you're on, **follows the active org** as you switch tabs
+(and quietly disables itself on non-Salesforce tabs), and an Appearance › **Default tool surface**
+setting lets you prefer the panel over the modal. Chrome-only, via the `sidePanel`
+[permission](/chrome-extension/privacy).
+
+### Schema Browser (`schema-browser`)
+
+A two-pane object/field explorer — a searchable, windowed object list beside a per-object field
+table (types, lengths, required, inline picklist values, formula source, flattened compound
+fields, reference targets as clickable cross-links, and child relationships). **Copy API name** on
+any field, **Insert into query** to drop a field straight into the SOQL Runner draft, and an
+**Export selected for prompt** field picker (every field pre-selected; unselect what you don't
+want) that hands the chosen fields to `export-for-prompt`. Runs as a [Workspace](/chrome-extension/workspace)
+tool and from a record page via the ⚡ menu; all describes share one session cache.
+
+### Debug Logs — Analyze view
+
+The Debug Logs viewer gains a per-log **📊 Analyze** action (backed by a pure Apex-log parser)
+that renders a sortable **method-timing table** (total / self / count), per-namespace
+**governor-limit snapshots**, and **SOQL / DML / callout inventories** with jump-to-line into the
+raw body, plus a truncation banner. A **Flame chart** shows the same data as a canvas
+invocation-tree timeline — zoom into a subtree, hover for detail, click a frame to select it (synced
+both ways with the method table). You can **📂 Import log** — drag-drop or pick a local
+`.log`/`.txt` and analyze it with no org connection — and Execute Anonymous gains **📊 Run &
+analyze**, which runs the Apex, finds the log it produced, and opens it in the Analyzer.
 
 ## Flow Builder
 
@@ -57,7 +101,7 @@ Features are surfaced through the ⚡ **side button** menu, which adapts to the 
 
 | Id | What it does |
 | --- | --- |
-| `soql-runner` | Run SOQL (REST or Tooling) with field/object autocomplete, history, a **🔎 Explain** query-plan view (cost/cardinality/leading operation, no execution), **Copy JSON / Copy for Excel (TSV)**, CSV export of the current page **or all rows** (follows `queryMore` pagination with a progress indicator + cancel), and a LangGraph node generator |
+| `soql-runner` | Run SOQL (REST or Tooling) with field/object autocomplete (fed fields from the Schema Browser's **Insert into query**), history, a **🔎 Explain** query-plan view (cost/cardinality/leading operation, no execution), **Copy JSON / Copy for Excel (TSV)**, CSV export of the current page **or all rows** (follows `queryMore` pagination with a progress indicator + cancel), and a LangGraph node generator |
 | `org-limits` | Live governor-limit usage, sorted by pressure and colour-banded |
 | `rest-explore` | Fire arbitrary `GET`/`POST`/`PATCH`/`PUT`/`DELETE` against `/services/data/...` with a response viewer and history |
 | `soap-explore` | Build and send SOAP API requests with a payload editor and response viewer |
@@ -73,6 +117,7 @@ Features are surfaced through the ⚡ **side button** menu, which adapts to the 
 | `field-creator` | Bulk-create multiple custom fields at once |
 | `metadata-retrieve` | Retrieve and deploy metadata directly from the browser |
 | `export-for-prompt` | Copy a dense Markdown schema for an object to the clipboard for pasting into an LLM prompt |
+| `schema-browser` | Two-pane object/field explorer (types, picklists, formula source, reference cross-links, child relationships) with **Copy API name**, **Insert into query** (into the SOQL Runner), and an **Export selected for prompt** field picker — see [Highlights](#schema-browser-schema-browser) |
 
 ## Workspace tab
 
@@ -80,8 +125,10 @@ These run inside the standalone [Workspace tab](/chrome-extension/workspace):
 
 | Id | What it does |
 | --- | --- |
-| `apex-anonymous` | Execute anonymous Apex with compile/runtime results, saved snippets, and a **DebugLevel picker** for the captured log |
-| `debug-log-viewer` | List recent `ApexLog` records and view full log bodies, with a 15s **auto-refresh** toggle and **Delete all logs** (bulk-clears the org's logs behind a count-confirm) |
+| `apex-anonymous` | Execute anonymous Apex with compile/runtime results, saved snippets, a **DebugLevel picker** for the captured log, and **📊 Run & analyze** (runs the Apex, finds the log it produced, and opens it in the log Analyzer) |
+| `debug-log-viewer` | List recent `ApexLog` records and view full log bodies, with a 15s **auto-refresh** toggle, **Delete all logs** (bulk-clears the org's logs behind a count-confirm), a per-log **📊 Analyze** view (method timings, governor limits, SOQL/DML/callout inventories, and a **Flame chart**), **📂 Import log** from disk (no org needed), and a **⚑ Trace flags** header entry — see [Highlights](#debug-logs--analyze-view) |
+| `schema-browser` | Two-pane object/field explorer with copy/insert/export-for-prompt actions — see [Highlights](#schema-browser-schema-browser) |
+| `trace-flags` | Manage `TraceFlag`s and debug sessions without a trip to Setup — list active flags with a live expiry countdown + one-click renew, start/stop a session for yourself or another user, and Basic/Full/Custom **DebugLevel presets**. Also a **⚑ Trace flags** entry in the Debug Logs header |
 | `saved-soql` | Browse bookmarked and recent SOQL and load any query straight into the runner, plus a built-in read-only **Templates** group of ready-to-run admin/dev queries |
 | `apex-test-runner` | Run Apex tests (`runTestsAsynchronous`) and view pass/fail results inline (Tooling API) |
 | `apex-coverage` | Org-wide and per-class Apex code coverage with deploy-threshold colour bands (Tooling API) |

@@ -35,6 +35,37 @@ A platform-integrity release plus a new API-version audit across every surface:
   [`quality --allow-legacy-analyzer`](/cli/commands/testing-quality#sfdt-quality) (Code Analyzer
   v4 is opt-in legacy only; v5 required for authoritative scans).
 
+## `@sfdt/extension` — Unreleased (Phases 2 & 3) — 2026-07-18
+
+Two build-out phases on top of Phase 1: a global command palette, a Schema Browser, a docked side
+panel (Phase 2), and a full debug-log analysis suite (Phase 3). See
+[Features](/chrome-extension/features).
+
+- **Command palette** (`command-palette`) — a global, keyboard-first ⚡ overlay
+  (`Ctrl`/`Cmd`+`Shift`+`K`) on any Salesforce page: fuzzy-search features, Setup deep-links,
+  objects, a pasted record Id, and your own **custom shortcuts** (managed on the options page).
+  Opening it makes zero org API calls. See
+  [Features → Command palette](/chrome-extension/features#command-palette-command-palette).
+- **Schema Browser** (`schema-browser`) — a two-pane object/field explorer (types, picklists,
+  formula source, reference cross-links, child relationships) with **Copy API name**, **Insert
+  into query** (into the SOQL Runner), and an **Export selected for prompt** field picker. A
+  [Workspace](/chrome-extension/workspace) tool and a record-page ⚡ entry.
+- **Docked side panel** — the tools now also run in a docked Chrome **side panel** (Firefox:
+  native `sidebar_action`), opened from the toolbar popup. It follows the active org across tab
+  switches, and an Appearance setting can make it the default tool surface. Adds the Chrome-only
+  `sidePanel` permission — see [Privacy &amp; Permissions](/chrome-extension/privacy).
+- **Debug Logs — Analyze view + Flame chart** — a per-log **📊 Analyze** action renders a sortable
+  method-timing table (total / self / count), per-namespace governor-limit snapshots, and
+  SOQL/DML/callout inventories with jump-to-line, plus a canvas **Flame chart** of the invocation
+  tree (zoom, hover, click-to-select synced with the table). Backed by a pure Apex-log parser.
+- **Import log from disk & Run & analyze** — drag-drop or pick a local `.log`/`.txt` and analyze
+  it with **no org connection**; and Execute Anonymous gains **📊 Run & analyze**, which runs the
+  Apex, finds the log it produced, and opens it in the Analyzer.
+- **Trace Flags & debug-session manager** (`trace-flags`) — list active `TraceFlag`s with a live
+  expiry countdown + one-click renew, start/stop a debug session for yourself or another user, and
+  Basic/Full/Custom **DebugLevel presets**. A Workspace tool and a **⚑ Trace flags** entry in the
+  Debug Logs header.
+
 ## `@sfdt/extension` — 0.7.1
 
 Quick-win tooling upgrades across the SOQL Runner, log tools, and record inspector — Phase 1 of
