@@ -73,7 +73,7 @@ analyze**, which runs the Apex, finds the log it produced, and opens it in the A
 | `canvas-search` | `Cmd`/`Ctrl`+`Shift`+`F` search across canvas nodes; matches get a gold highlight, `Enter` cycles through them and pans the canvas to centre each match |
 | `flow-health-check` | Scores the open Flow against the `@sfdt/flow-core` rules engine — severity grid, issue families, and a flow-profile metrics panel; copies the report as JSON |
 | `missing-description-flags` | Flags Flow nodes and the Flow itself when they lack a description, with inline ⚠ markers |
-| `api-name-generator` | Generates API names from labels using a configurable case style (also works in Object Manager) |
+| `api-name-generator` | Generates API names from labels using a configurable case style — defaults to **camelCase** (also works in Object Manager) |
 | `ai-assistant` 🔌 | Token estimates plus AI answers about the current Flow via the bridge (Claude / Gemini / OpenAI) |
 | `flow-deploy` 🔌 | Deploys the current Flow via the bridge (`sfdt deploy --metadata Flow:...`) |
 
@@ -95,7 +95,7 @@ analyze**, which runs the Apex, finds the log it produced, and opens it in the A
 | --- | --- |
 | `setup-tabs` | Adds an Automation Home plus reorderable tabs to the Setup tab bar (classic + Lightning), including a **Login as user…** deep link to Setup's user list |
 | `org-release-badge` | Shows the org's Salesforce release (e.g. Summer '26) and max API version as a badge in the Setup tab strip; flags preview releases |
-| `api-version-audit` | Setup pill (`API v67 · 2 behind`) that expands to per-type API-version histograms (Apex classes/triggers, active Flows) with below-floor rows highlighted and an org-max footer; amber when anything is below the shared health floor |
+| `api-version-audit` | On-demand API-version audit — launched from the ⚡ menu / command palette, opening as a Workspace tab or page view. Leads with an `API v67 · N behind` summary, then per-type API-version histograms (Apex classes/triggers, active Flows) with below-floor rows highlighted and an org-max footer |
 
 ## Salesforce APIs (Setup, Flow Builder, Trigger Explorer)
 
