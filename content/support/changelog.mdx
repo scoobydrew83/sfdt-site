@@ -35,12 +35,20 @@ A platform-integrity release plus a new API-version audit across every surface:
   [`quality --allow-legacy-analyzer`](/cli/commands/testing-quality#sfdt-quality) (Code Analyzer
   v4 is opt-in legacy only; v5 required for authoritative scans).
 
-## `@sfdt/extension` — Unreleased (Phases 2 & 3) — 2026-07-18
+## `@sfdt/extension` — 0.8.0 — 2026-07-20
 
-Two build-out phases on top of Phase 1: a global command palette, a Schema Browser, a docked side
-panel (Phase 2), and a full debug-log analysis suite (Phase 3). See
-[Features](/chrome-extension/features).
+The full Phase 0–3 build-out: a security-hardened worker-side session model, dark mode, a global
+command palette, a Schema Browser, a docked side panel, and a complete debug-log analysis suite.
+See [Features](/chrome-extension/features).
 
+- **Security posture — the session id never leaves the background worker.** Every REST/Tooling/SOAP
+  call (and the Event Monitor's live streaming) now runs inside the service worker, so page and
+  content-script code hold no `sid`. Injected UI mounts in a **closed shadow root**, isolating it
+  from Salesforce's own CSS/DOM in both directions.
+- **Dark mode + session-layer hardening** — a light/dark/auto **Theme** setting, plus support for
+  US GovCloud (`.mil`), Salesforce China (`.sfcrmapps.cn`), and Microsoft Defender
+  (`.mcas.ms`)-proxied orgs with per-org session resolution and org-id cross-matching. See
+  [Privacy &amp; Permissions](/chrome-extension/privacy).
 - **Command palette** (`command-palette`) — a global, keyboard-first ⚡ overlay
   (`Ctrl`/`Cmd`+`Shift`+`K`) on any Salesforce page: fuzzy-search features, Setup deep-links,
   objects, a pasted record Id, and your own **custom shortcuts** (managed on the options page).
@@ -65,11 +73,6 @@ panel (Phase 2), and a full debug-log analysis suite (Phase 3). See
   expiry countdown + one-click renew, start/stop a debug session for yourself or another user, and
   Basic/Full/Custom **DebugLevel presets**. A Workspace tool and a **⚑ Trace flags** entry in the
   Debug Logs header.
-
-## `@sfdt/extension` — 0.7.1
-
-Quick-win tooling upgrades across the SOQL Runner, log tools, and record inspector — Phase 1 of
-the extension build-out. See [Features](/chrome-extension/features).
 
 - **SOQL Runner power-ups** — a **🔎 Explain** action shows Salesforce's query plan
   (cost, cardinality, leading operation, notes) without executing; **Copy JSON** and
