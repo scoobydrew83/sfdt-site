@@ -35,6 +35,66 @@ A platform-integrity release plus a new API-version audit across every surface:
   [`quality --allow-legacy-analyzer`](/cli/commands/testing-quality#sfdt-quality) (Code Analyzer
   v4 is opt-in legacy only; v5 required for authoritative scans).
 
+## `@sfdt/extension` — 0.8.0 — 2026-07-20
+
+The full Phase 0–3 build-out: a security-hardened worker-side session model, dark mode, a global
+command palette, a Schema Browser, a docked side panel, and a complete debug-log analysis suite.
+See [Features](/chrome-extension/features).
+
+- **Security posture — the session id never leaves the background worker.** Every REST/Tooling/SOAP
+  call (and the Event Monitor's live streaming) now runs inside the service worker, so page and
+  content-script code hold no `sid`. Injected UI mounts in a **closed shadow root**, isolating it
+  from Salesforce's own CSS/DOM in both directions.
+- **Dark mode + session-layer hardening** — a light/dark/auto **Theme** setting, plus support for
+  US GovCloud (`.mil`), Salesforce China (`.sfcrmapps.cn`), and Microsoft Defender
+  (`.mcas.ms`)-proxied orgs with per-org session resolution and org-id cross-matching. See
+  [Privacy &amp; Permissions](/chrome-extension/privacy).
+- **Command palette** (`command-palette`) — a global, keyboard-first ⚡ overlay
+  (`Ctrl`/`Cmd`+`Shift`+`K`) on any Salesforce page: fuzzy-search features, Setup deep-links,
+  objects, a pasted record Id, and your own **custom shortcuts** (managed on the options page).
+  Opening it makes zero org API calls. See
+  [Features → Command palette](/chrome-extension/features#command-palette-command-palette).
+- **Schema Browser** (`schema-browser`) — a two-pane object/field explorer (types, picklists,
+  formula source, reference cross-links, child relationships) with **Copy API name**, **Insert
+  into query** (into the SOQL Runner), and an **Export selected for prompt** field picker. A
+  [Workspace](/chrome-extension/workspace) tool and a record-page ⚡ entry.
+- **Docked side panel** — the tools now also run in a docked Chrome **side panel** (Firefox:
+  native `sidebar_action`), opened from the toolbar popup. It follows the active org across tab
+  switches, and an Appearance setting can make it the default tool surface. Adds the Chrome-only
+  `sidePanel` permission — see [Privacy &amp; Permissions](/chrome-extension/privacy).
+- **Debug Logs — Analyze view + Flame chart** — a per-log **📊 Analyze** action renders a sortable
+  method-timing table (total / self / count), per-namespace governor-limit snapshots, and
+  SOQL/DML/callout inventories with jump-to-line, plus a canvas **Flame chart** of the invocation
+  tree (zoom, hover, click-to-select synced with the table). Backed by a pure Apex-log parser.
+- **Import log from disk & Run & analyze** — drag-drop or pick a local `.log`/`.txt` and analyze
+  it with **no org connection**; and Execute Anonymous gains **📊 Run & analyze**, which runs the
+  Apex, finds the log it produced, and opens it in the Analyzer.
+- **Trace Flags & debug-session manager** (`trace-flags`) — list active `TraceFlag`s with a live
+  expiry countdown + one-click renew, start/stop a debug session for yourself or another user, and
+  Basic/Full/Custom **DebugLevel presets**. A Workspace tool and a **⚑ Trace flags** entry in the
+  Debug Logs header.
+
+- **SOQL Runner power-ups** — a **🔎 Explain** action shows Salesforce's query plan
+  (cost, cardinality, leading operation, notes) without executing; **Copy JSON** and
+  **Copy for Excel (TSV)** on the result toolbar; and **Export all as CSV** that follows
+  `queryMore` pagination to download every row, with a live progress indicator and Cancel
+  (memory-safe by construction).
+- **Query template pack** — the Saved SOQL panel gains a read-only **Templates** group of 8
+  built-in admin/dev queries (Apex test coverage, validation rules, login history, setup audit
+  trail, limits snapshot, deploy requests, active TraceFlags, record types) that load straight
+  into the runner.
+- **Execute Anonymous — DebugLevel picker** — choose which org DebugLevel a captured log uses from
+  a native **Log level** select (persists per user), no trip to Setup.
+- **Debug Logs — auto-refresh + bulk delete** — a 15-second **Auto-refresh** toggle (off by
+  default, no orphan timers) and a **Delete all logs** action that clears every org `ApexLog`
+  behind a count-confirm dialog.
+- **Inspect Record — raw-JSON toggle + right-click open** — a **Fields / JSON** view toggle renders
+  the raw REST payload (copyable), and a right-click **"Inspect this record"** context menu opens
+  the inspector for a record Id on the page or link (new `contextMenus` permission — see
+  [Privacy &amp; Permissions](/chrome-extension/privacy)).
+- **Login as user** — the Setup tabs feature adds a **Login as user…** deep link to Setup's user
+  list (deep link only; Salesforce enforces the Login-As permission server-side).
+
 ## `@sfdt/extension` — 0.7.0
 
 - **`api-version-audit`** (the 40th feature) — an org-side Setup pill showing the org's max API

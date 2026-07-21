@@ -25,6 +25,20 @@ work. Closing a tab also cleanly stops any live work it owned (e.g. an event-mon
   there, clicking the backdrop dismisses it, returning you to the page you were on.
 </Callout>
 
+## Also available as a docked side panel
+
+The same Workspace — the full tool set, tabbed panes, and org switcher — also runs in a docked
+Chrome **side panel** (Firefox: a native `sidebar_action` sidebar), opened from the toolbar
+popup's **Open side panel** button. It sits beside the Salesforce tab you're working on, **follows
+the active org** as you switch tabs, and can be made the **default surface** for on-page tools
+(Options › Appearance). See [Command palette & side panel](/chrome-extension/features#highlights).
+
+<Callout type="info">
+  The ⚡ **command palette** (`Ctrl`/`Cmd`+`Shift`+`K`) opens the same tools — plus Setup
+  deep-links, objects, and custom shortcuts — from anywhere on a Salesforce page. See
+  [Features → Command palette](/chrome-extension/features#command-palette-command-palette).
+</Callout>
+
 ## Org targeting
 
 The Workspace opens against the org you launched it from. With no org in the URL it falls back,
@@ -51,15 +65,17 @@ rebuilding every tool's session. This is the `org-switcher` feature.
 
 | Feature | What it does |
 | --- | --- |
-| `soql-runner` | SOQL (REST or Tooling) with autocomplete, history, and CSV export |
-| `saved-soql` | Bookmarked and recent queries, loadable into the runner |
-| `apex-anonymous` | Execute anonymous Apex with compile/runtime results and saved snippets |
-| `debug-log-viewer` | List recent `ApexLog` records and view full bodies |
+| `soql-runner` | SOQL (REST or Tooling) with autocomplete, history, **Explain** query plan, **Copy JSON / Excel (TSV)**, and CSV export of the page or **all rows** (paginated) |
+| `saved-soql` | Bookmarked and recent queries plus a built-in **Templates** group, loadable into the runner |
+| `apex-anonymous` | Execute anonymous Apex with compile/runtime results, saved snippets, a **DebugLevel picker**, and **Run & analyze** (opens the produced log in the Analyzer) |
+| `debug-log-viewer` | List recent `ApexLog` records and view full bodies, with **auto-refresh**, **bulk delete**, a per-log **Analyze** view (timings, limits, inventories, **flame chart**), **Import log** from disk, and a **Trace flags** header entry |
+| `schema-browser` | Two-pane object/field explorer — types, picklists, formula source, reference cross-links, child relationships — with copy-API-name, **Insert into query**, and export-for-prompt field selection |
+| `trace-flags` | List/renew `TraceFlag`s (live expiry countdown), start/stop a debug session for yourself or another user, and Basic/Full/Custom **DebugLevel presets** — no trip to Setup |
 | `org-limits` | Live governor-limit usage |
 | `rest-explore` | Arbitrary REST calls against `/services/data/...` |
 | `soap-explore` | Build and send SOAP API requests |
 | `event-monitor` | Live platform / streaming event monitoring |
-| `inspect-record` | Show all fields/data for a record |
+| `inspect-record` | Show all fields/data for a record, with a **Fields / JSON** view toggle |
 | `metadata-retrieve` | Retrieve and deploy metadata |
 | `field-creator` | Bulk-create custom fields |
 | `data-import` | CSV data import wizard |
