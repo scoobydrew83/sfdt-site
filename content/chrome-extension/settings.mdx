@@ -59,6 +59,18 @@ Salesforce page itself is never restyled. Your choice is stored in `chrome.stora
 (`settings.theme`), read on boot on every surface, and persists across browser restarts. Both
 themes meet WCAG AA text contrast.
 
+**Default tool surface** (`settings.defaultSurface`, default `modal`) — when set to `panel`, tools
+prefer the docked Chrome **side panel** over the classic centred modal, and the toolbar popup
+promotes **Open side panel** as its primary action. Chrome only; Firefox uses its native sidebar.
+
+## Custom shortcuts
+
+The **Custom shortcuts** section adds your own **name → URL** entries that appear under
+**Shortcuts** in the [command palette](/chrome-extension/features#command-palette-command-palette).
+Add, rename, and remove rows, then Save; a duplicate name or a malformed URL is rejected on save.
+Shortcuts are stored as a top-level `customShortcuts` preference in `chrome.storage.local` and open
+in a new tab (never navigating away from the Salesforce page).
+
 ## Telemetry (opt-in, local-only)
 
 Telemetry is **off by default**. When you check **Enable local telemetry**, the extension keeps
