@@ -13,7 +13,7 @@ workspace-scoped, so different projects can target different orgs and CLI binari
 | `sfdt.cliPath` | string | `"sfdt"` | Path to the sfdt CLI binary. Defaults to `sfdt` on your `PATH`; set an absolute path if the CLI isn't found. |
 | `sfdt.defaultOrg` | string | `""` | Org alias passed to commands via `--org`. Empty uses the project's configured `defaultOrg`. |
 | `sfdt.dashboardPort` | number | `7654` | Port the `sfdt ui` dashboard server listens on. |
-| `sfdt.orgColor` | boolean | `true` | Tint the VS Code window by org type (production = red, sandbox = orange, scratch/developer = green) to prevent wrong-org mistakes. |
+| `sfdt.orgColor` | boolean | `false` | Opt in to tint the VS Code window by org type (production = red, sandbox = orange, scratch/developer = green) to prevent wrong-org mistakes. When enabled it writes `workbench.colorCustomizations` into the workspace `.vscode/settings.json`; disabling it removes those keys again. |
 
 ## Example `settings.json`
 
