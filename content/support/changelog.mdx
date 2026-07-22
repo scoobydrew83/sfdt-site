@@ -17,6 +17,17 @@ repository; this page summarizes recent highlights.
   [Extension `CHANGELOG.md`](https://github.com/scoobydrew83/sfdt/blob/main/extension/CHANGELOG.md)
 </Callout>
 
+## `@sfdt/cli` — 0.18.2
+
+Maintenance and dependency-security release — no CLI behaviour change:
+
+- **Security** — cleared all outstanding high-severity dependency advisories: npm-audit fixes for
+  `fast-uri`, `brace-expansion`, and `body-parser`; an `adm-zip` `^0.6.0` override
+  (GHSA-xcpc-8h2w-3j85 / CVE-2026-39244); a `shell-quote` `^1.9.0` override floor; and an
+  `express-rate-limit` bump.
+- **From 0.18.1** — shell scripts resolve bash via `/usr/bin/env` (works where bash isn't at
+  `/bin/bash`), and `sfdt skills export` emits a stable, deterministic order.
+
 ## `@sfdt/cli` — 0.18.0
 
 A platform-integrity release plus a new API-version audit across every surface:
@@ -99,6 +110,13 @@ See [Features](/chrome-extension/features).
 
 - **`api-version-audit`** (the 40th feature) — an org-side Setup pill showing the org's max API
   version and how many components lag, expanding to per-type API-version histograms.
+
+## `sfdt.sfdt-devtools` (VS Code) — 0.5.1
+
+- **`sfdt.orgColor` is now opt-in.** Per-org window theming defaults to `false`; the extension no
+  longer silently writes `workbench.colorCustomizations` into a version-controlled
+  `.vscode/settings.json` on activation. Disabling the setting now **removes** the colour keys it
+  wrote instead of leaving a stale block behind.
 
 ## `sfdt.sfdt-devtools` (VS Code) — 0.5.0
 
