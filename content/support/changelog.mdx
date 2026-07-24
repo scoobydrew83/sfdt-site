@@ -17,6 +17,20 @@ repository; this page summarizes recent highlights.
   [Extension `CHANGELOG.md`](https://github.com/scoobydrew83/sfdt/blob/main/extension/CHANGELOG.md)
 </Callout>
 
+## `@sfdt/cli` — 0.19.0
+
+Org-side API-version coverage now matches the local scan:
+
+- **[`sfdt versions`](/cli/commands/org-health#sfdt-versions) and
+  [`sfdt audit api-versions`](/cli/commands/org-health) now cover LWC and Aura on the org side.**
+  The local source scan always inventoried Apex/Trigger/Flow/LWC/Aura, but the org half stopped at
+  Apex and Flows — so an org-side bundle stuck on an old API version was invisible and the two
+  columns weren't comparing the same set. Both now query `LightningComponentBundle` and
+  `AuraDefinitionBundle` via the Tooling API, keyed to match the local scan.
+- **Independent degradation in `audit api-versions`** — Flow/LWC/Aura are optional types; any that a
+  given org can't query leaves the check at `warn`/`ok` with the type named in the summary rather
+  than failing the run. Apex remains the required core. Output order is deterministic.
+
 ## `@sfdt/cli` — 0.18.2
 
 Maintenance and dependency-security release — no CLI behaviour change:
@@ -45,6 +59,19 @@ A platform-integrity release plus a new API-version audit across every surface:
 - **Hardening** — `test --logic` zero-test guard + `--wait` validation, and
   [`quality --allow-legacy-analyzer`](/cli/commands/testing-quality#sfdt-quality) (Code Analyzer
   v4 is opt-in legacy only; v5 required for authoritative scans).
+
+## `@sfdt/extension` — 0.9.0 — 2026-07-24
+
+The API Version Audit gets specific, and a contrast-guard sweep:
+
+- **API Version Audit now names the components that are behind, and covers LWC + Aura.** The audit
+  used to say "12 things are on v41" but never *which* twelve — its queries selected the version
+  alone. It now selects each type's name field and renders below-floor buckets as keyboard-accessible
+  disclosures that expand to the component list. `LightningComponentBundle` and `AuraDefinitionBundle`
+  are queried too, so it covers five types where it covered three. See [Features](/chrome-extension/features).
+- **Widened the fill-token contrast guard** to every design-token fill with a foreground variant (it
+  previously checked only three, and only inline literals), and fixed three pre-existing dark-mode
+  contrast defects it surfaced.
 
 ## `@sfdt/extension` — 0.8.0 — 2026-07-20
 

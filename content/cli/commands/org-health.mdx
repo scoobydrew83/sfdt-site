@@ -32,7 +32,7 @@ sfdt audit all --notify          # also push the snapshot to notification channe
 | `unused-apex` | Apex classes with zero test coverage (heuristic) |
 | `apex-unreferenced` | Apex classes with no inbound metadata dependency |
 | `inactive-users` | Active users with no recent login (beyond `audit.inactiveUserDays`) |
-| `api-versions` | Apex/triggers below `audit.minApiVersion` |
+| `api-versions` | Apex classes/triggers, Flows, LWC, and Aura below `audit.minApiVersion` (Flow/LWC/Aura degrade independently if an org can't query them) |
 | `inactive-flows` | Flow definitions with no active version |
 | `inactive-validations` | Validation rules that are not active |
 | `inactive-workflows` | Workflow rules that are not active (legacy automation) |
