@@ -95,8 +95,8 @@ is configured.
 
 ## Events & severity routing
 
-- **Lifecycle events** — `deploy-success`, `deploy-failure`, `test-failure`, `release-created` —
-  are sent to any channel whose `events` filter allows them.
+- **Lifecycle events** — `deploy-success`, `deploy-failure`, `test-failure`, `release-created`,
+  `harness-escalation` — are sent to any channel whose `events` filter allows them.
 - The **`snapshot`** event (an audit/monitor run) is routed by severity: a channel receives it
   only when the snapshot's worst status is at or above the channel's `severityThreshold`.
 
