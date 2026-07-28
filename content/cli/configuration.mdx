@@ -231,7 +231,7 @@ still honored when `features.notifications: true`.
       // type: slack | teams | googlechat | email | webhook
       // common: name, severityThreshold (ok|warn|error|fail), events[]
       // slack/teams/googlechat: webhookUrl | webhookUrlEnv
-      // webhook: url | urlEnv, format (json|loki), headers{}
+      // webhook: url | urlEnv, format (json|loki), headers{}, headersEnv{} (auth — env-var NAMES)
       // email: from, to[], smtp{ hostEnv, portEnv, userEnv, passwordEnv, secure }
     ],
     // legacy single-Slack shape (still honored when features.notifications=true):
