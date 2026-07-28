@@ -31,7 +31,7 @@ sub-view to an existing tool.
 
 A global, keyboard-first ⚡ overlay on **any** Salesforce page — press `Ctrl`/`Cmd`+`Shift`+`K`
 (or pick **View all features** from the ⚡ menu). Fuzzy-search across your enabled features, Setup
-deep-links (including *Login as user…*), objects, a pasted record Id (opens the inspector), and
+deep-links, objects, a pasted record Id (opens the inspector), and
 your own **custom shortcuts**. Recent choices resurface first. Opening it makes **zero** Salesforce
 API calls — the Objects list fills in after first paint. Manage custom name→URL shortcuts on the
 [options page](/chrome-extension/settings); they open in a new tab and reappear under **Recent**.
@@ -93,7 +93,7 @@ analyze**, which runs the Apex, finds the log it produced, and opens it in the A
 
 | Id | What it does |
 | --- | --- |
-| `setup-tabs` | Adds an Automation Home plus reorderable tabs to the Setup tab bar (classic + Lightning), including a **Login as user…** deep link to Setup's user list |
+| `setup-tabs` | Adds an Automation Home plus reorderable tabs to the Setup tab bar (classic + Lightning) |
 | `org-release-badge` | Shows the org's Salesforce release (e.g. Summer '26) and max API version as a badge in the Setup tab strip; flags preview releases |
 | `api-version-audit` | On-demand API-version audit — launched from the ⚡ menu / command palette, opening as a Workspace tab or page view. Leads with an `API v67 · N behind` summary, then per-type API-version histograms (Apex classes/triggers, active Flows, LWC, Aura) with below-floor rows highlighted; each below-floor row expands to name the components behind. An org-max footer closes it out |
 
