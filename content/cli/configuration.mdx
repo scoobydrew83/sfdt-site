@@ -266,6 +266,18 @@ Settings for [Smart Deploy](/cli/smart-deploy) (`sfdt deploy --smart`).
 Salesforce's beta `RunRelevantTests` in place of the `RunLocalTests` fallback — see
 [Smart Deploy](/cli/smart-deploy).
 
+### `ai.headers` / `ai.headersEnv`
+
+Extra request headers for the `http` provider. `headers` takes **literal** values; `headersEnv`
+maps a header name to the **name** of an env var holding its value — use it for anything secret,
+so the token stays out of `.sfdt/config.json`. `headersEnv` overrides a literal of the same name,
+and an unset variable fails the request naming it rather than calling the endpoint without the
+header. See [AI Providers](/cli/ai-providers#gateway-headers).
+
+```jsonc
+{ "ai": { "headersEnv": { "X-Org-Id": "GATEWAY_ORG_ID" } } }
+```
+
 ### `ai.agent`
 
 The bounded coding-agent auto-fix loop for `sfdt deploy --smart --ai-fix`. Off by default; requires

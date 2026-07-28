@@ -35,6 +35,34 @@ options page; see [The bridge](/guides/the-bridge).
   so they never reach the in-memory buffer or the browser's live log view, not just the
   persisted file.
 
+## What redaction covers
+
+The same redaction runs on everything leaving the machine or landing on disk: audit-log entries,
+notification payloads, and prompt content sent to an AI provider (which matters most for the
+`http` provider, where the text goes to a remote endpoint).
+
+| Redacted | Example |
+|---|---|
+| Salesforce token shapes | session ids (`00D…`, `005…`), refresh tokens (`5AepD…`) |
+| Sensitive CLI flags | `--password`, `--client-secret`, `--access-token` |
+| Sensitive JSON keys | `password`, `client_secret`, `token`, `secret` — value replaced wholesale |
+| PEM private-key blocks | a JWT signing key pasted into a deploy error |
+| `force://` sfdx auth URLs | a complete, replayable org credential — printed by `sf org display --verbose` |
+| `Authorization: Bearer …` | captured request headers, `curl` lines in logs |
+| Secret-ish assignments | `api_key=…`, `password: …` appearing in prose or a stack trace |
+
+The last four cover secrets that arrive as **free text** — diffs, log excerpts, error messages —
+rather than as a recognizable token shape or a structured key.
+
+<Callout type="info">
+  Over-redaction is guarded as deliberately as under-redaction, since logs full of `[REDACTED]`
+  are useless for diagnosis. An env-var *name* like `apiKeyEnv: "MY_KEY_VAR"`, prose that merely
+  mentions a word like "token", and empty or structural values are all left intact.
+</Callout>
+
+Redaction is a safety net, not a licence to log secrets. It matches known shapes and patterns —
+it cannot recognize an arbitrary high-entropy string that carries no marker.
+
 ## The AI tool sandbox
 
 <Callout type="warning">
