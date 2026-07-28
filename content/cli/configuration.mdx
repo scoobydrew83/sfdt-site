@@ -231,7 +231,7 @@ still honored when `features.notifications: true`.
       // type: slack | teams | googlechat | email | webhook
       // common: name, severityThreshold (ok|warn|error|fail), events[]
       // slack/teams/googlechat: webhookUrl | webhookUrlEnv
-      // webhook: url | urlEnv, format (json|loki), headers{}
+      // webhook: url | urlEnv, format (json|loki), headers{}, headersEnv{} (auth — env-var NAMES)
       // email: from, to[], smtp{ hostEnv, portEnv, userEnv, passwordEnv, secure }
     ],
     // legacy single-Slack shape (still honored when features.notifications=true):
@@ -265,6 +265,18 @@ Settings for [Smart Deploy](/cli/smart-deploy) (`sfdt deploy --smart`).
 `deployment.smart.useRelevantTests` (default `false`) opts non-production orgs on API ≥ 66 into
 Salesforce's beta `RunRelevantTests` in place of the `RunLocalTests` fallback — see
 [Smart Deploy](/cli/smart-deploy).
+
+### `ai.headers` / `ai.headersEnv`
+
+Extra request headers for the `http` provider. `headers` takes **literal** values; `headersEnv`
+maps a header name to the **name** of an env var holding its value — use it for anything secret,
+so the token stays out of `.sfdt/config.json`. `headersEnv` overrides a literal of the same name,
+and an unset variable fails the request naming it rather than calling the endpoint without the
+header. See [AI Providers](/cli/ai-providers#gateway-headers).
+
+```jsonc
+{ "ai": { "headersEnv": { "X-Org-Id": "GATEWAY_ORG_ID" } } }
+```
 
 ### `ai.agent`
 

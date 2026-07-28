@@ -74,7 +74,32 @@ filtering and severity routing.
   given as the *name* of an environment variable (`webhookUrlEnv`, `urlEnv`, SMTP `*Env`) — the
   value is read from `process.env` at send time and is never stored in config. Inline
   `webhookUrl`/`url` are still supported for back-compat but discouraged.
+
+  The same applies to **webhook auth headers** — use `headersEnv`, not `headers`, for anything
+  secret.
 </Callout>
+
+### Authenticating a webhook channel
+
+`headers` takes literal values, so a token placed there is written into `.sfdt/config.json`. Use
+`headersEnv` instead — it maps a header name to the *name* of the env var holding its value:
+
+```json
+{
+  "type": "webhook",
+  "name": "n8n",
+  "webhookUrlEnv": "HARNESS_WEBHOOK_URL",
+  "headersEnv": { "X-Auth-Token": "HARNESS_WEBHOOK_TOKEN" }
+}
+```
+
+`headersEnv` overrides a literal `headers` entry of the same name, so an existing config can adopt
+it one key at a time. If a named env var is unset or empty, **that channel fails** with an error
+naming the variable — it does not fall back to sending the request unauthenticated. Other channels
+are unaffected.
+
+Works with n8n Header Auth, Cloudflare Access service tokens, and any gateway expecting a
+shared-secret header.
 
 ### Channel fields
 
@@ -85,7 +110,8 @@ filtering and severity routing.
 | `webhookUrl` / `webhookUrlEnv` | slack, teams, googlechat | Incoming-webhook URL (inline or env-var name) |
 | `url` / `urlEnv` | webhook | Endpoint URL (inline or env-var name) |
 | `format` | webhook | `json` (default) or `loki` (Grafana Loki push) |
-| `headers` | webhook | Extra HTTP headers |
+| `headers` | webhook | Extra HTTP headers (literal values) |
+| `headersEnv` | webhook | Header name → **name** of the env var holding its value. Use this for auth tokens. |
 | `from`, `to`, `smtp` | email | Sender, recipients, and SMTP env-var names |
 | `severityThreshold` | all | Minimum snapshot severity to receive (`ok` \| `warn` \| `error` \| `fail`) |
 | `events` | all | Which events this channel receives (omit = all) |
@@ -95,8 +121,8 @@ is configured.
 
 ## Events & severity routing
 
-- **Lifecycle events** — `deploy-success`, `deploy-failure`, `test-failure`, `release-created` —
-  are sent to any channel whose `events` filter allows them.
+- **Lifecycle events** — `deploy-success`, `deploy-failure`, `test-failure`, `release-created`,
+  `harness-escalation` — are sent to any channel whose `events` filter allows them.
 - The **`snapshot`** event (an audit/monitor run) is routed by severity: a channel receives it
   only when the snapshot's worst status is at or above the channel's `severityThreshold`.
 

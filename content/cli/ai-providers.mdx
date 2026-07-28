@@ -83,6 +83,32 @@ commands pre-gather context for it. Prompt content is passed through `redactSens
 it's sent. The bounded auto-fix loop (`deploy --smart --ai-fix` with `ai.agent.allowWrite`) is
 CLI-providers-only for this reason.
 
+### Gateway headers
+
+Some endpoints want an extra header beyond the API key — an org id, a routing tag, a proxy token.
+Use `ai.headersEnv`, which maps a header name to the **name** of the env var holding its value:
+
+```json
+{
+  "ai": {
+    "provider": "http",
+    "baseURL": "https://gateway.example/v1",
+    "apiKeyEnv": "GATEWAY_KEY",
+    "headersEnv": { "X-Org-Id": "GATEWAY_ORG_ID" }
+  }
+}
+```
+
+`ai.headers` also exists and takes **literal** values — fine for a non-secret routing tag, wrong
+for anything sensitive, because literals are written into `.sfdt/config.json`. `headersEnv`
+overrides a literal of the same name.
+
+<Callout type="info">
+  If a named env var is unset, the request **fails naming that variable** rather than calling the
+  endpoint without the header. The same helper backs webhook channel auth — see
+  [Notifications](/cli/notifications#authenticating-a-webhook-channel).
+</Callout>
+
 ## Which commands use AI
 
 | Command | AI role |
