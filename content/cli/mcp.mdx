@@ -84,6 +84,7 @@ Configure it under the `mcp` key in `.sfdt/config.json`:
 | `sfdt_docs` | `ai` (boolean) — generate MkDocs project docs (objects/fields, Apex, Flows) with an optional AI overview and a Mermaid ER diagram. Read-only. |
 | `sfdt_test` | `classNames` (array, optional) — run Apex tests via the enhanced runner; limit to specific classes or use the configured set. Consumes org test resources; not metadata-mutating. |
 | `sfdt_history` | `type` (optional filter — `audit` \| `monitor` \| `quality` \| `test-run` \| `deploy` \| `agent-test` …), `limit` (default 30) — recent runs from the local run index. Read-only. |
+| `sfdt_apex_logs` | `org`, `logId` (retrieve one log body), `limit` (default 20) — list recent Apex debug logs or fetch one by Id. Read-only. |
 
 ### Scratch orgs & data (safety-gated)
 
@@ -98,6 +99,8 @@ and `sfdt_scratch_pool` with `action: "status"` are read-only and need no gate.
 | `sfdt_data_export` | `set` (req), `org` — export a configured data set to local files. Read-only against the org. |
 | `sfdt_data_import` | `set` (req), `org`, `confirmExecution` (req) — write records to the org |
 | `sfdt_data_delete` | `set` (req), `org`, `confirmExecution` (req) — bulk-delete records in the org |
+| `sfdt_apex_trace` | `action` (req — `list` read-only \| `start`/`stop` mutating), `org`, `user`, `duration` (minutes), `debugLevel`, `all`, `confirmExecution` (req for `start`/`stop`) — manage USER_DEBUG trace flags |
+| `sfdt_apex_run` | `org`, `file` (project-relative path) or `apexCode` (inline), `confirmExecution` (req) — execute Anonymous Apex in the org |
 
 ### Org health & notifications
 
