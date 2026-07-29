@@ -17,6 +17,44 @@ repository; this page summarizes recent highlights.
   [Extension `CHANGELOG.md`](https://github.com/scoobydrew83/sfdt/blob/main/extension/CHANGELOG.md)
 </Callout>
 
+## `@sfdt/cli` — 0.20.0
+
+A security fix, and secrets kept out of config on two more surfaces:
+
+- **Security — `plugins` now accepts package names only.** Plugins load before argument parsing,
+  and the resolver accepted file paths as well as package names — so a project's
+  `.sfdt/config.json` listing `"plugins": ["./tools/helper.js"]` executed that file's top-level
+  code on *any* `sfdt` command, `sfdt --version` included, without logging it. Since sfdt is built
+  to run inside other people's Salesforce projects, cloning a repo and running one command was
+  enough. Entries that look like paths are now refused with a warning. Scoped names
+  (`@org/sfdt-plugin-thing`) and package subpaths are unaffected — the guard rejects paths, not
+  slashes. **If you load a plugin by relative path today, install it as a package instead.**
+- **Security — redaction now catches secrets written as free text.** PEM private-key blocks,
+  `force://` sfdx auth URLs, `Authorization: Bearer` headers, and secret-ish `key=value`
+  assignments are redacted before anything reaches an AI provider, a webhook, or the audit log.
+  Variable *names* like `apiKeyEnv: "MY_VAR"` are deliberately left intact.
+- **`headersEnv` on notification channels, and `ai.headersEnv` for the `http` AI provider.**
+  Reference a bearer token or gateway secret by env-var *name* instead of writing it into
+  `.sfdt/config.json`. A named-but-unset variable fails that one channel with an error naming it,
+  rather than silently sending an unauthenticated request. Enables n8n Header Auth, Cloudflare
+  Access service tokens, and any gateway expecting a shared-secret header.
+- **New `harness-escalation` notification event** — for automation that needs to hand a decision
+  back to a person instead of encoding a fix.
+- **`agent-fix` runs are recorded in run history**, so auto-fix attempts trend alongside deploys
+  and tests.
+
+## `@sfdt/extension` — 0.9.1
+
+- **Removed the "Login as user…" Setup tab.** The Setup tab strip now injects three base tabs
+  rather than four, and the deep link no longer appears in the ⚡ command palette. It was only ever
+  a link to Setup's standard user list — the page where Salesforce itself renders the per-user
+  Login action — so nothing is lost. No permission changes.
+
+## `sfdt.sfdt-devtools` (VS Code) — 0.5.2
+
+- **"Send Notification (event)"** in *SFDT: Run Command…* now lists `harness-escalation` among the
+  accepted lifecycle events, matching the CLI. Description text only.
+
 ## `@sfdt/cli` — 0.19.0
 
 Org-side API-version coverage now matches the local scan:
