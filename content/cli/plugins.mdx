@@ -47,6 +47,19 @@ Plugins load in this order, before CLI argument parsing:
 Resolved from the **project's** `node_modules/`, not the global sfdt install. Explicit plugins
 that fail to load print a warning but never abort startup.
 
+<Callout type="warning">
+  **Package specifiers only — not file paths.** Since 0.20.0, entries that look like paths are
+  refused with a warning and skipped: anything starting with `.`, `/`, or `~`, containing a `\` or
+  a Windows drive letter, or containing a `..` segment. Scoped names
+  (`@org/sfdt-plugin-thing`) and package subpaths (`sfdt-plugin-thing/dist/index.js`) still work —
+  the rule rejects paths, not slashes.
+
+  This closed a security hole: `config.plugins[]` is read from the project you happen to be
+  standing in, and it loads *before* argument parsing, so a path entry let any cloned repo run its
+  own code on any `sfdt` command — including `sfdt --version`. If you currently load a plugin by
+  relative path, install it as a package instead.
+</Callout>
+
 ### 2. Auto-discovered packages (`pluginOptions.autoDiscover`)
 
 ```json
