@@ -20,6 +20,21 @@ clicking the status-bar item) launches the full [`sfdt ui`](/cli/dashboard) web 
 
 The panel retains its state when hidden, so the dashboard keeps running until you close the tab.
 
+## Deep links
+
+The dashboard honors the URL path on boot, so commands can open it directly on a specific page
+instead of always landing on the overview:
+
+- **SFDT: Open Manifest Builder** (`sfdt.manifestBuilder`) — opens the panel directly on the
+  dashboard's **Manifest Builder** page: browse metadata by type, tick components, and preview,
+  save, or deploy the resulting `package.xml` (or `destructiveChanges.xml` pair). It sits in the
+  command palette next to **SFDT: Manifest from Diff**, which stays the terminal-based
+  `sfdt manifest` git-delta flow.
+
+Both commands share the same `DashboardController` panel and server — a deep-linked open reuses
+the running dashboard rather than starting a second one. Requires `@sfdt/cli` ≥ 0.21 (older CLI
+versions serve a dashboard that ignores the URL path and boots on the overview).
+
 ## Port
 
 The dashboard server port is controlled by [`sfdt.dashboardPort`](/vscode-extension/settings)
