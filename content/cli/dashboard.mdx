@@ -49,6 +49,7 @@ generated from the dashboard's own route registry, so it cannot drift from the a
   explain: { shows: 'AI deployment-log analysis', source: 'explain-latest.json' },
   flows: { shows: 'Flow health scores, trigger conflicts, subflow graph', source: '/api/flow/quality' },
   dependency: { shows: 'Seed + expand-on-click D3 dependency graph (references / referenced-by, capped 50/direction); Gaps toggle for source-parsed references the Tooling API misses; Show-inferred overlay renders missing edges as dashed lines', source: '/api/dependencies/resolve, /api/dependencies/neighbors, /api/dependencies/gaps' },
+  soql: { shows: 'SOQL/SOSL console: sObject search + field/relationship browser, query validation (org LIMIT 0 round-trip), query plans, bounded execution with JSON/CSV export', source: '/api/soql/* (soql-runner.js)' },
   scratch: { shows: 'Active scratch orgs, plus create / delete / pool-fill actions', source: '/api/scratch' },
   data: { shows: 'Defined sf data tree data sets, plus export / import / delete actions', source: '/api/data' },
   docs: { shows: 'Docs config, plus a generate action', source: '/api/docs' },
@@ -58,6 +59,30 @@ generated from the dashboard's own route registry, so it cannot drift from the a
 
 Data appears automatically after running the corresponding CLI commands (`sfdt test`,
 `sfdt preflight`, `sfdt drift`, …) that write JSON result files.
+
+## SOQL Console
+
+The **SOQL Console** page (deep-linkable at `/soql`) puts the whole
+[`sfdt soql` family](/cli/commands/metadata#sfdt-soql) on the dashboard. Its `/api/soql/*` routes
+are thin wrappers over the CLI's own `soql-runner.js` — the single query/schema engine shared with
+the CLI, MCP, and VS Code — so results, bounds, and error messages are identical across surfaces.
+
+- **Schema browser** — search sObjects (all / custom / standard), then browse a describe: field
+  types, active picklist values, reference targets, and a Relationships tab with parent lookups
+  (dot notation) and child relationships (subqueries). *Query this* seeds the editor with a
+  starter query.
+- **Validate** — local static checks plus an org `LIMIT 0` round-trip that never materialises
+  rows. An unreachable org degrades to a local-only verdict with a warning — never a fabricated
+  org pass.
+- **Plan** — the org's query plans via the REST explain endpoint; the query is never executed.
+- **Run** — bounded execution, never unbounded: the row cap comes from the limit field or
+  `soql.defaultLimit` (default 200), clamped to `soql.maxLimit` (default 2000). The result shows
+  the applied bound (`appended` / `kept` / `clamped`) and a truncation warning when the org holds
+  more rows. `FIND {…}` queries route to SOSL automatically. Tooling API and
+  deleted/archived-rows toggles match the CLI flags.
+- **Export** — download the raw records as JSON, or as CSV rendered by the runner's own CSV
+  shaping (nested parent fields flatten to dot-path columns like `Owner.Name`) — the same output
+  `sfdt soql query --out` writes.
 
 ## Live command runners
 
