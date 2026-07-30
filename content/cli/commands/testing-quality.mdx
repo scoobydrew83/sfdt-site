@@ -85,22 +85,20 @@ sfdt quality --output-file sfdt-quality.sarif   # extra Code Analyzer v5 output 
 | `--api67` | API v67 (Summer '26 user-mode-by-default) readiness scan of local Apex — flags `WITH SECURITY_ENFORCED` (no longer compiles at v67), classes with no sharing declaration, and `without sharing` classes doing DML/SOQL. Exits `1` only when blocking errors exist and `sourceApiVersion` ≥ 67. |
 | `--test-hints` | Advisory check — flags `@IsTest` classes with no `@IsTest(testFor=...)` annotation (invisible to Spring '26 `RunRelevantTests` and smart-deploy's annotation-aware widening) |
 | `--include-fixes` | Ask **Code Analyzer v5** for actionable fixes/suggestions in the scan output (`--include-fixes --include-suggestions`); the richer output feeds `--fix-plan` |
-| `--output-file <path>` | Ask **Code Analyzer v5** for a second output file whose format follows the extension — `.sarif` for GitHub code scanning, `.html`, `.csv`, etc. (as supported by v5). The stdout/JSON contract is unchanged (the flag adds a second `--output-file` to the same scan). Code Analyzer **v4** logs a warning and skips the extra file |
+| `--output-file <path>` | Ask **Code Analyzer v5** for a second output file whose format follows the extension — `.sarif` for GitHub code scanning, `.html`, `.csv`, etc. (as supported by v5). The stdout/JSON contract is unchanged (the flag adds a second `--output-file` to the same scan) |
 | `--tests` | Run the test analyzer only |
 | `--all` | Run both the code and test analyzers |
 | `--fix-plan` | Send analysis output to AI for a prioritized, file-specific fix plan |
 | `--generate-stubs` | Generate `@IsTest` stub classes for Apex without a test class |
-| `--allow-legacy-analyzer` | Permit the retired **Code Analyzer v4** (`sf scanner run`) when v5 is unavailable — results are labeled **non-authoritative**. Also enabled via config `quality.analyzer.allowLegacyV4`. Without it, a v4-only environment reports the scan as SKIPPED. v4 support is removed at 1.0 |
 | `--dry-run` | Preview `--generate-stubs` output without writing files |
 
 <Callout type="info">
-  **Code Analyzer v5 is required for authoritative scans.** The code scan runs Salesforce
+  **Code Analyzer v5 is the only supported engine.** The code scan runs Salesforce
   **Code Analyzer v5** (`sf code-analyzer run` — a just-in-time plugin, PMD 7 / ESLint / RetireJS,
-  that auto-installs on a modern `sf` CLI). The retired v4 (`sf scanner run`) never runs as a
-  silent fallback: it requires the explicit `--allow-legacy-analyzer` opt-in (or config
-  `quality.analyzer.allowLegacyV4`) and its results are labeled non-authoritative. Without v5 the
-  scan reports **SKIPPED** (never a fabricated clean result). Install v5 manually with
-  `sf plugins install code-analyzer` if needed.
+  that auto-installs on a modern `sf` CLI). Without v5 the scan reports **SKIPPED** (never a
+  fabricated clean result). Install v5 manually with `sf plugins install code-analyzer` if
+  needed. Support for the retired v4 (`sf scanner run`) — and its `--allow-legacy-analyzer`
+  opt-in — was removed at 1.0.
 </Callout>
 
 <Callout type="info">
