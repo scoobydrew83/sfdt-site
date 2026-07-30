@@ -37,6 +37,7 @@ generated from the dashboard's own route registry, so it cannot drift from the a
   coverage: { shows: 'Live org-wide Apex coverage (with threshold band) plus the per-run coverage trend', source: '/api/coverage, test-results/' },
   logs: { shows: 'Searchable log viewer with pagination and raw output', source: 'logs/*' },
   release: { shows: 'Manifest picker, changelog & release-note editing, deploy', source: 'manifest/release/, release-notes/, CHANGELOG.md' },
+  'manifest-builder': { shows: 'Changeset-style builder: browse org or local metadata by type, tick components (or whole types → * wildcard), live XML preview, save additive or destructive manifests', source: '/api/manifest/discover-org, /api/manifest/discover, /api/manifest/render, /api/manifest/save' },
   retrofit: { shows: 'Cross-org retrofit: retrieve from a source org, commit, smart-deploy to a target (validate-only or execute)', source: '/api/retrofit' },
   compare: { shows: 'Source-only / target-only / both; side-by-side XML diff; export package.xml', source: 'compare-latest.json' },
   scan: { shows: 'Full metadata inventory with search & filter', source: '/api/scan' },
@@ -83,6 +84,43 @@ the CLI, MCP, and VS Code — so results, bounds, and error messages are identic
 - **Export** — download the raw records as JSON, or as CSV rendered by the runner's own CSV
   shaping (nested parent fields flatten to dot-path columns like `Owner.Name`) — the same output
   `sfdt soql query --out` writes.
+## Manifest Builder
+
+The **Manifest Builder** page (Release group) is a changeset-style `package.xml` builder: browse
+metadata by type, tick checkboxes, watch a live XML preview, and save the result into your
+manifest directory (`manifestDir`, default `manifest/release/`).
+
+- **Two sources.** The **Org** source lists an org's real inventory (`sf org list
+  metadata-types` / `sf org list metadata`), served from the latest [Scan](#pages) snapshot when
+  it's fresh — the **Refresh from org** button re-queries live. The **Local** source globs your
+  local source tree instead. If the org can't be listed you get a visible error with a Retry
+  button — never a silently empty tree.
+- **Whole-type wildcard.** Ticking **Entire type (`*`)** for a metadata type emits
+  `<members>*</members>` instead of enumerating every member.
+- **Live preview, one renderer.** The XML pane updates on every tick and is rendered
+  server-side by the same engine every SFDT surface uses (`renderPackageXml`) — what you preview
+  is byte-for-byte what gets saved.
+- **Selections persist per org** in your browser (and separately for the Local source), with a
+  one-click **Clear all**.
+- **Saving** writes `rl-<name>-package.xml`; existing files are never overwritten (you get a
+  conflict error instead), and the `deployed/` archive folder is refused. Copy and download
+  buttons are there for ad-hoc use.
+
+### Destructive mode
+
+Switching the mode toggle to **Destructive** turns the selection into a *deletion* manifest, with
+a prominent warning. Saving writes a **paired set**:
+
+| File | Content |
+|---|---|
+| `rl-<name>-destructiveChanges.xml` | The components to **delete** from the target org |
+| `rl-<name>-package.xml` | An **empty** package — the Metadata API requires a `package.xml` alongside destructive changes |
+
+When `sfdt deploy` picks up a release whose manifest has a `-destructiveChanges.xml` companion,
+the `SFDT_DESTRUCTIVE_TIMING` setting controls **when** the deletions run relative to the
+deploy: `pre` (delete before deploying), `post` (after — the default), `none` (skip deletions),
+or `only` (run only the destructive operation). The Release Hub deploy step exposes the same
+choice as radio buttons.
 
 ## Live command runners
 

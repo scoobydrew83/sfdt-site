@@ -163,7 +163,7 @@ See [AI Providers](/cli/ai-providers) for full setup.
 
 See the [MCP Server](/cli/mcp) page for details.
 
-### `audit`, `quality`, `monitoring`, `docs`, `data`, `scratch`
+### `audit`, `quality`, `monitoring`, `docs`, `data`, `scratch`, `soql`
 
 | Key | Default | Description |
 |---|---|---|
@@ -175,7 +175,6 @@ See the [MCP Server](/cli/mcp) page for details.
 | `audit.fieldDescriptionMaxMissing` | `0` | Max custom fields allowed without a description before warning |
 | `audit.connectedAppFlagPermissive` | `true` | Flag connected apps that permit all users (admin approval off) |
 | `audit.soapLoginLookbackDays` | `30` | Lookback window for the `soap-logins` check (retiring SOAP `login()` traffic) |
-| `quality.analyzer.allowLegacyV4` | `false` | Permit the retired Code Analyzer v4 (`sf scanner run`) when v5 is unavailable — results are labeled non-authoritative; same as `quality --allow-legacy-analyzer`. Removed at 1.0 |
 | `monitoring.backupDir` | `monitoring-backup` | Metadata-backup output directory |
 | `monitoring.limitWarnThreshold` | `0.75` | Governor-limit warn threshold (0–1) |
 | `monitoring.errorLookbackDays` | `7` | Apex-error lookback window |
@@ -192,6 +191,8 @@ See the [MCP Server](/cli/mcp) page for details.
 | `scratch.definitionFile` | `config/project-scratch-def.json` | Scratch-org definition |
 | `scratch.durationDays` | `7` | Scratch-org lifetime |
 | `scratch.poolSize` | `0` | Pre-created scratch-org pool size |
+| `soql.defaultLimit` | `200` | Default row bound for [`sfdt soql query`/`sosl`](/cli/commands/metadata#sfdt-soql) when `--limit` isn't passed |
+| `soql.maxLimit` | `2000` | Hard row cap for `sfdt soql query`/`sosl` — any requested or in-query `LIMIT` above it is clamped |
 
 <Callout type="info">
   `audit.licenseWarnThreshold` and `monitoring.limitWarnThreshold` both default to `0.75` so the
