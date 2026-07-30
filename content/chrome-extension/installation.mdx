@@ -1,16 +1,20 @@
 ---
 title: Installing the Chrome Extension
-description: Build the SFDT SF Helper extension from source and load it unpacked into Chrome. Web Store submission is pending.
+description: Install SFDT for Salesforce from the Chrome Web Store, or build and load it unpacked from source.
 ---
 
 import { Callout, Steps } from 'nextra/components'
 
 # Installing the Chrome Extension
 
-The extension is **pre-Web-Store**. Until it is published you build it from source and load it
-as an unpacked extension. This takes about a minute.
+Install the extension from the Chrome Web Store. If you are developing it from source, you can
+also load an unpacked build.
 
-## From source (current method)
+## From the Chrome Web Store
+
+[Install SFDT for Salesforce from the Chrome Web Store](https://chromewebstore.google.com/detail/sfdt-sf-helper/lpomjnfcgpelnkobojinbfjbbmpceaan).
+
+## From source (development)
 
 <Steps>
 
@@ -46,7 +50,7 @@ extension/.output/chrome-mv3/
 1. Open `chrome://extensions/`.
 2. Toggle **Developer mode** on (top-right).
 3. Click **Load unpacked** and select `extension/.output/chrome-mv3/`.
-4. The extension appears as **SFDT SF Helper**. Note the assigned **extension ID** — you'll
+4. The extension appears as **SFDT for Salesforce**. Note the assigned **extension ID** — you'll
    need it if you set up the [native-messaging fallback](/chrome-extension/bridge#native-messaging-fallback).
 
 </Steps>
@@ -67,11 +71,6 @@ npm run build:ext
 
 Then click the reload icon on the extension card in `chrome://extensions/` and refresh your
 Salesforce tab. You do not need to re-pair the bridge unless the bridge token was rotated.
-
-## From the Chrome Web Store
-
-Pending submission. This page will be updated with the store link once the extension is
-published. Store listing assets live in `extension/store-assets/`.
 
 ## Supported browsers
 

@@ -17,6 +17,28 @@ repository; this page summarizes recent highlights.
   [Extension `CHANGELOG.md`](https://github.com/scoobydrew83/sfdt/blob/main/extension/CHANGELOG.md)
 </Callout>
 
+## `@sfdt/cli` — 0.21.0
+
+- **Apex observability and a bounded SOQL/SOSL toolkit.** New `sfdt apex` commands manage
+  trace flags and debug logs, execute Anonymous Apex, and expose the same capabilities to MCP
+  and VS Code. The new `sfdt soql` family searches schema, validates queries, inspects query
+  plans, and runs bounded SOQL/SOSL queries; the dashboard adds a matching SOQL Console.
+- **Manifest builder bridge.** The bridge protocol is now 1.3 and adds read-only
+  `manifest.discover` and `manifest.render` kinds, so the Chrome extension and dashboard use the
+  CLI's single manifest writer. Existing 1.2 clients receive a compatibility warning and keep
+  working.
+- **Salesforce Code Analyzer v5 is now required.** The legacy v4 fallback and its opt-in flag,
+  config key, and environment variable are removed. A machine without v5 reports a skipped scan
+  with install guidance rather than a fabricated clean result.
+
+## `@sfdt/extension` — 0.10.0
+
+- **Metadata Retrieve & Deploy is now bridge-aware.** When connected to CLI 0.21.0 or later, it
+  browses metadata and renders additive or destructive manifests through the CLI; the existing
+  Salesforce SOAP path remains the offline fallback. Selections persist per org.
+- **Chrome Web Store release.** The extension is now available as
+  [SFDT for Salesforce](https://chromewebstore.google.com/detail/sfdt-sf-helper/lpomjnfcgpelnkobojinbfjbbmpceaan).
+
 ## `@sfdt/cli` — 0.20.0
 
 A security fix, and secrets kept out of config on two more surfaces:
