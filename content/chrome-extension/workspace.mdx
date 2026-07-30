@@ -76,7 +76,7 @@ rebuilding every tool's session. This is the `org-switcher` feature.
 | `soap-explore` | Build and send SOAP API requests |
 | `event-monitor` | Live platform / streaming event monitoring |
 | `inspect-record` | Show all fields/data for a record, with a **Fields / JSON** view toggle |
-| `metadata-retrieve` | Retrieve and deploy metadata |
+| `metadata-retrieve` | Manifest builder + retrieve/deploy — live `package.xml` / `destructiveChanges.xml`-pair preview; uses the [bridge](/chrome-extension/bridge)'s `manifest.discover`/`manifest.render` when connected (CLI-rendered XML), SOAP fallback offline; per-org selection persistence |
 | `field-creator` | Bulk-create custom fields |
 | `data-import` | CSV data import wizard |
 | `apex-test-runner` | Run Apex tests (`runTestsAsynchronous`) and view pass/fail results inline — no bridge needed |

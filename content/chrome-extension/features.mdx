@@ -115,7 +115,7 @@ analyze**, which runs the Apex, finds the log it produced, and opens it in the A
 | `show-api-names` | Toggle inline field API names on record pages (object API name + 18-char id in the header), with copy helpers: Id, Apex `insert`, SOQL `SELECT` |
 | `data-import` | Guided CSV data import into the org |
 | `field-creator` | Bulk-create multiple custom fields at once |
-| `metadata-retrieve` | Retrieve and deploy metadata directly from the browser |
+| `metadata-retrieve` | Manifest builder + retrieve/deploy: browse metadata types and members, tick components, and watch a live `package.xml` — or **destructiveChanges.xml pair** (Additive / Destructive mode toggle, with a deletion warning) — preview. With the [bridge](/chrome-extension/bridge) connected, discovery and XML come from the sfdt CLI (`manifest.discover` / `manifest.render` — byte-identical to `sfdt manifest`); without it, the extension falls back to the SOAP API. Selections persist per org, with clear-all |
 | `export-for-prompt` | Copy a dense Markdown schema for an object to the clipboard for pasting into an LLM prompt |
 | `schema-browser` | Two-pane object/field explorer (types, picklists, formula source, reference cross-links, child relationships) with **Copy API name**, **Insert into query** (into the SOQL Runner), and an **Export selected for prompt** field picker — see [Highlights](#schema-browser-schema-browser) |
 
