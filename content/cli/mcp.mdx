@@ -75,7 +75,7 @@ Configure it under the `mcp` key in `.sfdt/config.json`:
 |---|---|
 | `sfdt_drift` | `org` (optional) |
 | `sfdt_compare` | `source` (req), `target` (req) |
-| `sfdt_quality` | `generateStubs`, `fixPlan` |
+| `sfdt_quality` | `generateStubs`, `fixPlan`, `apexGuru` (org-side ApexGuru check only; license-gated, degrades to skipped), `org` (target for `apexGuru`) |
 | `sfdt_logs` | `type` — `preflight` \| `drift` \| `deploy` \| `rollback` \| `quality` |
 | `sfdt_coverage` | `org` (optional) — org-wide + per-class Apex coverage. Read-only. |
 | `sfdt_scan` | `org` (optional) — full metadata inventory of the org. Read-only. |
