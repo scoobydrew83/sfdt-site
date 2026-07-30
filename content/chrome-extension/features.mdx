@@ -45,6 +45,20 @@ hosts the full Workspace next to the page you're on, **follows the active org** 
 setting lets you prefer the panel over the modal. Chrome-only, via the `sidePanel`
 [permission](/chrome-extension/privacy).
 
+### SOSL mode in the SOQL Runner
+
+The runner's toolbar carries a **SOQL | SOSL** toggle, and the mode also follows what you type — a
+query whose first keyword is `FIND` switches to SOSL, a `SELECT` switches back. That is the same
+rule the CLI (`sfdt soql`) and the [SOQL Console](/cli/dashboard#soql-console) use, so a query behaves the
+same in all three places.
+
+SOSL results are **grouped per returned object**: one labelled section per sObject
+(`Account · 2 rows`), each with its own table and its own copy of the result toolbar — **Copy CSV**,
+**Export CSV**, **Copy JSON**, **Copy for Excel** — so copy and export apply to that object's rows
+only (the export filename is per object too). **History and bookmarks record the mode** and restore
+it, badging each entry `SOQL` or `SOSL`. In SOSL mode the Tooling toggle and **Explain** are
+disabled — the Search resource has no Tooling variant and no query plan.
+
 ### Schema Browser (`schema-browser`)
 
 A two-pane object/field explorer — a searchable, windowed object list beside a per-object field
@@ -101,7 +115,7 @@ analyze**, which runs the Apex, finds the log it produced, and opens it in the A
 
 | Id | What it does |
 | --- | --- |
-| `soql-runner` | Run SOQL (REST or Tooling) with field/object autocomplete (fed fields from the Schema Browser's **Insert into query**), history, a **🔎 Explain** query-plan view (cost/cardinality/leading operation, no execution), **Copy JSON / Copy for Excel (TSV)**, CSV export of the current page **or all rows** (follows `queryMore` pagination with a progress indicator + cancel), and a LangGraph node generator |
+| `soql-runner` | Run **SOQL or SOSL** (a `SOQL \| SOSL` toggle that also auto-follows a `FIND {…}` query) with field/object autocomplete (fed fields from the Schema Browser's **Insert into query**), history, a **🔎 Explain** query-plan view (cost/cardinality/leading operation, no execution), **Copy JSON / Copy for Excel (TSV)**, CSV export of the current page **or all rows** (follows `queryMore` pagination with a progress indicator + cancel), and a LangGraph node generator. SOSL results are grouped per returned object, each group with its own copy/export toolbar — see [Highlights](#sosl-mode-in-the-soql-runner) |
 | `org-limits` | Live governor-limit usage, sorted by pressure and colour-banded |
 | `rest-explore` | Fire arbitrary `GET`/`POST`/`PATCH`/`PUT`/`DELETE` against `/services/data/...` with a response viewer and history |
 | `soap-explore` | Build and send SOAP API requests with a payload editor and response viewer |
