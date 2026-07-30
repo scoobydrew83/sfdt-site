@@ -1,6 +1,6 @@
 ---
 title: Testing & Quality Commands
-description: test, quality, coverage, and changelog — run Apex tests, analyze code and test quality, gate on coverage, and manage changelog files.
+description: test, quality, apex, coverage, and changelog — run Apex tests, analyze code and test quality, observe Apex (trace flags, debug logs, Anonymous Apex), gate on coverage, and manage changelog files.
 ---
 
 import { Callout } from 'nextra/components'
@@ -85,22 +85,20 @@ sfdt quality --output-file sfdt-quality.sarif   # extra Code Analyzer v5 output 
 | `--api67` | API v67 (Summer '26 user-mode-by-default) readiness scan of local Apex — flags `WITH SECURITY_ENFORCED` (no longer compiles at v67), classes with no sharing declaration, and `without sharing` classes doing DML/SOQL. Exits `1` only when blocking errors exist and `sourceApiVersion` ≥ 67. |
 | `--test-hints` | Advisory check — flags `@IsTest` classes with no `@IsTest(testFor=...)` annotation (invisible to Spring '26 `RunRelevantTests` and smart-deploy's annotation-aware widening) |
 | `--include-fixes` | Ask **Code Analyzer v5** for actionable fixes/suggestions in the scan output (`--include-fixes --include-suggestions`); the richer output feeds `--fix-plan` |
-| `--output-file <path>` | Ask **Code Analyzer v5** for a second output file whose format follows the extension — `.sarif` for GitHub code scanning, `.html`, `.csv`, etc. (as supported by v5). The stdout/JSON contract is unchanged (the flag adds a second `--output-file` to the same scan). Code Analyzer **v4** logs a warning and skips the extra file |
+| `--output-file <path>` | Ask **Code Analyzer v5** for a second output file whose format follows the extension — `.sarif` for GitHub code scanning, `.html`, `.csv`, etc. (as supported by v5). The stdout/JSON contract is unchanged (the flag adds a second `--output-file` to the same scan) |
 | `--tests` | Run the test analyzer only |
 | `--all` | Run both the code and test analyzers |
 | `--fix-plan` | Send analysis output to AI for a prioritized, file-specific fix plan |
 | `--generate-stubs` | Generate `@IsTest` stub classes for Apex without a test class |
-| `--allow-legacy-analyzer` | Permit the retired **Code Analyzer v4** (`sf scanner run`) when v5 is unavailable — results are labeled **non-authoritative**. Also enabled via config `quality.analyzer.allowLegacyV4`. Without it, a v4-only environment reports the scan as SKIPPED. v4 support is removed at 1.0 |
 | `--dry-run` | Preview `--generate-stubs` output without writing files |
 
 <Callout type="info">
-  **Code Analyzer v5 is required for authoritative scans.** The code scan runs Salesforce
+  **Code Analyzer v5 is the only supported engine.** The code scan runs Salesforce
   **Code Analyzer v5** (`sf code-analyzer run` — a just-in-time plugin, PMD 7 / ESLint / RetireJS,
-  that auto-installs on a modern `sf` CLI). The retired v4 (`sf scanner run`) never runs as a
-  silent fallback: it requires the explicit `--allow-legacy-analyzer` opt-in (or config
-  `quality.analyzer.allowLegacyV4`) and its results are labeled non-authoritative. Without v5 the
-  scan reports **SKIPPED** (never a fabricated clean result). Install v5 manually with
-  `sf plugins install code-analyzer` if needed.
+  that auto-installs on a modern `sf` CLI). Without v5 the scan reports **SKIPPED** (never a
+  fabricated clean result). Install v5 manually with `sf plugins install code-analyzer` if
+  needed. Support for the retired v4 (`sf scanner run`) — and its `--allow-legacy-analyzer`
+  opt-in — was removed at 1.0.
 </Callout>
 
 <Callout type="info">
@@ -142,6 +140,61 @@ sfdt agent-test --spec MyAgentEval --notify --pr-comment
   A numeric pass-rate threshold (e.g. fail below 90%) is a planned follow-up — it depends on the
   `sf agent test` JSON result schema. For now the gate is exit-code based: any failed test case
   fails the run.
+</Callout>
+
+---
+
+## `sfdt apex`
+
+Apex observability: manage debug **trace flags**, retrieve and **watch debug logs**, and execute
+**Anonymous Apex** — the debugging loop that complements `sfdt test` (which owns test execution).
+Debug logs go through the `sf apex` commands; trace flags use the Tooling API, since the `sf` CLI
+has no first-class trace-flag command. Every subcommand supports `--org <alias>` and `--json`.
+
+```bash
+# Trace flags (mutating — they write TraceFlag records)
+sfdt apex trace start                          # trace the authenticated user for 60 minutes
+sfdt apex trace start --user u@x.com --duration 30
+sfdt apex trace list                           # read-only
+sfdt apex trace stop                           # delete the authenticated user's USER_DEBUG flags
+sfdt apex trace stop --all                     # delete every USER_DEBUG flag in the org
+
+# Debug logs (read-only)
+sfdt apex logs list --limit 10
+sfdt apex logs get 07L5g00000AbCdEEAV --output debug.log
+sfdt apex logs watch                           # tail new logs for 5 minutes (CI-safe default)
+sfdt apex logs watch --duration 0              # until interrupted (interactive)
+
+# Anonymous Apex (mutating — the code runs in the org)
+sfdt apex run --file scripts/apex/reset-flags.apex
+echo 'System.debug(UserInfo.getUserName());' | sfdt apex run
+```
+
+| Option | Description |
+|---|---|
+| `trace start --user <username>` | Username to trace (default: the org's authenticated user) |
+| `trace start --duration <minutes>` | Trace window in minutes (default `60`, capped at `1440` — the Salesforce 24 h limit) |
+| `trace start --level <developerName>` | `DebugLevel` DeveloperName. Default: the sfdt-managed `SFDT_Trace`, created on demand; any other missing name is an error — sfdt never silently invents a level you named |
+| `trace stop --user <username>` / `--all` | Whose USER_DEBUG flags to delete (default: the authenticated user), or all of them |
+| `logs list --limit <n>` / `--user <name>` | Cap the list (default `20`) / only logs from one user |
+| `logs get <logId> --output <file>` | Write the raw log body to a file (the file stays raw; the JSON envelope is stdout-only) |
+| `logs watch --interval <seconds>` | Poll interval (default `5`) |
+| `logs watch --duration <seconds>` | Total watch window (default `300`; `0` = until interrupted). Bounded by default, so it is safe in CI |
+| `logs watch --max <n>` / `--no-body` | Stop after *n* new logs / report metadata without fetching bodies |
+| `run --file <path>` | Apex file to execute; without it, code is read from stdin (piped input) |
+
+<Callout type="info">
+  `apex run` reports the full compile/execution diagnostics (`compiled`, `compileProblem`,
+  `exceptionMessage`, stack trace, and the debug log) and exits non-zero when the Apex failed —
+  in `--json` mode the envelope still carries the diagnostics, so CI can branch on
+  `result.success`. `apex logs watch` streams only logs generated **after** it starts.
+</Callout>
+
+<Callout type="warning">
+  Trace-flag changes and Anonymous Apex **mutate the org** — their MCP counterparts
+  (`sfdt_apex_trace`, `sfdt_apex_run`) require `confirmExecution: true`, while `sfdt_apex_logs`
+  is read-only. If the `sf apex` plugin is unavailable, commands fail with an actionable install
+  hint (`sf plugins install @salesforce/plugin-apex`) rather than a fabricated result.
 </Callout>
 
 ---
