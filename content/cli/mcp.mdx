@@ -84,6 +84,11 @@ Configure it under the `mcp` key in `.sfdt/config.json`:
 | `sfdt_docs` | `ai` (boolean) — generate MkDocs project docs (objects/fields, Apex, Flows) with an optional AI overview and a Mermaid ER diagram. Read-only. |
 | `sfdt_test` | `classNames` (array, optional) — run Apex tests via the enhanced runner; limit to specific classes or use the configured set. Consumes org test resources; not metadata-mutating. |
 | `sfdt_history` | `type` (optional filter — `audit` \| `monitor` \| `quality` \| `test-run` \| `deploy` \| `agent-test` …), `limit` (default 30) — recent runs from the local run index. Read-only. |
+| `sfdt_soql_search` | `term`, `category` (`all` \| `custom` \| `standard`), `limit`, `org` — find sObjects by name substring. Read-only. |
+| `sfdt_soql_describe` | `sobject` (req), `filter`, `tooling`, `org` — fields, picklists, references, child relationships. Read-only. |
+| `sfdt_soql_validate` | `query` (req), `org` — local checks + an org `LIMIT 0` round-trip; never executes rows. Read-only. |
+| `sfdt_soql_plan` | `query` (req), `org` — org query plans via the REST explain endpoint; never executes the query. Read-only. |
+| `sfdt_soql_query` | `query` (req), `limit`, `tooling`, `org` — bounded SOQL execution (`soql.defaultLimit`/`soql.maxLimit`, never unbounded). Read-only. |
 | `sfdt_apex_logs` | `org`, `logId` (retrieve one log body), `limit` (default 20) — list recent Apex debug logs or fetch one by Id. Read-only. |
 
 ### Scratch orgs & data (safety-gated)

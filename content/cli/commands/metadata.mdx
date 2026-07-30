@@ -1,6 +1,6 @@
 ---
 title: Metadata & Source Control Commands
-description: manifest, pull, drift, compare, scan, and dependencies — generate manifests from git diffs, keep source and orgs in sync, and trace metadata dependencies.
+description: manifest, pull, drift, compare, scan, dependencies, and soql — generate manifests from git diffs, keep source and orgs in sync, trace metadata dependencies, and work the SOQL query lifecycle.
 ---
 
 import { Callout } from 'nextra/components'
@@ -212,6 +212,53 @@ sfdt dependencies AccountService --type ApexClass --gaps --org prod   # diff: ma
   comment) and doesn't resolve fully-dynamic references (a class name built from a variable). Treat
   it as a lead for impact analysis, not an exhaustive list.
 </Callout>
+
+---
+
+## `sfdt soql`
+
+The SOQL/SOSL toolkit — the full query & schema lifecycle: find sObjects, describe fields and
+relationships, validate a query without running it, inspect the org's query plans, and execute
+with a row bound enforced. Every subcommand is **read-only against the org** and supports
+`--json`.
+
+```bash
+sfdt soql search invoice --category custom           # which objects match "invoice"?
+sfdt soql describe Account --filter phone            # field inventory, filtered
+sfdt soql relationships Contact                      # parent lookups + child subqueries
+sfdt soql validate "SELECT Id FROM Account"          # local checks + org LIMIT 0 round-trip
+sfdt soql plan "SELECT Id FROM Case WHERE Status='Open'"    # REST explain: cost/selectivity
+sfdt soql query "SELECT Id, Name FROM Account" --limit 50   # bounded execution
+sfdt soql query "SELECT Id FROM Contact" --out contacts.csv # export raw rows
+sfdt soql sosl "FIND {Acme} IN ALL FIELDS RETURNING Account(Id, Name)"
+```
+
+| Subcommand | Description |
+|---|---|
+| `search [term]` | Find sObjects by case-insensitive name substring (`--category all\|custom\|standard`, `--limit <n>`) |
+| `describe <sobject>` | Fields (type, picklists, references), key prefix, child relationships (`--filter <term>`, `--tooling`) |
+| `relationships <sobject>` | Parent lookups (dot notation) and child relationships (subqueries) (`--direction parent\|child\|both`) |
+| `validate <query>` | Local static checks plus an org `LIMIT 0` round-trip; exits non-zero when invalid (`--local-only`, `--tooling`) |
+| `plan <query>` | Org query plans via the REST explain endpoint — the query is never executed (`--api-version <ver>`) |
+| `query <soql>` | Bounded SOQL execution (`--limit <n>`, `--tooling`, `--all-rows`, `--out <file>`, `--format json\|csv`) |
+| `sosl <search>` | Bounded SOSL execution (`--limit <n>`, `--out <file>`, `--format json\|csv`) |
+
+**Bounded execution.** `query` and `sosl` never run unbounded: the effective row cap is
+`--limit`, defaulting to the [`soql.defaultLimit`](/cli/configuration#audit-quality-monitoring-docs-data-scratch-soql)
+config key (`200`) and clamped to `soql.maxLimit` (`2000`). A `LIMIT` already present in the
+query is kept only when it's at or under the cap, and results carry `bound` + `truncated`
+metadata so scripts can tell a complete result from a capped one.
+
+<Callout type="info">
+  `validate` degrades gracefully: with no reachable org it reports its local-only verdict with a
+  warning — it never fabricates an org pass. `--out` exports write the **raw** records (JSON, or
+  CSV with parent fields flattened to dot-path columns); the `{ status, result, warnings }`
+  envelope stays a stdout-only contract.
+</Callout>
+
+The read-only pieces are exposed over [MCP](/cli/mcp) as `sfdt_soql_search`,
+`sfdt_soql_describe`, `sfdt_soql_validate`, `sfdt_soql_plan`, and `sfdt_soql_query`, and in the
+VS Code command tree as **SOQL Toolkit**.
 
 ---
 
