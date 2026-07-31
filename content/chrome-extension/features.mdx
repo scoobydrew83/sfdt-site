@@ -75,6 +75,45 @@ any field, **Insert into query** to drop a field straight into the SOQL Runner d
 want) that hands the chosen fields to `export-for-prompt`. Runs as a [Workspace](/chrome-extension/workspace)
 tool and from a record page via the ⚡ menu; all describes share one session cache.
 
+### Field Impact Analysis (`field-impact`)
+
+*"What writes this field?"* — the question a schema browser can't answer. Open it from the Schema
+Browser's per-field **What writes this?** action, from the **Show API Names** panel's field picker,
+or standalone from the [Workspace](/chrome-extension/workspace) / ⚡ menu, and it gathers three
+kinds of writer for one `Object.Field`:
+
+- **Flows** — `MetadataComponentDependency` narrows the candidates, then `@sfdt/flow-core` parses
+  each candidate's metadata and keeps only the ones that actually **write** the field (Create/Update
+  Records field assignments, and `$Record.Field__c`-style Assignment elements). A flow that merely
+  *reads* the field in a filter or entry criterion is dropped — something a raw dependency query
+  cannot do for you.
+- **Workflow field updates** — read from the Tooling API, which names the target field outright.
+- **Apex** — a best-effort Tooling text search over class and trigger source.
+
+Every row is badged **confirmed** or **inferred**, the same vocabulary the CLI's
+[`sfdt dependencies --gaps`](/cli/commands/metadata#sfdt-dependencies) report uses:
+
+| Badge | Means |
+| --- | --- |
+| **confirmed** | The metadata states the write — a parsed Flow assignment, or a field update naming the field. |
+| **inferred** | A best-effort signal, *not* proof of a write — an Apex text hit (it may only read the field), a flow that a dependency edge links to the field but whose metadata couldn't be analysed, or a Flow write whose object couldn't be pinned down. |
+
+An inferred hit is never shown as confirmed, and the confirmed/inferred counts are reported
+separately.
+
+Scan **limits and precision** are both stated rather than hidden, in a **Scan scope** note. A
+**standard** field has no dependency edge to narrow by, so Flow coverage falls back to a broad sweep
+of the most recently modified active flows — and on that path a flow is reported *only* when its own
+metadata binds the write to the object you asked about. A write into an untyped or Apex-defined
+variable is skipped rather than guessed at: matching on the bare field name would otherwise
+attribute any flow writing some *other* object's `Status` / `Type` / `Rating` to yours. A flow whose
+metadata can't be read at all is likewise not listed on that path — nothing linked it to your field
+in the first place, so a row would imply a reference that was never established. The trade is
+deliberate — a missing row is recoverable, a confident-looking false one is not — and the note says
+which results that rule omits. Per-scan caps (including the Apex search's true bound) and any query
+the org refuses are disclosed the same way. Each row carries an **Open** link into Flow Builder or
+the relevant Setup page.
+
 ### Debug Logs — Analyze view
 
 The Debug Logs viewer gains a per-log **📊 Analyze** action (backed by a pure Apex-log parser)
@@ -132,12 +171,13 @@ analyze**, which runs the Apex, finds the log it produced, and opens it in the A
 | Id | What it does |
 | --- | --- |
 | `inspect-record` | View a record's complete field set — including empty and system fields — via the REST API, with a **Fields / JSON** toggle to see the raw REST payload (copyable); also reachable from a right-click **"Inspect this record"** context menu |
-| `show-api-names` | Toggle inline field API names on record pages (object API name + 18-char id in the header), with copy helpers: Id, Apex `insert`, SOQL `SELECT` |
+| `show-api-names` | Toggle inline field API names on record pages (object API name + 18-char id in the header), with copy helpers: Id, Apex `insert`, SOQL `SELECT`, and a field picker that hands any field to **Field Impact Analysis** |
 | `data-import` | Guided CSV data import into the org |
 | `field-creator` | Bulk-create multiple custom fields at once |
 | `metadata-retrieve` | Manifest builder + retrieve/deploy: browse metadata types and members, tick components, and watch a live `package.xml` — or **destructiveChanges.xml pair** (Additive / Destructive mode toggle, with a deletion warning) — preview. With the [bridge](/chrome-extension/bridge) connected, discovery and XML come from the sfdt CLI (`manifest.discover` / `manifest.render` — byte-identical to `sfdt manifest`); without it, the extension falls back to the SOAP API. Selections persist per org, with clear-all |
 | `export-for-prompt` | Copy a dense Markdown schema for an object to the clipboard for pasting into an LLM prompt |
 | `schema-browser` | Two-pane object/field explorer (types, picklists, formula source, reference cross-links, child relationships) with **Copy API name**, **Insert into query** (into the SOQL Runner), and an **Export selected for prompt** field picker — see [Highlights](#schema-browser-schema-browser) |
+| `field-impact` | **What writes this field?** — the Flows (parsed, not guessed), workflow field updates, and Apex classes/triggers that write a given field, each labelled confirmed or inferred, with open links — see [Highlights](#field-impact-analysis-field-impact) |
 
 ## Workspace tab
 
@@ -148,6 +188,7 @@ These run inside the standalone [Workspace tab](/chrome-extension/workspace):
 | `apex-anonymous` | Execute anonymous Apex with compile/runtime results, saved snippets, a **DebugLevel picker** for the captured log, and **📊 Run & analyze** (runs the Apex, finds the log it produced, and opens it in the log Analyzer) |
 | `debug-log-viewer` | List recent `ApexLog` records and view full log bodies, with a 15s **auto-refresh** toggle, **Delete all logs** (bulk-clears the org's logs behind a count-confirm), a per-log **📊 Analyze** view (method timings, governor limits, SOQL/DML/callout inventories, and a **Flame chart**), **📂 Import log** from disk (no org needed), and a **⚑ Trace flags** header entry — see [Highlights](#debug-logs--analyze-view) |
 | `schema-browser` | Two-pane object/field explorer with copy/insert/export-for-prompt actions — see [Highlights](#schema-browser-schema-browser) |
+| `field-impact` | **What writes this field?** — Flows (parsed via `@sfdt/flow-core`), workflow field updates, and Apex text hits for one `Object.Field`, each badged confirmed or inferred — see [Highlights](#field-impact-analysis-field-impact) |
 | `trace-flags` | Manage `TraceFlag`s and debug sessions without a trip to Setup — list active flags with a live expiry countdown + one-click renew, start/stop a session for yourself or another user, and Basic/Full/Custom **DebugLevel presets**. Also a **⚑ Trace flags** entry in the Debug Logs header |
 | `saved-soql` | Browse bookmarked and recent SOQL and load any query straight into the runner, plus a built-in read-only **Templates** group of ready-to-run admin/dev queries |
 | `apex-test-runner` | Run Apex tests (`runTestsAsynchronous`) and view pass/fail results inline (Tooling API) |
