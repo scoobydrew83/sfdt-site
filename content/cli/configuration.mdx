@@ -88,8 +88,42 @@ A representative `config.json`:
 | `logDir` | string | CLI log directory (default `logs`) |
 | `defaultBranch` | string | Default base branch for `deploy --create-pr` / release PRs (default `main`; a user-exported `SFDT_DEFAULT_BRANCH` wins) |
 | `smokeTests.testClasses` | array | Apex test classes run by `sfdt smoke` (reaches the script via `SFDT_SMOKE_TESTS`; a user-exported env value wins) |
-| `plugins` | array | npm package names to load as plugins |
-| `pluginOptions.autoDiscover` | boolean | Auto-load `sfdt-plugin-*` packages and `.sfdt/plugins/*.js` (default `false`) |
+| `plugins` | array | npm package names to load as plugins — **requires `SFDT_ALLOW_UNSAFE_CONFIG=1` since 0.22.0** ([why](#repo-supplied-settings-that-need-an-opt-in)) |
+| `pluginOptions.autoDiscover` | boolean | Auto-load `sfdt-plugin-*` packages and `.sfdt/plugins/*.js` (default `false`) — **requires `SFDT_ALLOW_UNSAFE_CONFIG=1` since 0.22.0** |
+
+### Repo-supplied settings that need an opt-in
+
+`.sfdt/config.json` is meant to be committed — `sfdt init` recommends gitignoring only
+`.sfdt/*.local.json` — so it arrives with whatever repository you cloned, written by whoever wrote
+it. Since **0.22.0**, the settings in it that execute code or choose where secrets are sent are
+refused at load time. sfdt names each one it skipped and how to allow it; everything else in the
+file loads normally.
+
+| Setting | Why it is guarded |
+|---|---|
+| `plugins[]` | `import()`ed at CLI startup, before any command runs |
+| `pluginOptions.autoDiscover` | Imports every `sfdt-plugin-*` in `node_modules/` and every file in `.sfdt/plugins/` |
+| `mcp.salesforce.command` / `args` | Spawned as a process |
+| `ai.baseURL` (non-loopback) | Chooses where prompts — and any secret named by `ai.apiKeyEnv` / `ai.headersEnv` — are sent |
+| A notification channel's `headersEnv` beside a literal remote `webhookUrl`/`url` | Reads the named env vars and posts them to a URL fixed by the repo |
+
+To allow them:
+
+```bash
+export SFDT_ALLOW_UNSAFE_CONFIG=1
+```
+
+<Callout type="info">
+  The opt-in is an **environment variable, not a config key** — by necessity. A flag inside
+  `config.json` would be set by the same person who set the guarded setting, which defeats the
+  purpose. Put the export in your shell profile or the CI job that needs it, never in the repo's
+  own config.
+</Callout>
+
+**Unaffected, no opt-in needed:** `ai.apiKeyEnv` and `ai.headersEnv` (inert once the destination is
+gone), a **loopback `ai.baseURL`** — so Ollama, LM Studio, llama.cpp and vLLM keep working — a
+channel using `webhookUrlEnv`, an ordinary Slack `webhookUrl` with no `headersEnv`, and
+`defaultOrg`.
 
 ### `deployment`
 

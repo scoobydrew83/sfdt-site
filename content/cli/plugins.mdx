@@ -48,16 +48,27 @@ Resolved from the **project's** `node_modules/`, not the global sfdt install. Ex
 that fail to load print a warning but never abort startup.
 
 <Callout type="warning">
-  **Package specifiers only — not file paths.** Since 0.20.0, entries that look like paths are
-  refused with a warning and skipped: anything starting with `.`, `/`, or `~`, containing a `\` or
-  a Windows drive letter, or containing a `..` segment. Scoped names
-  (`@org/sfdt-plugin-thing`) and package subpaths (`sfdt-plugin-thing/dist/index.js`) still work —
-  the rule rejects paths, not slashes.
+  **Since 0.22.0, `plugins[]` requires an opt-in.**
 
-  This closed a security hole: `config.plugins[]` is read from the project you happen to be
-  standing in, and it loads *before* argument parsing, so a path entry let any cloned repo run its
-  own code on any `sfdt` command — including `sfdt --version`. If you currently load a plugin by
-  relative path, install it as a package instead.
+  ```bash
+  export SFDT_ALLOW_UNSAFE_CONFIG=1
+  ```
+
+  Without it the entries are refused and sfdt prints what it skipped. `.sfdt/config.json` is
+  normally committed, so it arrives with whatever repository you cloned — and these entries are
+  `import()`ed at startup, *before* argument parsing, so any `sfdt` command at all (including
+  `sfdt --version`) would run that code.
+
+  The opt-in is an environment variable rather than a config key on purpose: a key inside
+  `config.json` would be set by whoever wrote that file. Put the export in your shell profile or
+  the CI job that needs the plugin — never in the repo's own config.
+
+  **This supersedes the 0.20.0 rule.** 0.20.0 rejected path-shaped specifiers (anything starting
+  with `.`, `/`, or `~`, containing a `\` or a Windows drive letter, or containing a `..`
+  segment). That rule still applies — package specifiers only, though scoped names and package
+  subpaths remain fine — but on its own it did **not** close the hole: a plain package name still
+  resolved out of the cloned repository's own `node_modules/`, so a repo could vendor its payload
+  and skip the path check entirely. The 0.22.0 opt-in is what actually closes it.
 </Callout>
 
 ### 2. Auto-discovered packages (`pluginOptions.autoDiscover`)
@@ -72,6 +83,12 @@ When enabled, sfdt scans `node_modules/` for packages named `sfdt-plugin-*` (inc
 <Callout type="warning">
   Auto-discovery is **off by default** — it executes arbitrary project-local code before CLI
   parsing. Only enable it when you control the packages in your project.
+
+  **Since 0.22.0 it also requires `SFDT_ALLOW_UNSAFE_CONFIG=1`**, for the same reason as
+  `plugins[]` above and covering both of its sources: every `sfdt-plugin-*` in `node_modules/`
+  **and** every file in `.sfdt/plugins/`. Setting `autoDiscover: true` in a committed
+  `config.json` is not sufficient on its own — otherwise a cloned repo could flip one boolean and
+  ship its own `node_modules/sfdt-plugin-*`.
 </Callout>
 
 ### 3. Local files (`.sfdt/plugins/*.js`)

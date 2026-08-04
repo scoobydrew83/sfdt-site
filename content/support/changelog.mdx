@@ -17,6 +17,23 @@ repository; this page summarizes recent highlights.
   [Extension `CHANGELOG.md`](https://github.com/scoobydrew83/sfdt/blob/main/extension/CHANGELOG.md)
 </Callout>
 
+## `@sfdt/cli` — 0.22.0
+
+- **`.sfdt/config.json` is no longer trusted.** That file is meant to be committed, so it arrives
+  with whatever repository you cloned. The settings in it that execute code or choose where secrets
+  are sent — `plugins[]`, `pluginOptions.autoDiscover`, `mcp.salesforce.command`, a non-loopback
+  `ai.baseURL`, and a channel's `headersEnv` beside a literal remote URL — are now refused at load
+  time unless you export `SFDT_ALLOW_UNSAFE_CONFIG=1`. **If you use plugins or a remote AI
+  endpoint, this affects you** — see [Configuration](/cli/configuration#repo-supplied-settings-that-need-an-opt-in)
+  and [Plugins](/cli/plugins). Loopback `ai.baseURL` (Ollama, LM Studio, llama.cpp, vLLM),
+  `ai.apiKeyEnv`, `webhookUrlEnv` channels, and `defaultOrg` are unaffected.
+- **AI provider sandboxes are no longer disabled by an empty tool list.** `allowedTools: []` means
+  "no tools at all", but the gate tested for a *non-empty* list — so the most restrictive request a
+  caller could make silently dropped the read-only sandbox.
+- **`@sfdt/flow-core` 0.11.0** adds `extractFieldWrites` / `filterFieldWrites` — "what writes this
+  field?" from a Flow metadata payload, with `confirmed`/`inferred` status matching the dependency
+  gaps report. Consumer ranges move to `^0.11.0` in lockstep.
+
 ## `@sfdt/extension` — 0.12.0
 
 - **A Workspace Overview home.** The empty "pick a tool to get started" pane is now a dashboard:
