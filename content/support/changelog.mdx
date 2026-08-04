@@ -17,6 +17,63 @@ repository; this page summarizes recent highlights.
   [Extension `CHANGELOG.md`](https://github.com/scoobydrew83/sfdt/blob/main/extension/CHANGELOG.md)
 </Callout>
 
+## `@sfdt/cli` — 0.22.0
+
+- **`.sfdt/config.json` is no longer trusted.** That file is meant to be committed, so it arrives
+  with whatever repository you cloned. The settings in it that execute code or choose where secrets
+  are sent — `plugins[]`, `pluginOptions.autoDiscover`, `mcp.salesforce.command`, a non-loopback
+  `ai.baseURL`, and a channel's `headersEnv` beside a literal remote URL — are now refused at load
+  time unless you export `SFDT_ALLOW_UNSAFE_CONFIG=1`. **If you use plugins or a remote AI
+  endpoint, this affects you** — see [Configuration](/cli/configuration#repo-supplied-settings-that-need-an-opt-in)
+  and [Plugins](/cli/plugins). Loopback `ai.baseURL` (Ollama, LM Studio, llama.cpp, vLLM),
+  `ai.apiKeyEnv`, `webhookUrlEnv` channels, and `defaultOrg` are unaffected.
+- **AI provider sandboxes are no longer disabled by an empty tool list.** `allowedTools: []` means
+  "no tools at all", but the gate tested for a *non-empty* list — so the most restrictive request a
+  caller could make silently dropped the read-only sandbox.
+- **`@sfdt/flow-core` 0.11.0** adds `extractFieldWrites` / `filterFieldWrites` — "what writes this
+  field?" from a Flow metadata payload, with `confirmed`/`inferred` status matching the dependency
+  gaps report. Consumer ranges move to `^0.11.0` in lockstep.
+
+## `@sfdt/extension` — 0.12.0
+
+- **A Workspace Overview home.** The empty "pick a tool to get started" pane is now a dashboard:
+  org-health tiles, quick actions, and a recent-activity table. The header also shows the org's
+  **API version** alongside the release (`Summer '26 · v67.0`), which decides what every tool calls
+  and was previously only visible on hover. See [Workspace](/chrome-extension/workspace).
+- **A line-numbered, syntax-highlighting editor** for SOQL and Apex, so "Malformed query at line 3"
+  from the org points at a line you can see. Used by the SOQL Query Runner and Execute Anonymous.
+- **One Org Health tool instead of two.** "Org Health" and "Org Health (Live)" were two
+  near-identical entries with nothing on screen explaining the difference. Org Health now always
+  runs five checks with no setup and adds twelve more when the CLI bridge answers.
+  See [Features](/chrome-extension/features).
+- **Feature kill switches now apply to the Workspace and side panel.** Turning a tool off in
+  Settings removed it from the ⚡ menu on Salesforce pages but left it visible and usable in the
+  Workspace. See [Kill switch](/chrome-extension/kill-switch).
+- **An extension update no longer floods open Salesforce tabs with errors.** Chrome updates an
+  extension underneath tabs that are already open, orphaning the content script; every storage
+  touch was throwing uncaught. Storage now fails quietly — the tab still needs a reload, but a
+  routine Web Store update no longer fills the console.
+
+## `@sfdt/extension` — 0.11.0
+
+- **Salesforce's real error is no longer replaced by "Session expired or invalid."** A query the org
+  rejected (say, a quoted value against a numeric field) reported a dead session on a perfectly
+  healthy one, discarding the org's actual `MALFORMED_QUERY` answer. Errors now lead with the org's
+  own message plus its error code, the fields it named, and a short "what to do" line.
+  See [Troubleshooting](/chrome-extension/troubleshooting).
+- **SOAP was broken on every path.** The service URL was built with a `v`-prefixed API version,
+  which Salesforce refuses — so Metadata Retrieve **and** Deploy, the SOAP API Explorer, and Data
+  Import's batches all failed. Fixed and pinned per service by tests.
+- **Writes no longer time out after 5 seconds and blame your session.** Reads now get 30s and writes
+  120s; a blown budget on a write says the result is unknown and the change may already have saved,
+  rather than reporting a failure for something that landed.
+- **Field Impact Analysis** — "what writes this field?", answered from Flows (parsed, not guessed),
+  workflow field updates, and Apex, each row badged confirmed or inferred.
+- **SOSL mode in the SOQL Runner**, with results grouped per returned object and per-object copy and
+  export. History and bookmarks record and restore the query language.
+- **The extension is called "SFDT for Salesforce" everywhere now** — the manifest name and toolbar
+  tooltip still said "SFDT SF Helper". Display text only; nothing needs migrating.
+
 ## `@sfdt/cli` — 0.21.0
 
 - **Apex observability and a bounded SOQL/SOSL toolkit.** New `sfdt apex` commands manage

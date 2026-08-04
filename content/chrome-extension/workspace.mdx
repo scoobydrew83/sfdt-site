@@ -12,6 +12,32 @@ standalone full-page tab at `chrome-extension://<id>/app.html`. The Workspace ho
 tools in their own browser tab, so opening a query runner or executing Apex never disturbs the
 Salesforce page you were on.
 
+## The Overview home
+
+With no tool open, the Workspace shows an **Overview** of the org you're targeting rather than an
+empty pane:
+
+- **Org health tiles** — scratch orgs, permission sets, daily API requests, and how many tracked
+  limits are near their cap. These share their shaping and colour bands with the Org Limits tool,
+  so the summary and the detail view can never disagree.
+- **Quick actions** — one click into the tools you reach for most.
+- **Recent activity** — a local, bounded log of what you ran (time, action, resource, outcome),
+  written by the SOQL runner, anonymous Apex, metadata deploy/retrieve, and the bridge tools. It
+  never leaves your device and never records results; clear it any time, or switch it off in
+  Options. See [Privacy](/chrome-extension/privacy).
+
+The header carries the org name, a **release badge showing the API version** (`Summer '26 · v67.0`)
+— that number decides which endpoints every tool calls — plus tool search and **Switch org**.
+
+Opening a tool replaces the Overview; closing the last tab brings it back.
+
+<Callout type="info">
+  The sidebar lists a curated set of primary tools with the long tail behind an **All tools**
+  disclosure, and a **Recent** group above it. Membership of the primary set is a curation call —
+  it says nothing about whether a tool works. Every shipped tool is reachable from **All tools**,
+  the command palette, or the options page.
+</Callout>
+
 ## Tools open as tabs
 
 Inside the Workspace, each tool opens as a **tab in the main area** — not a pop-up modal. Open
@@ -81,7 +107,6 @@ rebuilding every tool's session. This is the `org-switcher` feature.
 | `data-import` | CSV data import wizard |
 | `apex-test-runner` | Run Apex tests (`runTestsAsynchronous`) and view pass/fail results inline — no bridge needed |
 | `apex-coverage` | Org-wide and per-class Apex code coverage, with deploy-threshold bands |
-| `org-health-live` | Runs health checks **live** against the org (coverage, inactive users, license use, API-version spread, limits near cap) — no bridge needed |
 | `dependency-explorer` | "What references this / what does this reference" via `MetadataComponentDependency`, for Apex, Flows, fields, pages, and LWC |
 | `flow-quality` | Scores a Flow's quality — fetches the Flow's Metadata (Tooling) and runs `@sfdt/flow-core` in-browser; no bridge needed |
 | `drift-check` 🔌 | Metadata drift via the bridge — returns the latest `sfdt drift` snapshot by default, or runs it live with the "Run live" checkbox; filtered by component |
@@ -89,7 +114,7 @@ rebuilding every tool's session. This is the `org-switcher` feature.
 | `org-compare` 🔌 | Live org-vs-org / org-vs-local metadata comparison via the bridge (same as `sfdt compare`) |
 | `org-limits` | Live governor-limit usage |
 | `org-switcher` | Switch between logged-in orgs |
-| `org-health` 🔌 | Latest audit/monitor **snapshots** from the CLI (requires the [bridge](/chrome-extension/bridge)) — see `org-health-live` above for the no-bridge version |
+| `org-health` | Five checks run **live** against the org with no setup (coverage, inactive users, license use, API-version spread, limits near cap), plus twelve more from the CLI's audit/monitor **snapshots** when the [bridge](/chrome-extension/bridge) is running |
 
 <Callout type="info">
   **Bridge-backed tools** (`drift-check`, `metadata-scan`, `org-compare`) need a
