@@ -112,10 +112,20 @@ with the prompt is covered under [Third parties](#third-parties). See
 **Destructive writes.** One feature —
 [`soql-bulk-delete`](/chrome-extension/features#bulk-delete-from-a-soql-result-set-soql-bulk-delete)
 — deletes org records, so it ships **switched off** and requires no new permission: the deletes go
-through the same worker-proxied session as every other call. Before it deletes anything it saves a
-**backup CSV of the affected rows to your downloads folder** — that file is written locally, is not
-transmitted anywhere, and contains whatever Salesforce data your query returned, so treat it the
-way you'd treat any exported CSV.
+through the same worker-proxied session as every other call.
+
+Before it deletes anything it generates a **backup CSV of the affected rows** and hands it to your
+browser as a normal download. That file is produced locally and is not transmitted anywhere, but it
+contains whatever Salesforce data your query returned — treat it the way you'd treat any exported
+CSV.
+
+To be precise about what is and is not guaranteed: SFDT verifies that the CSV it generated contains
+every record Id it is about to delete, and that your browser accepted the file — if either fails,
+nothing is deleted. It **cannot** confirm the file reached your disk. Doing so would require the
+`downloads` permission, which is **not** in the manifest and which we would rather not hold, since
+it grants visibility into your download history well beyond this one feature. Instead the confirm
+dialog names the file and asks you to check. The backup also contains only the columns your query
+selected.
 
 ## Third parties
 
