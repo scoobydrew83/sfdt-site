@@ -109,6 +109,26 @@ from the results table currently on screen appears in the assembled prompt. What
 with the prompt is covered under [Third parties](#third-parties). See
 [Generate query](/chrome-extension/features#generate-query-soql-nl-generate).
 
+**Destructive writes.** Several features delete things you asked them to delete — Flow versions,
+debug logs, trace flags, or whatever you aim `rest-explore` at. Only one deletes **arbitrary
+business records, in bulk, from a query result set**:
+[`soql-bulk-delete`](/chrome-extension/features#bulk-delete-from-a-soql-result-set-soql-bulk-delete).
+That is why it is the destructive feature that ships **switched off**. It requires no new
+permission either: the deletes go through the same worker-proxied session as every other call.
+
+Before it deletes anything it generates a **backup CSV of the affected rows** and hands it to your
+browser as a normal download. That file is produced locally and is not transmitted anywhere, but it
+contains whatever Salesforce data your query returned — treat it the way you'd treat any exported
+CSV.
+
+To be precise about what is and is not guaranteed: SFDT verifies that the CSV it generated contains
+every record Id it is about to delete, and that the browser minted a blob URL so the download could
+be handed off — if either fails, nothing is deleted. It **cannot** confirm the file reached your
+disk, or even that the download completed. Doing so would require the `downloads` permission, which
+is **not** in the manifest and which we would rather not hold, since it grants visibility into your
+download history well beyond this one feature. Instead the confirm dialog names the file and asks
+you to check. The backup also contains only the columns your query selected.
+
 ## Third parties
 
 **None.** The extension bundles no third-party SDK, analytics service, error reporter, ad

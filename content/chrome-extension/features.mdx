@@ -100,6 +100,64 @@ A generated string that fails the local SOQL checks — the same rules as
 whatever you already had in the editor. Generation is **SOQL only**: switching the runner to SOSL
 closes the panel and disables the button.
 
+### Bulk delete from a SOQL result set (`soql-bulk-delete`)
+
+<Callout type="warning">
+  **Off by default.** It deletes org records, so the control does not exist until you switch
+  `soql-bulk-delete` on in the [options page](/chrome-extension/settings), where its row carries an
+  **Off by default** badge. The button is not built, not merely hidden. It is one of two features
+  that ship switched off — the other is [Generate query](#generate-query-soql-nl-generate).
+</Callout>
+
+With it on, and when your result set includes an `Id` column, the SOQL Runner's result toolbar gains
+**Delete N rows** — and each SOSL object group gets its own, scoped to that object's rows. The count
+on the button is the preview: it re-counts on every run and after **Load more**, and the button
+disappears again if the next query returns no `Id`. A flat result set whose rows span more than one
+object gets no button either — the runner refuses rather than guess which object to delete against.
+
+**There is no cap on N.** One run deletes every loaded row the plan accepts — the only ceiling is
+how many rows the runner is holding, and **Load more** will stack up to ten pages. The count in the
+button and in the typed phrase is the only thing standing between you and that number.
+
+Clicking it runs a fixed sequence, and there is no path through it that skips a step:
+
+1. **A backup CSV is generated and handed to your browser** — exactly the rows about to be deleted
+   and nothing else, serialised by the same code as **Export CSV**, so it quotes commas and quotes
+   identically to the export you already use.
+2. **A modal asks you to type the phrase exactly** — `DELETE 12 Account`. Confirm stays disabled
+   until it matches; `Escape` and the backdrop cancel, and can never confirm. The count is *inside*
+   the phrase deliberately: you can retype `DELETE` from muscle memory, but not a number you have
+   not read.
+3. **Only then** does anything reach the org, in waves of 25 with a live progress count. A
+   **Cancel** button stops the next wave; so does closing the runner or running a new query. Rows
+   already sent cannot be recalled.
+
+<Callout type="warning">
+  **What the backup guarantee actually is.** Two things are checked before the confirm appears, and
+  failing either deletes nothing and never asks you: the **serialised CSV must contain every record
+  Id in the plan** (a search of the text for each Id, so an empty or truncated file cannot pass),
+  and the **browser must mint a blob URL** for it so the download can be handed off. That second
+  check is the weaker one — it proves the handoff was started, not that it finished.
+
+  What SFDT **cannot** verify is that the file reached your disk. Nothing in the extension can:
+  that needs the `downloads` [permission](/chrome-extension/privacy), which is not in the manifest.
+  So the dialog **names the file** (`sfdt-delete-backup-Account-2026-08-05.csv`) and asks you to
+  check your downloads before continuing. You are the only one who can.
+
+  The backup also holds **only the columns your query selected**. A `SELECT Id FROM Account` backup
+  restores nothing but Ids. Select the fields you would need to recreate the records.
+</Callout>
+
+A failed row does not abort the run: every row that did not delete is listed afterwards **by Id,
+with its reason**. A row that **timed out** is called out separately as *may still have committed* —
+the request never came back, so re-run the query to see what is actually left rather than retrying
+blind and deleting something twice.
+
+Rows the org confirms are gone disappear from the table; rows that failed — including the timed-out
+ones — stay, because they are the ones to re-check. Deletes follow the runner's **REST / Tooling**
+toggle, and add **no new extension permission** — they go through the same worker-proxied session
+every other write already uses.
+
 ### Schema Browser (`schema-browser`)
 
 A two-pane object/field explorer — a searchable, windowed object list beside a per-object field
@@ -197,6 +255,7 @@ analyze**, which runs the Apex, finds the log it produced, and opens it in the A
 | --- | --- |
 | `soql-runner` | Run **SOQL or SOSL** via a `SOQL \| SOSL` toggle that also auto-follows a `FIND {…}` query. **SOQL** (REST or Tooling): field/object autocomplete (fed fields from the Schema Browser's **Insert into query**), a **🔎 Explain** query-plan view (cost/cardinality/leading operation, no execution), CSV export of the current page **or all rows** (follows `queryMore` pagination with a progress indicator + cancel), and a LangGraph node generator. **SOSL** (REST only — the Search resource has no Tooling variant, so Explain and the LangGraph generator don't apply): results grouped per returned object. Both share the result toolbar — **Copy CSV / Export CSV / Copy JSON / Copy for Excel (TSV)** — which applies per group in SOSL. History and bookmarks remember which mode an entry used. See [Highlights](#sosl-mode-in-the-soql-runner) |
 | `soql-nl-generate` 🔌 | **Off by default.** Adds **Generate query** to the SOQL Runner: describe a query in plain English and the generated SOQL lands in the editor for review — it is never run for you. Sends your description plus the objects' **field metadata** (never record data) through the [bridge](/chrome-extension/bridge) to the CLI's configured AI provider; the extension holds no AI endpoint or key. SOQL only. See [Highlights](#generate-query-soql-nl-generate) |
+| `soql-bulk-delete` | **Off by default.** Adds **Delete N rows** to the SOQL Runner's result toolbar when the rows carry an `Id`: automatic backup CSV (verified to cover every row) → typed `DELETE <n> <Object>` confirmation → batched, cancellable delete with progress and a per-row failure report. See [Highlights](#bulk-delete-from-a-soql-result-set-soql-bulk-delete) |
 | `org-limits` | Live governor-limit usage, sorted by pressure and colour-banded |
 | `rest-explore` | Fire arbitrary `GET`/`POST`/`PATCH`/`PUT`/`DELETE` against `/services/data/...` with a response viewer and history |
 | `soap-explore` | Build and send SOAP API requests with a payload editor and response viewer |
