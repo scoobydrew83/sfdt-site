@@ -109,6 +109,14 @@ from the results table currently on screen appears in the assembled prompt. What
 with the prompt is covered under [Third parties](#third-parties). See
 [Generate query](/chrome-extension/features#generate-query-soql-nl-generate).
 
+**Destructive writes.** One feature —
+[`soql-bulk-delete`](/chrome-extension/features#bulk-delete-from-a-soql-result-set-soql-bulk-delete)
+— deletes org records, so it ships **switched off** and requires no new permission: the deletes go
+through the same worker-proxied session as every other call. Before it deletes anything it saves a
+**backup CSV of the affected rows to your downloads folder** — that file is written locally, is not
+transmitted anywhere, and contains whatever Salesforce data your query returned, so treat it the
+way you'd treat any exported CSV.
+
 ## Third parties
 
 **None.** The extension bundles no third-party SDK, analytics service, error reporter, ad
