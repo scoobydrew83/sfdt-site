@@ -18,7 +18,17 @@ other browsers or transmitted off your device.
 ## Per-feature toggles
 
 Every one of the [<SurfaceCount surface="chrome" metric="registeredFeatures" /> features](/chrome-extension/features) can be switched on or off
-individually. A feature with no explicit toggle is enabled by default.
+individually. Almost all of them are **on** until you turn them off; a small number ship **off**
+and do nothing at all until you tick them. Each is badged *Off by default* on the options page,
+which is the authority if this list ever lags a release:
+
+| Feature | Why it ships off |
+| --- | --- |
+| `soql-nl-generate` | Sends your description and the objects' field metadata out of the browser, through the [bridge](/chrome-extension/bridge) to an AI provider — see [Generate query](/chrome-extension/features#generate-query-soql-nl-generate) |
+| `soql-bulk-delete` | Deletes records, irreversibly, from the rows a SOQL query returned. It has no page on this site yet — the in-extension flow is the only documentation of it so far: it downloads a CSV backup of the rows first, then makes you type `DELETE <count> <Object>` exactly before it will run |
+
+Your choice always wins over the shipped default, in both directions: a feature you switched off
+stays off, and one you switched on stays on.
 
 ## Bridge settings
 

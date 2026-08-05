@@ -65,6 +65,41 @@ Tooling variant and no query plan. Your transport choice is only *unavailable*, 
 runs on REST because that is all it can run on, and switching back to SOQL puts you back on Tooling
 if that is where you were.
 
+### Generate query (`soql-nl-generate`)
+
+<Callout type="warning">
+  **Off by default, and needs the [bridge](/chrome-extension/bridge).** Tick **Generate SOQL from a
+  description (AI)** on the [options page](/chrome-extension/settings) to switch it on. Until you
+  do, the button is not built at all.
+</Callout>
+
+Describe the query you want in plain English and the SOQL arrives **in the editor**, for you to
+read before you run it. **Generate query** in the runner's toolbar opens a panel above the editor:
+type a description, optionally name the objects (leave it blank and they're inferred from your
+wording, matched against the org's own sObject list — never invented), press **Generate**. The
+result is written into the query editor and the status line reads *review it, then Run*. Nothing
+runs on its own; **Run** is still the only thing that touches the org, and pressing it is still
+yours to do.
+
+**What is sent, and what is not.** The prompt carries your description plus a Markdown **field
+table** per object — the same format `export-for-prompt` copies to your clipboard — built from the
+object describe: API name, label, type, required, inline help text, and nothing else. It does
+**not** carry record data. The prompt assembler is never handed the result set, and a second check
+scans the assembled prompt (minus your own wording, which is yours) for any value from the results
+table on screen and refuses the send if it finds one. Large objects are capped at 150 fields, and
+the prompt says so rather than truncating silently.
+
+**Where it goes.** Through the [bridge](/chrome-extension/bridge) to your local `sfdt` CLI, using
+the same `ai` request the Flow AI Assistant uses — the extension holds **no AI endpoint and no API
+key**, and this feature adds no browser permission. The CLI decides the provider under your own
+key. With no bridge running, an unpaired token, or `"features.ai": false` in the project's
+`.sfdt/config.json`, the panel shows what the bridge said plus the steps to fix it.
+
+A generated string that fails the local SOQL checks — the same rules as
+[`sfdt soql validate`](/cli/commands/metadata#sfdt-soql) — is reported in the panel rather than pasted over
+whatever you already had in the editor. Generation is **SOQL only**: switching the runner to SOSL
+closes the panel and disables the button.
+
 ### Schema Browser (`schema-browser`)
 
 A two-pane object/field explorer — a searchable, windowed object list beside a per-object field
@@ -161,6 +196,7 @@ analyze**, which runs the Apex, finds the log it produced, and opens it in the A
 | Id | What it does |
 | --- | --- |
 | `soql-runner` | Run **SOQL or SOSL** via a `SOQL \| SOSL` toggle that also auto-follows a `FIND {…}` query. **SOQL** (REST or Tooling): field/object autocomplete (fed fields from the Schema Browser's **Insert into query**), a **🔎 Explain** query-plan view (cost/cardinality/leading operation, no execution), CSV export of the current page **or all rows** (follows `queryMore` pagination with a progress indicator + cancel), and a LangGraph node generator. **SOSL** (REST only — the Search resource has no Tooling variant, so Explain and the LangGraph generator don't apply): results grouped per returned object. Both share the result toolbar — **Copy CSV / Export CSV / Copy JSON / Copy for Excel (TSV)** — which applies per group in SOSL. History and bookmarks remember which mode an entry used. See [Highlights](#sosl-mode-in-the-soql-runner) |
+| `soql-nl-generate` 🔌 | **Off by default.** Adds **Generate query** to the SOQL Runner: describe a query in plain English and the generated SOQL lands in the editor for review — it is never run for you. Sends your description plus the objects' **field metadata** (never record data) through the [bridge](/chrome-extension/bridge) to the CLI's configured AI provider; the extension holds no AI endpoint or key. SOQL only. See [Highlights](#generate-query-soql-nl-generate) |
 | `org-limits` | Live governor-limit usage, sorted by pressure and colour-banded |
 | `rest-explore` | Fire arbitrary `GET`/`POST`/`PATCH`/`PUT`/`DELETE` against `/services/data/...` with a response viewer and history |
 | `soap-explore` | Build and send SOAP API requests with a payload editor and response viewer |
