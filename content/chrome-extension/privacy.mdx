@@ -101,6 +101,14 @@ When you use a bridge feature (e.g. "Deploy this Flow"), the extension sends the
 name to `http://127.0.0.1:7654` so the local CLI can run the deploy. It never leaves your
 device.
 
+**Generate query** (`soql-nl-generate`, off by default) sends the description you typed plus a
+**schema table** for the objects involved — object and field API names, labels, data types, whether
+a field is required, and inline help text — through the same local bridge. It does not send record
+data: the prompt is built from the object describe only, and a check refuses the send if a value
+from the results table currently on screen appears in the assembled prompt. What the CLI then does
+with the prompt is covered under [Third parties](#third-parties). See
+[Generate query](/chrome-extension/features#generate-query-soql-nl-generate).
+
 ## Third parties
 
 **None.** The extension bundles no third-party SDK, analytics service, error reporter, ad

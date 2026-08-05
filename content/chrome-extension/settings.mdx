@@ -18,7 +18,16 @@ other browsers or transmitted off your device.
 ## Per-feature toggles
 
 Every one of the [<SurfaceCount surface="chrome" metric="registeredFeatures" /> features](/chrome-extension/features) can be switched on or off
-individually. A feature with no explicit toggle is enabled by default.
+individually. Almost all of them are **on** until you turn them off; a small number ship **off**
+and do nothing at all until you tick them. Those rows are badged *Off by default* on the options
+page:
+
+| Feature | Why it ships off |
+| --- | --- |
+| `soql-nl-generate` | Sends your description and the objects' field metadata out of the browser, through the [bridge](/chrome-extension/bridge) to an AI provider — see [Generate query](/chrome-extension/features#generate-query-soql-nl-generate) |
+
+Your choice always wins over the shipped default, in both directions: a feature you switched off
+stays off, and one you switched on stays on.
 
 ## Bridge settings
 
