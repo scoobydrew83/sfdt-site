@@ -103,16 +103,21 @@ closes the panel and disables the button.
 ### Bulk delete from a SOQL result set (`soql-bulk-delete`)
 
 <Callout type="warning">
-  **Off by default — and the only feature that is.** It deletes org records, so the control does
-  not exist until you switch `soql-bulk-delete` on in the [options
-  page](/chrome-extension/settings), where its row carries an **Off by default** badge. The button
-  is not built, not merely hidden.
+  **Off by default.** It deletes org records, so the control does not exist until you switch
+  `soql-bulk-delete` on in the [options page](/chrome-extension/settings), where its row carries an
+  **Off by default** badge. The button is not built, not merely hidden. It is one of two features
+  that ship switched off — the other is [Generate query](#generate-query-soql-nl-generate).
 </Callout>
 
 With it on, and when your result set includes an `Id` column, the SOQL Runner's result toolbar gains
 **Delete N rows** — and each SOSL object group gets its own, scoped to that object's rows. The count
 on the button is the preview: it re-counts on every run and after **Load more**, and the button
-disappears again if the next query returns no `Id`.
+disappears again if the next query returns no `Id`. A flat result set whose rows span more than one
+object gets no button either — the runner refuses rather than guess which object to delete against.
+
+**There is no cap on N.** One run deletes every loaded row the plan accepts — the only ceiling is
+how many rows the runner is holding, and **Load more** will stack up to ten pages. The count in the
+button and in the typed phrase is the only thing standing between you and that number.
 
 Clicking it runs a fixed sequence, and there is no path through it that skips a step:
 
@@ -128,13 +133,16 @@ Clicking it runs a fixed sequence, and there is no path through it that skips a 
    already sent cannot be recalled.
 
 <Callout type="warning">
-  **What the backup guarantee actually is.** Before the confirm appears, SFDT checks that the
-  generated CSV really does contain **every record Id it is about to delete**, and that your browser
-  accepted the file. If either check fails, nothing is deleted and you are never asked. What SFDT
-  **cannot** verify is that the file reached your disk — that would need the `downloads`
-  [permission](/chrome-extension/privacy), which the extension does not have and does not want. So
-  the dialog **names the file** (`sfdt-delete-backup-Account-2026-08-05.csv`) and asks you to check
-  your downloads before continuing. You are the only one who can.
+  **What the backup guarantee actually is.** Two things are checked before the confirm appears, and
+  failing either deletes nothing and never asks you: the **serialised CSV must contain every record
+  Id in the plan** (a search of the text for each Id, so an empty or truncated file cannot pass),
+  and the **browser must mint a blob URL** for it so the download can be handed off. That second
+  check is the weaker one — it proves the handoff was started, not that it finished.
+
+  What SFDT **cannot** verify is that the file reached your disk. Nothing in the extension can:
+  that needs the `downloads` [permission](/chrome-extension/privacy), which is not in the manifest.
+  So the dialog **names the file** (`sfdt-delete-backup-Account-2026-08-05.csv`) and asks you to
+  check your downloads before continuing. You are the only one who can.
 
   The backup also holds **only the columns your query selected**. A `SELECT Id FROM Account` backup
   restores nothing but Ids. Select the fields you would need to recreate the records.
