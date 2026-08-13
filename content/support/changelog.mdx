@@ -34,6 +34,32 @@ repository; this page summarizes recent highlights.
   field?" from a Flow metadata payload, with `confirmed`/`inferred` status matching the dependency
   gaps report. Consumer ranges move to `^0.11.0` in lockstep.
 
+## `@sfdt/extension` — 0.13.0
+
+- **Describe a query in plain English and the SOQL lands in the editor — never in the org.** The SOQL
+  Runner's new **Generate query** panel writes its answer into the editor and tells you to review it,
+  then Run. The prompt carries your description plus a field table for the objects involved and
+  **no record data** — a check refuses the send outright if any value from the results on screen
+  appears in the assembled text. It goes through the local [bridge](/chrome-extension/bridge) to the
+  provider *you* configured under your own API key; the extension gains no new permission and no new
+  host. See [Generate query](/chrome-extension/features#generate-query-soql-nl-generate).
+- **Bulk delete from a SOQL result set, built as guard rails rather than a delete button.** The order
+  is the feature: the affected rows are serialised to a backup CSV and handed to your browser
+  **first**, then a dialog asks you to type `DELETE 12 Account` exactly, and only then does anything
+  reach the org. Deletes run in waves of 25 with progress and a **Cancel**; rows that fail stay in
+  the table listed by Id with a reason, and a timed-out row is called out separately as *may still
+  have committed*. See
+  [Bulk delete from a SOQL result set](/chrome-extension/features#bulk-delete-from-a-soql-result-set-soql-bulk-delete).
+- **These are the first two features that ship switched off.** Neither is built at all until you tick
+  its row — the controls are *absent*, not hidden — because one deletes records irreversibly and the
+  other moves org schema out of the browser. Both carry their own kill-switch id, so the destructive
+  half can be taken away without taking the query runner with it. See
+  [Settings](/chrome-extension/settings).
+- **A Salesforce error now renders the org's own text and our guidance as separate lines, everywhere.**
+  One helper builds the error block and nothing else may, so a failure can no longer lose the org's
+  real message or run the two together into one paragraph — and every one of them is announced to
+  screen readers, which fifteen hand-rolled panels previously were not.
+
 ## `@sfdt/extension` — 0.12.0
 
 - **A Workspace Overview home.** The empty "pick a tool to get started" pane is now a dashboard:
