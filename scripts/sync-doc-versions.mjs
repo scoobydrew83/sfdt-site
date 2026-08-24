@@ -9,7 +9,7 @@
 // skill, not here — this only touches version literals.
 //
 // Usage:
-//   node scripts/sync-doc-versions.mjs [--cli X.Y.Z] [--ext X.Y.Z] [--check] [--selftest]
+//   node scripts/sync-doc-versions.mjs [--cli X.Y.Z] [--ext X.Y.Z] [--vscode X.Y.Z] [--check] [--selftest]
 //
 //   (no flags)   apply bumps, print what changed, exit 0
 //   --check      report drift, DO NOT write, exit 1 if anything is stale
@@ -58,6 +58,17 @@ const TARGETS = [
     re: new RegExp(`(built manifest\\*\\* \\(\`v)${SEMVER}(\`\\))`),
     build: (v) => `$1${v}$2`,
   },
+  {
+    // Anchored to the "**Version:**" bullet on purpose. The same page says
+    // "As of **v0.2.0** it is a full command center" a few lines above, which is
+    // a HISTORICAL statement about when that capability arrived — bumping it
+    // every release would turn a true sentence into a false one. A looser regex
+    // would have caught both.
+    which: 'vscode',
+    file: 'content/vscode-extension/index.mdx',
+    re: new RegExp(`(\\*\\*Version:\\*\\* \`)${SEMVER}(\`)`),
+    build: (v) => `$1${v}$2`,
+  },
 ];
 
 function arg(name) {
@@ -83,19 +94,23 @@ async function fetchVersion(rel) {
 async function resolveVersions() {
   let cli = arg('cli');
   let ext = arg('ext');
-  if (cli && ext) return { cli, ext };
+  let vscode = arg('vscode');
+  if (cli && ext && vscode) return { cli, ext, vscode };
 
   // local upstream checkout (developer machine / skill run)
   const localCli = await readJsonMaybe(path.resolve(ROOT, '..', 'sfdt', 'package.json'));
   const localExt = await readJsonMaybe(path.resolve(ROOT, '..', 'sfdt', 'extension', 'package.json'));
+  const localVsc = await readJsonMaybe(path.resolve(ROOT, '..', 'sfdt', 'vscode', 'package.json'));
   cli ??= localCli?.version;
   ext ??= localExt?.version;
-  if (cli && ext) return { cli, ext };
+  vscode ??= localVsc?.version;
+  if (cli && ext && vscode) return { cli, ext, vscode };
 
   // CI fallback: public upstream repo
   cli ??= await fetchVersion('package.json');
   ext ??= await fetchVersion('extension/package.json');
-  return { cli, ext };
+  vscode ??= await fetchVersion('vscode/package.json');
+  return { cli, ext, vscode };
 }
 
 function selftest() {
@@ -121,14 +136,14 @@ async function main() {
   if (has('selftest')) return selftest();
 
   const check = has('check');
-  const { cli, ext } = await resolveVersions();
-  if (!cli || !ext) {
-    console.error('Could not resolve versions (cli/ext). Pass --cli/--ext.');
+  const { cli, ext, vscode } = await resolveVersions();
+  if (!cli || !ext || !vscode) {
+    console.error('Could not resolve versions (cli/ext/vscode). Pass --cli/--ext/--vscode.');
     process.exit(2);
   }
-  console.log(`Target versions: cli=${cli} ext=${ext}`);
+  console.log(`Target versions: cli=${cli} ext=${ext} vscode=${vscode}`);
 
-  const versions = { cli, ext };
+  const versions = { cli, ext, vscode };
   const drifted = [];
   for (const t of TARGETS) {
     const abs = path.resolve(ROOT, t.file);
