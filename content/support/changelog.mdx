@@ -17,6 +17,57 @@ repository; this page summarizes recent highlights.
   [Extension `CHANGELOG.md`](https://github.com/scoobydrew83/sfdt/blob/main/extension/CHANGELOG.md)
 </Callout>
 
+## `@sfdt/cli` — 0.23.0
+
+- **The first commands that change a live org.** Everything before this read an org, deployed
+  metadata from a reviewed repo, or wrote a file. New: [`sfdt automation`](/cli/commands/org-health#sfdt-automation)
+  (one on/off grid over five automation types, stating which cost a *metadata deploy* rather than a
+  record write), [`sfdt permissions`](/cli/commands/org-health#sfdt-permissions) (object and field access, with a
+  repo-vs-org drift gate; profiles are refused by name because Salesforce does not permit direct DML
+  on profile-owned entries), and [`sfdt record`](/cli/commands/org-health#sfdt-record),
+  [`sfdt field`](/cli/commands/metadata#sfdt-field), [`sfdt events`](/cli/commands/org-health#sfdt-events),
+  [`sfdt packages`](/cli/commands/org-health#sfdt-packages), plus `sfdt data load` over Bulk API v2.
+- **[`sfdt ledger`](/cli/commands/config-utils#sfdt-ledger) — an append-only, hash-chained record of every org change,
+  and how to reverse one.** Each entry's hash covers the previous one, so an edited or deleted line
+  breaks the chain and `ledger verify` names the first break. Every write records the state it is
+  about to replace *before* the org is touched, so `ledger undo` can put it back. It is a **record,
+  not a gate**: writes apply immediately, and the recorded before-state is what makes them
+  reversible afterwards — which is when you usually find out a change was wrong.
+- **Every org-mutating command carries the same brakes.** `--dry-run`, a production guard that
+  **fails safe** (an org whose sandbox status cannot be read is treated as production), and a
+  confirmation that **refuses** rather than auto-confirms when non-interactive — because a prompt in
+  CI is either a hang or a silent yes.
+- **`@sfdt/flow-core` 0.13.0** ships the shared automation, permissions, packages and field-usage
+  models the CLI and the Chrome extension both read, so neither can drift from the other. Consumer
+  ranges move to `^0.13.0`.
+
+<Callout type="warning">
+  These commands change a live org. Start with `--dry-run`, and note that a production org needs an
+  explicit `--production` before any of them will write.
+</Callout>
+
+## `@sfdt/extension` — 0.14.0
+
+- **Edit a record in the inspector with the control each field deserves.** Picklists become a
+  `<select>` built from the describe's own values, dates and times get typed inputs that keep their
+  seconds, and numbers carry the field's scale — replacing one plain text box for everything, which
+  used to make untouched numbers read as unsaved changes.
+- **A field you cannot edit now says why.** Formula fields, auto-numbers, audit fields and fields
+  your permissions do not cover all still appear, each with a short reason — nothing is filtered out
+  of the view, only out of the payload.
+- **Saving claims one of exactly three things.** Saved, *no changes were saved*, or **save outcome
+  unknown** — the third is new, and it is the honest answer when a request times out and the write
+  may well have committed.
+- **Clone a record into a form you review before anything is created**, and **delete a record from
+  the inspector** — off by default, behind its own switch.
+
+## `sfdt.sfdt-devtools` (VS Code) — 0.7.0
+
+- **Five new command groups in the picker**, tracking the CLI commands above: Permissions, Packages,
+  Platform Events, Field Usage and Record — plus Data → Load (Bulk API).
+- **Destructive actions are marked as such** (publish, record edit/clone, data load), mirroring the
+  CLI's own gating rather than adding a second opinion about it.
+
 ## `@sfdt/cli` — 0.22.0
 
 - **`.sfdt/config.json` is no longer trusted.** That file is meant to be committed, so it arrives

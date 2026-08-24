@@ -354,3 +354,35 @@ sfdt flow conflicts --org production --json
   **no entry criteria** are highlighted, since they run on every record change in the group. See
   [flow-core](/guides/flow-core) for how the scoring and conflict detection work.
 </Callout>
+
+---
+
+## `sfdt field`
+
+Answers "what actually uses this field?" — separately for what **writes** it and what merely
+**references** it, because those are different questions with different consequences.
+
+```bash
+sfdt field impact Account.Region__c
+sfdt field usage Account
+sfdt field usage Account --population
+sfdt field usage Account --offline --fail-on-unreferenced
+```
+
+| Subcommand | Description |
+|---|---|
+| `impact <Object.Field>` | What writes the field — flows, field updates, Apex |
+| `usage <Object>` | Object-wide sweep for unreferenced fields |
+
+The scan is shared verbatim with the Chrome extension's Field Impact panel, so both surfaces give
+the same answer about the same org. The **notes are the product**: a query the org refuses is
+reported as *unchecked*, never folded into "nothing writes this field".
+
+`--population` adds a non-null count per candidate field — opt-in, because it costs one query per
+field. Without it no field is called safe to remove: an unreferenced field may still hold values, and
+a count that did not run is not a count of zero.
+
+`--offline` sweeps the repository instead of an org, so it needs no connection at all. Paired with
+`--fail-on-unreferenced` it becomes a CI gate.
+
+Common options: `--org <alias>`, `--json`.

@@ -3,6 +3,8 @@ title: Config & Utility Commands
 description: config, completion, version, and update — read and write configuration, enable shell completion, and keep sfdt current.
 ---
 
+import { Callout } from 'nextra/components'
+
 # Config & Utilities
 
 ---
@@ -65,3 +67,49 @@ sfdt update --force
 | `--force` | Force the update |
 
 If a self-update fails, sfdt prints an actionable error with a manual retry command.
+
+---
+
+## `sfdt ledger`
+
+The append-only record of every org change sfdt makes, and how to reverse one.
+
+```bash
+sfdt ledger list                 # what has sfdt changed?
+sfdt ledger show <id>            # including the state it replaced
+sfdt ledger verify               # has the file been tampered with?
+sfdt ledger undo <id>            # put it back
+```
+
+| Subcommand | Description |
+|---|---|
+| `list` | Recorded changes, newest first |
+| `show <id>` | One change in full, including the state that preceded it |
+| `verify` | Check the hash chain |
+| `undo <id>` | Reverse a change, restoring the state it replaced |
+
+**A record, not a gate.** Writes apply immediately; the recorded before-state is what makes them
+reversible *afterwards* — which is when you usually find out a change was wrong. A stage-and-approve
+queue only ever looks forward.
+
+**Hash-chained.** Each entry's hash covers its content plus the previous entry's, so editing or
+deleting any line breaks the chain. `verify` names the first break by both its recorded sequence
+number and its current line — when those diverge, the gap is itself the evidence.
+
+**Nothing is ever mutated.** Undo appends a compensating entry rather than flipping a flag on the
+original, so `verify` still passes afterwards. A second undo of the same change is refused.
+
+| Status | Meaning |
+|---|---|
+| `applied` | The write succeeded |
+| `failed` | Attempted and rejected |
+| `undone` | Reversed by a later entry |
+| **`pending`** | Recorded, but its outcome never was — the command may have been interrupted mid-write. **Check the org before undoing it.** |
+
+<Callout type="warning">
+  `undo` is itself an org write and carries the same brakes as the change it reverses — a production
+  guard and a confirmation. Undoing a `permissions grant` *revokes* access. The target org comes from
+  the recorded entry, so `undo` takes no `--org`.
+</Callout>
+
+Common options: `--limit <n>` (list), `--yes`, `--production`, `--json`.

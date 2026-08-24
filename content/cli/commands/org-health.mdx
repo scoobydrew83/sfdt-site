@@ -151,9 +151,15 @@ sfdt data delete AccountsAndContacts --yes
 | `list` | List defined data sets |
 | `export [set]` | Export records to a data set |
 | `import [set]` | Import a data set into the org |
-| `delete [set]` | Delete records (`--yes` to skip confirmation; required non-interactively) |
+| `load [set]` | Load a data set over **Bulk API v2** (insert or upsert) |
+| `delete [set]` | Delete records the set's queries match |
 
 Common options: `--org <alias>`, `--json`.
+
+`load` and `delete` both write, so both carry a production guard (`--production`) and a
+confirmation that **refuses** rather than auto-confirms when non-interactive (`--yes` to skip it).
+`load` inserts or *upserts*, and an upsert overwrites records that are already there. Neither is
+recorded in the ledger: `sfdt ledger undo` covers org *configuration*, not bulk data writes.
 
 ---
 
@@ -210,6 +216,158 @@ sfdt notify snapshot --type audit
   and push in one step. The legacy single-Slack config (`notifications.slack.webhookUrl` with
   `features.notifications: true`) is still honored.
 </Callout>
+
+---
+
+## `sfdt automation`
+
+The on/off grid across every kind of Salesforce automation, and the toggles behind it.
+
+```bash
+sfdt automation list
+sfdt automation list --type validation-rule
+sfdt automation disable validation-rule Account.Region_Required --dry-run
+sfdt automation disable validation-rule Account.Region_Required
+sfdt automation enable flow Set_Region
+```
+
+| Subcommand | Description |
+|---|---|
+| `list` | Every flow, validation rule, duplicate rule, workflow rule and Apex trigger, with its state |
+| `enable <type> <name>` | Turn one component on |
+| `disable <type> <name>` | Turn one component off |
+
+**The five types do not cost the same to toggle**, and the grid says so at the point of use. Flows,
+validation rules and duplicate rules are Tooling record writes. Workflow rules and Apex triggers
+need a **metadata deploy** — and a production deploy runs tests, so toggling a trigger there is a
+deployment with everything that implies.
+
+<Callout type="warning">
+  Toggling automation changes how the org behaves for **every user, immediately**. A production org
+  requires `--production`, and detection fails safe: an org whose sandbox status cannot be read is
+  treated as production. Every change is recorded in the [ledger](/cli/commands/config-utils#sfdt-ledger),
+  so `sfdt ledger undo` restores the prior state.
+</Callout>
+
+Common options: `--org <alias>`, `--dry-run`, `--yes`, `--production`, `--json`.
+
+---
+
+## `sfdt permissions`
+
+Object and field access — what is **granted**, by which profile or permission set, and where the org
+disagrees with your repository.
+
+```bash
+sfdt permissions matrix --object Account
+sfdt permissions drift Account
+sfdt permissions grant Account.Region__c --parent "Sales Ops" --level edit
+sfdt permissions revoke Account.SSN__c --parent "Sales Ops"
+sfdt permissions fix Account --dry-run
+```
+
+| Subcommand | Description |
+|---|---|
+| `matrix` | What each profile and permission set grants |
+| `drift <object>` | Compare org grants against the repository |
+| `grant <Object.Field...>` | Grant field access on a permission set |
+| `revoke <Object.Field...>` | Remove field access |
+| `fix <object>` | Apply the grants your repo declares but the org is missing |
+
+Reports what is **granted**, never "effective": muting permission sets cannot be queried, and a
+stronger claim would be an upper bound presented as a fact.
+
+**Profiles are refused by name.** Salesforce does not permit direct DML on profile-owned permission
+entries — those must go through the Metadata API, so change them in source and deploy. Refusing up
+front beats an opaque `INSUFFICIENT_ACCESS_OR_READONLY` that reads like a problem with your own access.
+
+`fix` applies only `missing-in-org` rows. Grants the org has that source does not are deliberately
+left alone — removing access nobody asked to remove is a different, and riskier, decision.
+
+Common options: `--org <alias>`, `--dry-run`, `--yes`, `--production`, `--json`.
+
+---
+
+## `sfdt record`
+
+Read, edit, or clone a single record, using the same editability model as the Chrome extension's
+inspector — so a field refused here is refused for the identical stated reason in the browser.
+
+```bash
+sfdt record get 001800000000001AAA
+sfdt record edit 001800000000001AAA --set Name="Acme Corp" --set AnnualRevenue=250000
+sfdt record clone 001800000000001AAA --set Name="Acme Corp (copy)"
+```
+
+| Subcommand | Description |
+|---|---|
+| `get <id>` | Read a record and show which fields are editable, **and why the rest are not** |
+| `edit <id>` | Update fields (`--set Field=Value`, repeatable) |
+| `clone <id>` | Create a copy from the record's createable fields |
+
+Non-editable fields are refused **locally, by name, before anything reaches the org** — formula
+fields, auto-numbers, and fields your permissions do not cover. A field hidden from you by
+field-level security is never written as `null` over a value you were not allowed to see.
+
+A save reports exactly one of three outcomes: **saved**, **nothing was saved**, or **outcome
+unknown** — the last when a request times out and the write may in fact have committed. Exiting `0`
+on an unknown outcome would tell a script the change landed.
+
+Common options: `--org <alias>`, `--sobject <name>`, `--dry-run`, `--json`.
+
+---
+
+## `sfdt events`
+
+Platform Events and Change Data Capture.
+
+```bash
+sfdt events list
+sfdt events tail Order_Placed__e
+sfdt events tail AccountChangeEvent --replay all
+sfdt events publish Order_Placed__e --field Order_Id__c=A-1
+```
+
+| Subcommand | Description |
+|---|---|
+| `list` | Every subscribable channel, with its Bayeux path |
+| `tail <channel>` | Subscribe and print events as they arrive |
+| `publish <Event__e>` | Publish one platform event |
+
+A channel whose query is refused is reported as *unchecked* — it never silently becomes "your org
+has none".
+
+<Callout type="warning">
+  `publish` fires **every subscriber** on the channel: flows, Apex triggers, and any external
+  listener. A delivered event cannot be recalled, which is why it is gated going in — a production
+  org requires `--production`, and there is no undo.
+</Callout>
+
+Common options: `--org <alias>`, `--dry-run`, `--yes`, `--production`, `--json`.
+
+---
+
+## `sfdt packages`
+
+Installed package inventory, your own annotations, and version drift between orgs.
+
+```bash
+sfdt packages list
+sfdt packages compare --source prod --target uat
+sfdt packages note ecflc --owner "Platform team" --latest 1.7.0
+```
+
+| Subcommand | Description |
+|---|---|
+| `list` | Installed packages with versions and any notes |
+| `compare` | Version drift between two orgs |
+| `note <namespace>` | Record vendor URL, latest known version, and internal owner |
+
+`note` writes `.sfdt/packages.json`, a **committed** file — so an annotation is shared and
+code-reviewed rather than trapped on one machine. Merges are additive: fields you do not supply are
+left alone, including keys written by a newer sfdt that this one does not understand.
+
+Common options: `--org <alias>`, `--json`.
 
 ---
 
