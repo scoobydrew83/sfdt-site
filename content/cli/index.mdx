@@ -56,9 +56,11 @@ See [Architecture](/getting-started/architecture) for the full picture.
 | Workspace | What it is | Status |
 |---|---|---|
 | **`@sfdt/cli`** (`/src`, `/bin`, `/scripts`) | The npm CLI documented here. | Published to npm |
-| **`@sfdt/extension`** (`/extension`) | Chrome extension for Flow Builder + Setup. Talks to the CLI via the local bridge. | Pre-Web-Store |
+| **`@sfdt/extension`** (`/extension`) | Chrome extension for Flow Builder + Setup. Talks to the CLI via the local bridge. | Published to the Chrome Web Store |
+| **`sfdt-devtools`** (`/vscode`) | VS Code extension — a CLI-backed command center (Org Health sidebar, command palette, CodeLens). | Published to the VS Code Marketplace |
 | **`@sfdt/host`** (`/host`) | Native messaging host used as the extension's fallback transport when `sfdt ui` isn't running. | Bundled with CLI |
-| **`@sfdt/flow-core`** (`/packages/flow-core`) | Shared TypeScript library — Flow normalization, rules engine, scoring, and the versioned bridge contract. | Workspace-only |
+| **`@sfdt/flow-core`** (`/packages/flow-core`) | Shared TypeScript library — Flow normalization, rules engine, scoring, and the versioned bridge contract. | Published to npm |
+| **`@sfdt/plugin`** (`/packages/plugin`) | Salesforce CLI plugin — a thin wrapper exposing every command as `sf sfdt <command>`. | Published to npm |
 
 ## Quick start
 
