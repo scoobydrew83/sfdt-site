@@ -17,6 +17,44 @@ repository; this page summarizes recent highlights.
   [Extension `CHANGELOG.md`](https://github.com/scoobydrew83/sfdt/blob/main/extension/CHANGELOG.md)
 </Callout>
 
+## `@sfdt/cli` — 0.23.1
+
+A security patch. Both fixes close a path where input chosen by someone other than the operator
+reached a sink that trusted it.
+
+- **[MCP](/cli/mcp) path arguments are now contained to the project.** `sfdt_apex_run`'s `file` and
+  the `manifest` of `sfdt_validate` / `sfdt_deploy` were resolved with a bare `path.resolve()`,
+  which returns an absolute input verbatim and honours `../`. The data-set name of the four
+  `sfdt_data_*` tools had no validation at all. All of them now reject absolute paths, `..`
+  segments, and anything resolving outside the project.
+- **Why that matters more on MCP than elsewhere:** tool arguments are chosen by a *model*, and the
+  CLI's AI surfaces feed that model untrusted org content — Apex compile errors, flow metadata,
+  deploy failure text. A path argument is untrusted input, and `confirmExecution` is not a
+  mitigation: it authorises the *operation* while the model still supplies the *argument*.
+- **A local-only `ai.baseURL` could point offsite.** The loopback exemption that lets Ollama,
+  LM Studio, llama.cpp and vLLM work with no opt-in anchored the host but not the authority, so
+  `http://127.0.0.1:80@example.invalid/v1` read as loopback while the real host was
+  `example.invalid` — and the exemption is exactly what keeps the `ai.apiKeyEnv` Authorization
+  header attached. Now parsed rather than pattern-matched, rejecting userinfo and non-http schemes.
+  Local inference servers are unaffected. See [Configuration](/cli/configuration).
+
+<Callout type="warning">
+  If you run `sfdt mcp`, upgrade. Both gaps are reachable in 0.23.0 and earlier, and
+  `.sfdt/config.json` is committed — it arrives with whatever repository was cloned.
+</Callout>
+
+## `@sfdt/extension` — 0.15.0
+
+- **Deployment Status — watch org deploys without a trip to Setup.** A Workspace tool listing recent
+  deployments with status, who ran them, timings, and component and test counts, distinguishing a
+  validation from a real deploy. Click a failed or partially-failed row and the component errors
+  come back with it.
+- **Read-only by design.** It never starts, cancels, or retries a deploy, and needs no new
+  permission. Default on.
+- **Auto-refresh is data-driven, not a toggle.** A 15-second interval runs only while a loaded row
+  is still in flight, and stops when the view closes — nothing polls in the background once the
+  deploys have settled.
+
 ## `@sfdt/cli` — 0.23.0
 
 - **The first commands that change a live org.** Everything before this read an org, deployed
