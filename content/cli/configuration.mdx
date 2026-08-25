@@ -125,6 +125,15 @@ gone), a **loopback `ai.baseURL`** — so Ollama, LM Studio, llama.cpp and vLLM 
 channel using `webhookUrlEnv`, an ordinary Slack `webhookUrl` with no `headersEnv`, and
 `defaultOrg`.
 
+<Callout type="info">
+  Since **0.23.1** the loopback test parses the URL and compares the resolved host, rather than
+  pattern-matching the string. A URL carrying userinfo is refused outright:
+  `http://127.0.0.1:80@example.invalid/v1` names `example.invalid` as its real host, and previously
+  read as loopback — which mattered because the exemption is what keeps the `ai.apiKeyEnv`
+  Authorization header attached. Ordinary local endpoints such as `http://127.0.0.1:11434/v1` are
+  unaffected.
+</Callout>
+
 ### `deployment`
 
 | Key | Type | Default | Description |
