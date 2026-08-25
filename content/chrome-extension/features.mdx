@@ -295,6 +295,7 @@ These run inside the standalone [Workspace tab](/chrome-extension/workspace):
 | `metadata-scan` 🔌 | Live metadata inventory via the bridge (same logic as `sfdt scan`) |
 | `org-compare` 🔌 | Live org-vs-org / org-vs-local comparison via the bridge (same logic as `sfdt compare`) |
 | `org-health` | Five checks run **live** against the org with no setup — coverage, inactive users, license use, API-version spread, limits near cap — plus twelve more from the CLI's audit/monitor **snapshots** when the [bridge](/chrome-extension/bridge) is running |
+| `deploy-status` | Recent metadata deployments (`DeployRequest`): status, who, start/finish, component and test counts, validate vs deploy. Auto-refreshes while any deploy is in progress. Click a failed row for SOAP component errors. Degrades to a warning if the org refuses the query — no new permission |
 
 <Callout type="info">
   Adding a feature is a one-file change — see `extension/features/` and the registry in
