@@ -103,6 +103,7 @@ rebuilding every tool's session. This is the `org-switcher` feature.
 | `event-monitor` | Live platform / streaming event monitoring |
 | `inspect-record` | Show all fields/data for a record, with a **Fields / JSON** view toggle |
 | `metadata-retrieve` | Manifest builder + retrieve/deploy — live `package.xml` / `destructiveChanges.xml`-pair preview; uses the [bridge](/chrome-extension/bridge)'s `manifest.discover`/`manifest.render` when connected (CLI-rendered XML), SOAP fallback offline; per-org selection persistence |
+| `deploy-status` | Recent Tooling `DeployRequest` rows — status, who, start/finish, component and test counts, validate vs deploy. Auto-refresh while any are in-flight; click a failed deploy for SOAP component errors. Warns (does not error) if the org rejects the query |
 | `field-creator` | Bulk-create custom fields |
 | `data-import` | CSV data import wizard |
 | `apex-test-runner` | Run Apex tests (`runTestsAsynchronous`) and view pass/fail results inline — no bridge needed |
