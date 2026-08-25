@@ -8,6 +8,8 @@ import { GuiPageTable, SurfaceCount } from '../../components/catalogs'
 
 # Web Dashboard
 
+![SFDT CLI Dashboard](/images/cli-dashboard.png)
+
 `sfdt ui` starts a local Express server and opens the **SFDT dashboard** in your browser. It reads
 log/result files from your project's `logDir` (default `logs/`) and can run several commands live.
 
@@ -63,6 +65,8 @@ Data appears automatically after running the corresponding CLI commands (`sfdt t
 
 ## SOQL Console
 
+![SFDT SOQL Console](/images/soql-console.png)
+
 The **SOQL Console** page (deep-linkable at `/soql`) puts the whole
 [`sfdt soql` family](/cli/commands/metadata#sfdt-soql) on the dashboard. Its `/api/soql/*` routes
 are thin wrappers over the CLI's own `soql-runner.js` — the single query/schema engine shared with
@@ -85,6 +89,8 @@ the CLI, MCP, and VS Code — so results, bounds, and error messages are identic
   shaping (nested parent fields flatten to dot-path columns like `Owner.Name`) — the same output
   `sfdt soql query --out` writes.
 ## Manifest Builder
+
+![SFDT Manifest Builder](/images/manifest-builder.png)
 
 The **Manifest Builder** page (Release group) is a changeset-style `package.xml` builder: browse
 metadata by type, tick checkboxes, watch a live XML preview, and save the result into your

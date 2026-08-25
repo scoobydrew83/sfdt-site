@@ -19,6 +19,11 @@ export const metadata = {
     title: 'SFDT — Salesforce DevTools',
     description:
       'Deploy, test, and ship Salesforce changes with confidence — CLI, Chrome extension, and VS Code extension.'
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'SFDT — Salesforce DevTools',
+    description: 'Deploy, test, and ship Salesforce changes with confidence — CLI, Chrome extension, and VS Code extension.',
   }
 }
 

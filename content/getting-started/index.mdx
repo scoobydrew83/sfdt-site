@@ -17,9 +17,11 @@ The project is a single open-source monorepo with four workspaces:
 | Workspace | What it is | Status |
 |---|---|---|
 | **`@sfdt/cli`** | The npm command-line tool — deploy, test, quality, release, org health, AI, and a local web dashboard. | Published to npm |
-| **`@sfdt/extension`** | A Chrome extension for Salesforce Flow Builder & Setup productivity. | Pre-Web-Store |
+| **`@sfdt/extension`** | A Chrome extension for Salesforce Flow Builder & Setup productivity. | Published to the Chrome Web Store |
+| **`sfdt-devtools`** | VS Code extension — a CLI-backed command center (Org Health sidebar, command palette, CodeLens). | Published to the VS Code Marketplace |
 | **`@sfdt/host`** | A tiny native-messaging host — a fallback transport the extension uses when the CLI's HTTP bridge isn't running. | Bundled with the CLI |
-| **`@sfdt/flow-core`** | A shared TypeScript library — Flow normalization, the rules engine, scoring, and the versioned bridge contract. | Workspace-only |
+| **`@sfdt/flow-core`** | A shared TypeScript library — Flow normalization, the rules engine, scoring, and the versioned bridge contract. | Published to npm |
+| **`@sfdt/plugin`** | Salesforce CLI plugin — exposing every command as `sf sfdt <command>`. | Published to npm |
 
 <Callout type="info">
   The CLI is the heart of the suite. The Chrome and VS Code extensions are thin clients that
