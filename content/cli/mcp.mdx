@@ -129,7 +129,7 @@ and `sfdt_scratch_pool` with `action: "status"` are read-only and need no gate.
 | `sfdt_audit` | `check` — any [audit check id](/cli/commands/org-health#sfdt-audit) or `all`. Includes `inactive-flows`, `unused-permsets`, `connected-apps`, `field-descriptions`, `apex-unreferenced`, `lint-access`, `inactive-validations`, `inactive-workflows`, `lint-access-fields` |
 | `sfdt_monitor` | `check` — `limits`, `errors`, `health`, `backup`, `org-info`, `deploy-history`, `deprecated-api`, `flow-errors`, or `all` |
 | `sfdt_notify` | Push the latest audit/monitor snapshot to configured channels (`type`: `audit` \| `monitor`) |
-| `sfdt_pr_comment` | Post the latest audit/monitor snapshot to the current PR (`type`, `pr`) |
+| `sfdt_pr_comment` | `type` (`audit` \| `monitor`), `pr` (a PR **number** in the current repository — a URL is refused, since a URL names a repository too), `confirmExecution` (req) — post the latest snapshot as a PR comment. The body is redacted before it leaves the machine. |
 
 ### Context budget governance
 

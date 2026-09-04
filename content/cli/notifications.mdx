@@ -148,6 +148,23 @@ sfdt audit all --notify
 
 See [Org Health & Operations](/cli/commands/org-health) for the `audit`/`monitor` commands.
 
+## What leaves your machine
+
+Every notification body is redacted before it is sent — session ids, `force://` auth URLs, bearer
+tokens, private-key blocks and password-shaped CLI arguments are replaced with `[REDACTED]`
+markers. This applies to **all** channel types, including email and the `snapshot` object embedded
+in webhook and Loki payloads.
+
+<Callout type="warning">
+  **Since 0.24.0.** Two gaps closed here. Redaction ran per webhook shape and skipped the email
+  branch, so an email channel relayed run output through your own SMTP server unredacted. And the
+  destination check covered `webhookUrl`/`url` but not an email channel's `to` list — so a
+  committed `.sfdt/config.json` could name a recipient and mail your org snapshots there with no
+  warning. A literal recipient list now needs the same `SFDT_ALLOW_UNSAFE_CONFIG=1` opt-in as a
+  literal webhook URL. Use `webhookUrlEnv` / environment-sourced values for anything the
+  repository should not fix.
+</Callout>
+
 ## Surfaces
 
 - **GUI** — the Notifications page lists configured channels (secrets redacted), shows whether the
