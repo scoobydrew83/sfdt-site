@@ -123,6 +123,16 @@ accepts `--auth` and `--runner`).
   Settings → Environments, and scope the auth secret to the environment.
 - **GitLab** — the job is `when: manual` and bound to an environment: protect it via
   Settings → CI/CD → Protected environments.
+<Callout type="warning">
+  **Regenerate Azure pipelines produced before 0.24.0.** The generated Azure deploy pipeline passed
+  the PR target branch into a `script:` body using Azure macro syntax. The agent substitutes a macro
+  into the script text *before* the shell parses it, and a git branch name may legally contain
+  shell metacharacters — so a pull request targeting a specially named branch could run commands on
+  the build agent, after the auth step had already placed org credentials there. The value now goes
+  through an `env:` mapping, matching the GitHub templates. Re-run
+  `sfdt ci init --provider azure --type deploy` and commit the result.
+</Callout>
+
 - **Azure** — uses a `deployment:` job bound to an Environment: create it first
   (Pipelines → Environments) and add "Approvals and checks"; plain script jobs do not honor
   approvals.

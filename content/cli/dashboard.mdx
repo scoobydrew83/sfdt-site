@@ -54,6 +54,7 @@ generated from the dashboard's own route registry, so it cannot drift from the a
   dependency: { shows: 'Seed + expand-on-click D3 dependency graph (references / referenced-by, capped 50/direction); Gaps toggle for source-parsed references the Tooling API misses; Show-inferred overlay renders missing edges as dashed lines', source: '/api/dependencies/resolve, /api/dependencies/neighbors, /api/dependencies/gaps' },
   soql: { shows: 'SOQL/SOSL console: sObject search + field/relationship browser, query validation (org LIMIT 0 round-trip), query plans, bounded execution with JSON/CSV export', source: '/api/soql/* (soql-runner.js)' },
   scratch: { shows: 'Active scratch orgs, plus create / delete / pool-fill actions', source: '/api/scratch' },
+  'installed-packages': { shows: 'Managed and unmanaged packages installed in the target org, with a per-package note; a package with no recorded latest version reads as untracked rather than guessed at', source: '/api/installed-packages' },
   data: { shows: 'Defined sf data tree data sets, plus export / import / delete actions', source: '/api/data' },
   docs: { shows: 'Docs config, plus a generate action', source: '/api/docs' },
   notifications: { shows: 'Notification channels (redacted), per-channel event filters, and a send-test action', source: '/api/notifications' },

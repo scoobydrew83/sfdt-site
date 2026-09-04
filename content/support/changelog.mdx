@@ -17,6 +17,51 @@ repository; this page summarizes recent highlights.
   [Extension `CHANGELOG.md`](https://github.com/scoobydrew83/sfdt/blob/main/extension/CHANGELOG.md)
 </Callout>
 
+## `@sfdt/cli` — 0.24.0
+
+A feature release that also closes four high-severity findings from the pre-release security
+review. Two new workspaces land, both private to the repository and not published to npm.
+
+<Callout type="warning">
+  **Upgrading from 0.23.x:** an absolute path in a project-path config key (`logDir`,
+  `manifestDir`, and siblings) is now refused even when it resolves *inside* the project root,
+  and the rule applies at config load rather than only in the dashboard. A committed
+  `"logDir": "/abs/path/inside/project"` is replaced with the default, which changes where logs
+  are written. Use a project-relative path (`"logs"`), or set `SFDT_ALLOW_UNSAFE_CONFIG=1` if you
+  trust the project. See [Configuration](/cli/configuration).
+</Callout>
+
+- **The Chrome extension can read `sfdt quality` output.** A new read-only `quality.results` bridge
+  kind returns the latest recorded Code Analyzer run through the same parser that backs the
+  dashboard, so every surface reports the same result — including a **SKIPPED** verdict when the
+  scanner never ran. It never *starts* a scan: a Code Analyzer sweep is minutes of work and should
+  not be triggered by a browser click. Bridge `PROTOCOL_VERSION` moves 1.3 → 1.4; the change is
+  additive, so an older client and server still talk.
+- **New [Installed Packages](/cli/dashboard) page** in the dashboard, listing managed and unmanaged
+  packages in the target org with per-package notes.
+- **Notifications redact every channel, email included.** Redaction previously ran per webhook
+  shape and missed the email branch, so an email channel relayed run output through your own SMTP
+  server unredacted. It now runs once for every channel, and a recipient list fixed by a committed
+  `.sfdt/config.json` is refused the same way a hardcoded webhook URL already was. See
+  [Notifications](/cli/notifications).
+- **`sfdt pr comment` is scoped and gated.** It accepted a full PR *URL*, which names a repository
+  as well as a pull request — so a value chosen by an AI model could post an org snapshot to a repo
+  you don't own, under your GitHub identity. It now takes a PR number in the current repository,
+  redacts the body, and the matching MCP tool requires explicit confirmation instead of presenting
+  as read-only.
+- **Session ids are redacted in full.** A Salesforce session id is `<entityId>!<secret>`; redaction
+  stopped at the `!`, masking the public id and leaving the credential in log excerpts and
+  notification bodies. Refresh-token detection also no longer assumes a fixed character position
+  that only matched some orgs.
+- **Azure CI pipelines no longer interpolate a git ref into a script body.** Generated Azure
+  pipelines passed the PR target branch through Azure macro syntax, which the agent substitutes
+  into the script text before the shell parses it. Branch names may legally contain shell
+  metacharacters. The value now goes through an `env:` mapping, matching the GitHub templates.
+  Regenerate any Azure pipeline with `sfdt ci init --provider azure`. See [CI/CD](/cli/ci-cd).
+- **Config settings are classified by capability rather than by key name**, so a newly added
+  setting in an existing class — process spawn, exfiltration destination, filesystem path,
+  privilege, code execution — is covered without a separate rule.
+
 ## `@sfdt/cli` — 0.23.1
 
 A security patch. Both fixes close a path where input chosen by someone other than the operator

@@ -81,15 +81,25 @@ A representative `config.json`:
 |---|---|---|
 | `projectName` | string | Display name used in logs and notifications |
 | `defaultOrg` | string | Default Salesforce org alias |
-| `releaseNotesDir` | string | Release-notes output directory (default `release-notes`) |
-| `manifestDir` | string | Manifest output directory (default `manifest/release`) |
+| `releaseNotesDir` | string | Release-notes output directory (default `release-notes`) — project-relative only ([why](#repo-supplied-settings-that-need-an-opt-in)) |
+| `manifestDir` | string | Manifest output directory (default `manifest/release`) — project-relative only ([why](#repo-supplied-settings-that-need-an-opt-in)) |
 | `manifestLayout` | enum | `flat` (default) or `subpath` for per-package subdirectories |
-| `changelogDir` | string | Per-package changelog directory (default `changelogs`) |
-| `logDir` | string | CLI log directory (default `logs`) |
+| `changelogDir` | string | Per-package changelog directory (default `changelogs`) — project-relative only ([why](#repo-supplied-settings-that-need-an-opt-in)) |
+| `logDir` | string | CLI log directory (default `logs`) — project-relative only ([why](#repo-supplied-settings-that-need-an-opt-in)) |
 | `defaultBranch` | string | Default base branch for `deploy --create-pr` / release PRs (default `main`; a user-exported `SFDT_DEFAULT_BRANCH` wins) |
 | `smokeTests.testClasses` | array | Apex test classes run by `sfdt smoke` (reaches the script via `SFDT_SMOKE_TESTS`; a user-exported env value wins) |
 | `plugins` | array | npm package names to load as plugins — **requires `SFDT_ALLOW_UNSAFE_CONFIG=1` since 0.22.0** ([why](#repo-supplied-settings-that-need-an-opt-in)) |
 | `pluginOptions.autoDiscover` | boolean | Auto-load `sfdt-plugin-*` packages and `.sfdt/plugins/*.js` (default `false`) — **requires `SFDT_ALLOW_UNSAFE_CONFIG=1` since 0.22.0** |
+
+<Callout type="warning">
+  **Path keys must be project-relative — since 0.24.0.** `releaseNotesDir`, `manifestDir`,
+  `changelogDir`, `logDir` and their siblings are refused if the value is **absolute**, even when
+  it resolves *inside* the project root, and the check now runs at config load rather than only in
+  the dashboard. Before 0.24.0 an absolute path that happened to sit inside the project was
+  accepted. On upgrade, a committed `"logDir": "/Users/me/myproject/logs"` is refused and replaced
+  with the default — which changes where logs are written. Use `"logs"`, or set
+  `SFDT_ALLOW_UNSAFE_CONFIG=1` if you trust the project.
+</Callout>
 
 ### Repo-supplied settings that need an opt-in
 
