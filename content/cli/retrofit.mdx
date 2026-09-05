@@ -53,6 +53,14 @@ smart test selection apply.
   skipped when a release can't be determined; `retrofit --json` reports it as `releaseMismatch`.
 </Callout>
 
+<Callout type="warning">
+  **Since 0.25.0: retrofit asks for confirmation even without `--execute`.** Omitting
+  `--execute` skipped only the *deploy*. Retrofit still retrieved metadata over your working
+  checkout and committed the result, which is why the equivalent capability on `sfdt pull` was
+  already treated as mutating. The MCP tool `sfdt_retrofit` now requires `confirmExecution` on
+  both paths.
+</Callout>
+
 ## PR comments
 
 `sfdt pr comment` posts results to the current pull request via the GitHub CLI (`gh`). It renders
@@ -79,6 +87,14 @@ deploy outcome.
 <Callout type="warning">
   Requires the GitHub CLI (`gh`) installed and authenticated (`gh auth login`), and `GITHUB_TOKEN`
   in CI.
+</Callout>
+
+<Callout type="info">
+  **Since 0.25.0: `sfdt pr comment` takes a PR *number*, not a URL.** A URL names a repository
+  as well as a pull request, so a value chosen by an AI model could post an org snapshot into a
+  repo you do not own under your GitHub identity. The reference is now constrained to a number
+  in the current repository, the body is redacted before it leaves the machine, and
+  `sfdt_pr_comment` requires `confirmExecution` instead of presenting as read-only.
 </Callout>
 
 ## Surfaces

@@ -113,7 +113,7 @@ file loads normally.
 |---|---|
 | `plugins[]` | `import()`ed at CLI startup, before any command runs |
 | `pluginOptions.autoDiscover` | Imports every `sfdt-plugin-*` in `node_modules/` and every file in `.sfdt/plugins/` |
-| `mcp.salesforce.command` / `args` | Spawned as a process |
+| `mcp.salesforce.command` / `args` | Spawned as a process. **Since 0.25.0** either half alone triggers the refusal — `args` without `command` still applied attacker-chosen arguments to the default `sf` binary — and `mcp.salesforce` accepts **only** `transport`, `command` and `args`; any other key now fails config load rather than being silently ignored |
 | `ai.baseURL` (non-loopback) | Chooses where prompts — and any secret named by `ai.apiKeyEnv` / `ai.headersEnv` — are sent |
 | A notification channel's `headersEnv` beside a literal remote `webhookUrl`/`url` | Reads the named env vars and posts them to a URL fixed by the repo |
 

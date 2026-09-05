@@ -165,6 +165,15 @@ in webhook and Loki payloads.
   repository should not fix.
 </Callout>
 
+<Callout type="warning">
+  **Since 0.25.0: webhook redirects are refused.** A 3xx response used to be followed, and
+  307/308 preserve the method *and* the body — so an endpoint answering
+  `307 Location: https://elsewhere.example` received your notification body along with any
+  token in `headersEnv`. That defeated the destination check rather than merely lacking
+  depth: the check validates the URL you configured and has no say over where a redirect
+  points. A redirect is now an error naming the `Location`. Configure the final URL directly.
+</Callout>
+
 ## Surfaces
 
 - **GUI** — the Notifications page lists configured channels (secrets redacted), shows whether the

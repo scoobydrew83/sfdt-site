@@ -39,6 +39,31 @@ Configure it under the `mcp` key in `.sfdt/config.json`:
 }
 ```
 
+### Pinning which projects a server serves
+
+Every tool accepts a `projectRoot`, and that value is chosen by the **model** — while SFDT's AI
+surfaces feed that model untrusted org content (Apex compile errors, flow metadata, deploy failure
+text). So a call you read as *"query the current project"* can name a **different checkout** and run
+against that org, with the tool list still presenting it as read-only.
+
+Cross-project routing is deliberate — it is what lets one server serve several checkouts — so SFDT
+does not refuse it by default. On a machine holding more than one customer's checkout, pin the
+server:
+
+```bash
+export SFDT_MCP_PROJECT_ROOTS="/work/customer-a:/work/customer-b"
+```
+
+Colon-separated absolute paths. When set, a `projectRoot` outside the list is refused before any
+command runs. **Unset — the default — nothing changes.**
+
+<Callout type="info">
+  Added in 0.25.0. Also in 0.25.0: `sfdt_retrofit` requires `confirmExecution` on both paths (without
+  `--execute` it still retrieved over your checkout and committed), and `sfdt_pr_comment` takes a PR
+  **number** rather than a URL — a URL names a repository too — redacts its body, and requires
+  confirmation instead of presenting as read-only.
+</Callout>
+
 ## Exposed tools
 
 ### Pre-deployment validation
