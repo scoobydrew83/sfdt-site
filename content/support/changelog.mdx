@@ -17,6 +17,49 @@ repository; this page summarizes recent highlights.
   [Extension `CHANGELOG.md`](https://github.com/scoobydrew83/sfdt/blob/main/extension/CHANGELOG.md)
 </Callout>
 
+## `@sfdt/cli` — 0.25.0
+
+A security release. Everything left open from the 0.24.0 review, plus eight more found by
+reviewing those fixes. None of it is a regression from 0.24.0 — these paths had shipped for
+several releases.
+
+<Callout type="warning">
+  **Three changes need action when you upgrade.**
+
+  1. **Notification webhooks no longer follow redirects.** A 3xx from your endpoint used to
+     re-send the message body *and* any `headersEnv` token to wherever it pointed. A redirect
+     is now an error naming the destination — configure the final URL directly.
+     See [Notifications](/cli/notifications).
+  2. **`sfdt retrofit` requires confirmation even without `--execute`.** Without it, retrofit
+     still retrieved over your checkout and committed the result.
+     See [Retrofit](/cli/retrofit).
+  3. **`.sfdt/config.json` rejects unknown keys under `mcp.salesforce`.** Only `transport`,
+     `command` and `args` are accepted; a fourth key now fails config load instead of being
+     silently ignored. See [Configuration](/cli/configuration).
+
+  Also **regenerate any CI pipeline** created before this release —
+  `sfdt ci init --provider azure` or `--provider github`.
+</Callout>
+
+- **Salesforce API names are validated everywhere they reach a path.** `sfdt events publish`
+  and `sfdt record get/edit/clone` interpolated a name into a REST path with no validation.
+  This matters most through [MCP](/cli/mcp), where the value is chosen by an AI model and the
+  CLI feeds that model untrusted org content: a name like `../tooling/sobjects/ApexClass`
+  reached the Tooling API, and `sfdt_record_get` is read-only with no confirmation prompt at
+  all. One shared guard now covers every call site.
+- **Parked MCP results are redacted correctly and written `0600`.** Large tool results spill to
+  `.sfdt/cache/parked/`. Add that directory to `.gitignore` — `sfdt init` now says so.
+- **The dashboard's manifest viewer only serves manifests.** It could read any file under the
+  project, including `.env`. It is now restricted to `.xml` under your manifest and log
+  directories and refuses symlinks. See [Dashboard](/cli/dashboard).
+- **New `SFDT_MCP_PROJECT_ROOTS`** — an optional allowlist pinning which projects an MCP server
+  will serve. Every tool accepts a `projectRoot` and that value is model-chosen, so a call
+  presented as "the current project" can name a different checkout. Cross-project routing is a
+  real feature, so this is opt-in — set it on any machine holding more than one customer's
+  checkout. See [MCP](/cli/mcp).
+- **The `sfdt` GitHub Action writes its JWT key with `mktemp`,** not a fixed path left
+  group-readable on persistent runners. See [CI/CD](/cli/ci-cd).
+
 ## `@sfdt/cli` — 0.24.0
 
 A feature release that also closes four high-severity findings from the pre-release security
