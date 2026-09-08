@@ -218,6 +218,21 @@ both ways with the method table). You can **📂 Import log** — drag-drop or p
 `.log`/`.txt` and analyze it with no org connection — and Execute Anonymous gains **📊 Run &
 analyze**, which runs the Apex, finds the log it produced, and opens it in the Analyzer.
 
+### Quality Results (`quality-results`) 🔌
+
+The last [`sfdt quality`](/cli/commands/testing-quality) run, in the
+[Workspace](/chrome-extension/workspace). Salesforce Code Analyzer findings arrive over the
+[bridge](/chrome-extension/bridge) and render as a per-file issue list — severity, line, rule id,
+message, and engine attribution (pmd, eslint, …) — grouped by file worst-first and filterable by
+both severity and engine. Files that map to a Setup component get **Open in Setup**, which
+resolves the record Id through the Tooling API and deep-links to the component itself, falling
+back to the type's Setup list rather than a dead link when the org has no matching row.
+
+**A skipped scan is never shown as a pass.** If the analyzer did not run, the panel says so
+instead of rendering an empty, reassuring result set.
+
+Requires the bridge — the findings come from a CLI run, not from the org.
+
 ## Flow Builder
 
 | Id | What it does |
