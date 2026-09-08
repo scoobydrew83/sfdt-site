@@ -17,6 +17,33 @@ repository; this page summarizes recent highlights.
   [Extension `CHANGELOG.md`](https://github.com/scoobydrew83/sfdt/blob/main/extension/CHANGELOG.md)
 </Callout>
 
+## `@sfdt/cli` — 0.26.1
+
+A maintenance release: a week of dependency updates, a CI gap closed, and one security fix the
+pre-release gate turned up.
+
+- **The Compare page can no longer be made to read files outside your project.** The dashboard's
+  local-component read followed symlinks off disk. Clone a hostile SFDX repo where
+  `AccountService.cls` is a symlink to `~/.sfdx/<user>.json`, run [`sfdt ui`](/cli/dashboard),
+  open Compare, and that file came back in the browser. The read is now containment-checked like
+  every other project read. Same class as 0.26.0's symlink work — a missed call site, not a new
+  bug shape.
+- **CI now builds and typechecks the `web` workspace.** It ran unit tests but never the build, so
+  a framework major could land green on unit tests alone.
+- **Dependency maintenance:** `nodemailer` 9 → 10, `@oclif/core` and `oclif` 4 → 5 (both need
+  Node ≥ 22, already required), plus grouped runtime and dev updates.
+
+## `@sfdt/extension` — 0.16.0
+
+- **Quality Results in the Workspace.** The last [`sfdt quality`](/cli/commands/testing-quality) run,
+  rendered as a per-file issue list — severity, line, rule id, and engine attribution (pmd,
+  eslint, …), grouped worst-first and filterable. Files that map to a Setup component get
+  "Open in Setup". A skipped scan is never shown as a pass.
+- **Bridge protocol 1.3 → 1.4** — one additive read-only request kind, `quality.results`.
+- **Settings validation migrated to zod 4.** Internal, with one externally visible consequence
+  avoided: the new `.default()` semantics would have loaded bridge, telemetry, and activity-log
+  settings as empty objects on a fresh profile — no SMTP port, no shortcut, no highlight colour.
+
 ## `@sfdt/cli` — 0.26.0
 
 A security release, four days after 0.25.0 — because 0.25.0 shipped this vulnerability's
