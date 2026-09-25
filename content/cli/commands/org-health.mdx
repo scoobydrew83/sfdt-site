@@ -161,6 +161,10 @@ confirmation that **refuses** rather than auto-confirms when non-interactive (`-
 `load` inserts or *upserts*, and an upsert overwrites records that are already there. Neither is
 recorded in the ledger: `sfdt ledger undo` covers org *configuration*, not bulk data writes.
 
+A data set arrives with a clone, so `load` refuses symlinks in it. A source CSV must physically live
+inside the set, and the field-mapped copy it writes to `.mapped/` cannot be redirected by a link
+(since 0.26.2).
+
 ---
 
 ## `sfdt scratch`
