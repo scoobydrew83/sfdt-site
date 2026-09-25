@@ -17,6 +17,31 @@ repository; this page summarizes recent highlights.
   [Extension `CHANGELOG.md`](https://github.com/scoobydrew83/sfdt/blob/main/extension/CHANGELOG.md)
 </Callout>
 
+## `@sfdt/cli` — 0.26.2
+
+A licensing and security release.
+
+- **Third-party notices ship with SFDT.** Parts of `@sfdt/flow-core` and the Chrome extension
+  (the Flow Health rules, normalizer, scorer, API name prefixes, scheduled flow calculator,
+  metadata cleaner and default AI prompts) are derived from
+  [SF Flow Utility Toolkit](https://github.com/ThisIsMarkJones/SF-Flow-Utility-Toolkit) by Mark
+  Jones (MIT). Its notice now ships in the npm packages and the extension build:
+  [THIRD_PARTY_NOTICES.md](https://github.com/scoobydrew83/sfdt/blob/main/THIRD_PARTY_NOTICES.md).
+- **[`sfdt data load`](/cli/commands/org-health) refuses symlinks committed in a data set.** A
+  hostile repo could link `.mapped/` to `.git` and turn the field-mapped CSV copy into an
+  overwrite of `.git/config`, which runs code on your next `git` command. A symlinked source CSV
+  would have been uploaded to your org. Both are now refused. The pre-release security gate
+  found this, and it shipped in the same release.
+- **`@sfdt/flow-core` 0.15.0.** Attribution only, with no behaviour change. The range is widened
+  to `^0.15.0`.
+- The `next > sharp` override moves to 0.35.4 (GHSA-rgj7-g3m4-5g8c).
+
+## `@sfdt/extension` — 0.16.1
+
+- **Third-party notices** are bundled into the extension and linked from the store listing.
+- **Store listing refreshed:** new featured screenshots (the Workspace home, Schema Browser, SOQL
+  Runner in SOSL mode, and the side panel) and regenerated promo tiles.
+
 ## `@sfdt/cli` — 0.26.1
 
 A maintenance release: a week of dependency updates, a CI gap closed, and one security fix the
