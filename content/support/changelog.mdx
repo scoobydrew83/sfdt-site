@@ -17,6 +17,39 @@ repository; this page summarizes recent highlights.
   [Extension `CHANGELOG.md`](https://github.com/scoobydrew83/sfdt/blob/main/extension/CHANGELOG.md)
 </Callout>
 
+## `@sfdt/cli` — 0.27.0
+
+The AI-Readiness Index release.
+
+- **[`sfdt audit --index`](/cli/commands/org-health#ai-readiness-index-evidence)** runs every audit
+  and monitor check and groups the results under the eight AI-Readiness Index dimensions. It
+  writes `logs/index-latest.json` and a paste-ready `logs/index-latest.md`. The result is
+  evidence for an assessor, not a score. The [`sfdt_audit`](/cli/mcp) MCP tool takes
+  `index: true` for the same output.
+- **Snapshots record their org ID**, so an evidence pack never mixes two orgs' results.
+- **Every surface now bundles the current `@sfdt/flow-core`.** The dashboard, native host, VS Code
+  extension and web workspace had been installing older registry copies (0.10 and 0.13), so they
+  banded findings with older rules than the CLI. A new contract check keeps the ranges in step.
+- **API v68 (Winter '27)** is in the [`sfdt versions --advise`](/cli/commands/org-health#--advise--registry-grounded-ai-upgrade-advice)
+  registry, from the official Apex versioned behavior changes.
+- **Dependencies:** oclif 6, React 19.3, and patched `brace-expansion`, `fast-uri`, `hono`,
+  `ip-address`, `next` (GHSA-vcvr-r3jv-pc5j) and `nodemailer`. `@sfdt/flow-core` 0.16.0.
+
+## `@sfdt/extension` — 0.17.0
+
+- **Org Health Index view:** the same checks grouped under the eight AI-Readiness Index
+  dimensions, using the mapping `sfdt audit --index` uses. **Copy evidence pack** copies the
+  grouping as Markdown, to the local clipboard only. CLI snapshots from a different org, or from
+  a CLI older than 0.27.0 with no org ID, are left out, and the view says so.
+
+## `sfdt.sfdt-devtools` (VS Code) — 0.7.1
+
+- **Packaging fixed:** `@types/vscode` is pinned to the `engines.vscode` floor, so `vsce
+  package` builds again. VS Code 1.80+ support is unchanged.
+- The extension bundles the current `@sfdt/flow-core` (0.16) instead of a stale 0.13 copy, so
+  coverage bands and finding text match the CLI.
+- Ships `THIRD_PARTY_NOTICES.md`.
+
 ## `@sfdt/cli` — 0.26.2
 
 A licensing and security release.

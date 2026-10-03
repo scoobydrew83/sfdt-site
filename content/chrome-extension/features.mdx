@@ -309,7 +309,7 @@ These run inside the standalone [Workspace tab](/chrome-extension/workspace):
 | `drift-check` 🔌 | Metadata drift via the bridge — latest `sfdt drift` snapshot by default, or run live; filtered by component |
 | `metadata-scan` 🔌 | Live metadata inventory via the bridge (same logic as `sfdt scan`) |
 | `org-compare` 🔌 | Live org-vs-org / org-vs-local comparison via the bridge (same logic as `sfdt compare`) |
-| `org-health` | Five checks run **live** against the org with no setup — coverage, inactive users, license use, API-version spread, limits near cap — plus twelve more from the CLI's audit/monitor **snapshots** when the [bridge](/chrome-extension/bridge) is running |
+| `org-health` | Five checks run **live** against the org with no setup — coverage, inactive users, license use, API-version spread, limits near cap — plus twelve more from the CLI's audit/monitor **snapshots** when the [bridge](/chrome-extension/bridge) is running. **Index view** groups the same checks under the eight [AI-Readiness Index](/cli/commands/org-health#ai-readiness-index-evidence) dimensions; **Copy evidence pack** copies the grouping as Markdown (clipboard only). CLI snapshots from a different org are left out |
 | `deploy-status` | Recent metadata deployments (`DeployRequest`): status, who, start/finish, component and test counts, validate vs deploy. Auto-refreshes while any deploy is in progress. Click a failed row for SOAP component errors. Degrades to a warning if the org refuses the query — no new permission |
 
 <Callout type="info">
