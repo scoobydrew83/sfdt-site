@@ -20,6 +20,7 @@ sfdt audit all
 sfdt audit mfa
 sfdt audit licenses --org production --json
 sfdt audit all --notify          # also push the snapshot to notification channels
+sfdt audit --index --org production   # group every result by AI-Readiness Index dimension
 ```
 
 | Check | What it inspects |
@@ -49,8 +50,27 @@ CI gate.
 | Option | Description |
 |---|---|
 | `--notify` | Push the snapshot to configured [notification channels](/cli/notifications) |
+| `--index` | Also run the [`monitor`](#sfdt-monitor) checks and group every result under the AI-Readiness Index dimensions (see below) |
 | `--org <alias>` | Target org |
 | `--json` | Structured output |
+
+### AI-Readiness Index evidence
+
+`sfdt audit --index` runs every `audit` and `monitor` check, then groups the results under the
+eight dimensions of the AI-Readiness Index: automation sprawl, dependency risk, documentation
+coverage, permissions hygiene, dead metadata, data quality, change safety and AI-groundability.
+
+The result is **evidence for a person scoring the org, not a score**. Each dimension shows its
+worst check, the checks under it, any mapped check that did not run, and what the checks cannot
+see (data quality has no automated checks at all). The run refreshes `logs/audit-latest.json`
+and `logs/monitor-latest.json`, and writes `logs/index-latest.json` plus a paste-ready
+`logs/index-latest.md`. Both runs are recorded in [`sfdt history`](#sfdt-history), and
+`--notify` sends both snapshots. The exit code follows the plain audit rule: non-zero when any
+check reports `fail` or `error`.
+
+Every `audit` and `monitor` snapshot records the org ID it ran against, so a pack never mixes two
+orgs. The Chrome extension's [Org Health Index view](/chrome-extension/features) uses the same
+grouping and leaves out snapshots from a different org, or from an older CLI with no org ID.
 
 ---
 
