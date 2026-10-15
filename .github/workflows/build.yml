@@ -37,3 +37,6 @@ jobs:
 
       - name: Build (next export + pagefind index)
         run: npm run build
+
+      - name: Check legal pages
+        run: npm run check:legal
