@@ -63,6 +63,9 @@ const footer = (
       <span style={{ opacity: 0.6, fontSize: '0.85em' }}>
         Built with Nextra. “Salesforce” and “Flow Builder” are trademarks of Salesforce, Inc.
       </span>
+      <span style={{ fontSize: '0.85em' }}>
+        <a href="/privacy/">Privacy Policy</a> · <a href="/terms/">Terms of Use</a>
+      </span>
     </div>
   </Footer>
 )

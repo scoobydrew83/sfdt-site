@@ -9,7 +9,8 @@
     "build": "next build",
     "postbuild": "pagefind --site out --output-subdir _pagefind",
     "start": "next start",
-    "serve": "serve out"
+    "serve": "serve out",
+    "check:legal": "node scripts/check-legal.mjs"
   },
   "dependencies": {
     "next": "^15.1.6",
