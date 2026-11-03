@@ -17,6 +17,36 @@ repository; this page summarizes recent highlights.
   [Extension `CHANGELOG.md`](https://github.com/scoobydrew83/sfdt/blob/main/extension/CHANGELOG.md)
 </Callout>
 
+## `@sfdt/cli` — 0.28.1
+
+Fixes for the `callermap` probe. No new commands, flags, MCP tools or config keys.
+
+- **[`sfdt audit callermap --probe`](/cli/commands/org-health#callermap-probe)** no longer marks a
+  source unreadable when only its sort field is missing, and reports the original error when a
+  query fails for another reason.
+- A source that hits its row limit is described as a **partial sample** whose counts may be off,
+  not as a lower bound.
+- Control characters are stripped from org values, so CLI, `--json` and MCP output all get clean text.
+
+## `@sfdt/cli` — 0.28.0
+
+- **[`sfdt audit callermap --probe`](/cli/commands/org-health#callermap-probe)** — a read-only
+  check of which login and API-usage data an org exposes (LoginHistory, OauthToken, API-access
+  permissions, active users, ApiTotalUsage event log columns). It is the first step toward an
+  inventory of everything that signs into an org, and is not part of `sfdt audit all`.
+- **Security:** production `npm audit` passes again — patched `body-parser` (GHSA-27r3-jxmh-p828),
+  `fast-uri`, `glob` and `minimatch`.
+- **Dependencies:** `@modelcontextprotocol/sdk` 1.32.2, `happy-dom` 21, Next.js 16.4.4.
+
+## `@sfdt/cli` — 0.27.1
+
+A dependency and security release. No CLI commands, flags, MCP tools or config keys change.
+
+- **Security:** production `npm audit --audit-level=high --omit=dev` reports 0 vulnerabilities,
+  including the critical `proxy-addr` advisory (GHSA-jqcg-44mw-7w3h).
+- **Dependencies:** `@modelcontextprotocol/sdk` 1.32.1 (only one MCP SDK copy ships now),
+  React 19.3.1, Next.js 16.4.2, express 5.3.
+
 ## `@sfdt/cli` — 0.27.0
 
 The AI-Readiness Index release.

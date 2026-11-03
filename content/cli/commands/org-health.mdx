@@ -72,6 +72,44 @@ Every `audit` and `monitor` snapshot records the org ID it ran against, so a pac
 orgs. The Chrome extension's [Org Health Index view](/chrome-extension/features) uses the same
 grouping and leaves out snapshots from a different org, or from an older CLI with no org ID.
 
+### `callermap` probe
+
+```bash
+sfdt audit callermap --probe --org my-sandbox            # readable / partial / unreadable per source
+sfdt audit callermap --probe --org my-sandbox --json     # the same as a JSON envelope
+sfdt audit callermap --probe --days 7                    # shorter LoginHistory / OAuth window
+```
+
+`callermap` will list everything that signs into an org (integrations, users, AI clients), together
+with the Salesforce authentication change each one is affected by. So far only `--probe` exists: it
+checks which login and API-usage data the org exposes, so the inventory can be built on what is
+really there. It is a separate subcommand and is **not** part of `sfdt audit all`.
+
+| Option | Description |
+|---|---|
+| `--probe` | Run the data-availability probe (required for now) |
+| `--org <alias>` | Target org (defaults to `config.defaultOrg`) |
+| `--days <n>` | Lookback for LoginHistory and OAuth usage, 1–180 (default 30) |
+| `--json` | Emit the probe result as a JSON envelope |
+
+The probe runs one query per source — `LoginHistory`, `OauthToken`, `PermissionSet` /
+`PermissionSetAssignment` (including "Use Any API Client"), `User`, and the `ApiTotalUsage`
+`EventLogFile` column list — and reports each as `readable`, `partial` (missing fields named) or
+`unreadable` (with the reason). It ends with a heuristic answer to "can this data name the calling
+app?" (`yes`, `partly`, `no`, `unknown`). A source that hits its row limit is marked `truncated`;
+its counts then come from a partial sample and may be off in either direction. A count that depends
+on a missing field is shown as unknown (`null` in JSON), not zero.
+
+Running `callermap` without `--probe` exits non-zero, as does a probe where no source is readable
+(usually an auth or connection problem).
+
+<Callout type="warning">
+  The probe never writes to the org or to disk, never downloads event log files, and reduces org
+  data to counts, field names and picklist values. Two things are shown as-is: the org alias and
+  the text of any `sf` error, which can include the org's username or instance URL. Check those
+  before you share the output.
+</Callout>
+
 ---
 
 ## `sfdt monitor`
